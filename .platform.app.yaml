@@ -1,0 +1,70 @@
+# .platform.app.yaml
+
+# The name of this application, which must be unique within a project.
+name: 'app'
+
+# The type key specifies the language and version for your application.
+type: 'php:7.0'
+
+# On PHP, there are multiple build flavors available. Pretty much everyone
+# except Drupal 7 users will want the composer flavor.
+build:
+  flavor: composer
+
+# The relationships of the application with services or other applications.
+# The left-hand side is the name of the relationship as it will be exposed
+# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
+# side is in the form `<service name>:<endpoint name>`.
+relationships:
+    database: 'mysqldb:mysql'
+
+# The hooks that will be triggered when the package is deployed.
+hooks:
+    # Build hooks can modify the application files on disk but not access any services like databases.
+    #build: |
+    # Deploy hooks can access services but the file system is now read-only.
+    deploy: |
+        set -e
+        if [ ! -f var/writeable/installed.lock ]; then
+            php index_cli.php --db_server=database.internal --db_name=main --db_user=user
+            touch var/writeable/installed.lock
+        fi;
+
+# The size of the persistent disk of the application (in MB).
+disk: 2048
+
+# The 'mounts' describe writable, persistent filesystem mounts in the application.
+# The keys are directory paths relative to the application root. The values are a
+# mount definition. In this case, `web-files` is just a unique name for the mount.
+mounts:
+    'mails':
+        source: local
+        source_path: 'mails'
+    'modules':
+        source: local
+        source_path: 'modules'
+    'upload':
+        source: local
+        source_path: 'upload'
+    'download':
+        source: local
+        source_path: 'download'
+    'var/cache':
+        source: local
+        source_path: 'var-cache'
+    'var/log':
+        source: local
+        source_path: 'var-log'
+    'var/writeable':
+        source: local
+        source_path: 'var-writeable'
+
+# The configuration of the application when it is exposed to the web.
+web:
+    locations:
+        '/':
+            # The public directory of the application relative to its root.
+            root: ''
+            # The front-controller script which determines where to send
+            # non-static requests.
+            passthru: '/index.php'
