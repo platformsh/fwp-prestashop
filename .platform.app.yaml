@@ -54,6 +54,9 @@ mounts:
     'app/Resources/translations':
         source: local
         source_path: 'resources-translations'
+    'config':
+        source: local
+        source_path: 'config'
     'img':
         source: local
         source_path: 'img'
