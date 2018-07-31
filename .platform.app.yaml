@@ -68,7 +68,7 @@ web:
             root: ''
             # The front-controller script which determines where to send
             # non-static requests.
-            passthru: 'index.php'
+            passthru: '/index.php'
         '/install':
             # The public directory of the application relative to its root.
             root: 'install'
