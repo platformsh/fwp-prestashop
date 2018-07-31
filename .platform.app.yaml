@@ -48,9 +48,9 @@ mounts:
     'modules':
         source: local
         source_path: 'modules'
-    'trasnlations':
+    'translations':
         source: local
-        source_path: 'trasnlations'
+        source_path: 'translations'
     'app/Resources/translations':
         source: local
         source_path: 'resources-translations'
