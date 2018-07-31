@@ -79,6 +79,9 @@ mounts:
     'var/writeable':
         source: local
         source_path: 'var-writeable'
+    'themes/classic/assets/cache'
+        source: local
+        source_path: 'classic-cache'
 
 # The configuration of the application when it is exposed to the web.
 web:
