@@ -31,6 +31,7 @@ hooks:
             cp -R init/config/* config/
             cp -R init/translations/* translations/
             cp -R init/resources-translations/* app/Resources/translations/
+            cp -R init/app-config/* app/config/
             cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user
             #cd && touch var/writeable/installed.lock
         fi;
@@ -57,6 +58,9 @@ mounts:
     'config':
         source: local
         source_path: 'config'
+    'app/config':
+        source: local
+        source_path: 'app-config'
     'img':
         source: local
         source_path: 'img'
