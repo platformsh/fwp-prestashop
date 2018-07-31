@@ -27,8 +27,12 @@ hooks:
         set -e
         if [ ! -f var/writeable/installed.lock ]; then
             cp -R init/modules/* modules/
+            cp -R init/img/* img/
+            cp -R init/config/* config/
+            cp -R init/translations/* translations/
+            cp -R init/resources-translations/* app/Resources/translations/
             cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user
-            cd && touch var/writeable/installed.lock
+            #cd && touch var/writeable/installed.lock
         fi;
 
 # The size of the persistent disk of the application (in MB).
@@ -44,6 +48,15 @@ mounts:
     'modules':
         source: local
         source_path: 'modules'
+    'trasnlations':
+        source: local
+        source_path: 'trasnlations'
+    'app/Resources/translations':
+        source: local
+        source_path: 'resources-translations'
+    'img':
+        source: local
+        source_path: 'img'
     'upload':
         source: local
         source_path: 'upload'
