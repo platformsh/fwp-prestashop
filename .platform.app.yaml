@@ -74,4 +74,4 @@ web:
             root: 'install'
             # The front-controller script which determines where to send
             # non-static requests.
-            passthru: 'index.php'
+            passthru: '/install/index.php'
