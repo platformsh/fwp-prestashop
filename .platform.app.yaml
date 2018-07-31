@@ -32,7 +32,8 @@ hooks:
             cp -R init/translations/* translations/
             cp -R init/resources-translations/* app/Resources/translations/
             cp -R init/app-config/* app/config/
-            cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user
+            cp -R init/themes/* themes/
+            #cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user
             #cd && touch var/writeable/installed.lock
         fi;
 
@@ -79,9 +80,9 @@ mounts:
     'var/writeable':
         source: local
         source_path: 'var-writeable'
-    'themes/classic/assets/cache'
+    'themes':
         source: local
-        source_path: 'classic-cache'
+        source_path: 'themes'
 
 # The configuration of the application when it is exposed to the web.
 web:
