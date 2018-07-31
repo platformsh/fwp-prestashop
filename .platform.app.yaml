@@ -27,6 +27,7 @@ hooks:
     deploy: |
         set -e
         if [ ! -f var/writeable/installed.lock ]; then
+            cp -R init/modules/* modules/
             php index_cli.php --db_server=database.internal --db_name=main --db_user=user
             touch var/writeable/installed.lock
         fi;
