@@ -35,7 +35,7 @@ hooks:
             cp -R init/themes/* themes/
             wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq
             chmod +x /tmp/jq
-            cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --domain=$(echo $PLATFORM_ROUTES | base64 -d | /tmp/jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
+            cd install && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --email=$ADMIN_EMAIL --password=$ADMIN_PASSWORD --domain=$(echo $PLATFORM_ROUTES | base64 -d | /tmp/jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
             cd && touch var/writeable/installed.lock
         fi;
 
