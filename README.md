@@ -12,8 +12,8 @@ platform project:create
 3. Add specific environment variables
 
 ```
-platform variable add ADMIN_EMAIL your@email.com
-platform variable add ADMIN_PASSWORD yourpassword
+platform variable:add ADMIN_EMAIL your@email.com
+platform variable:add ADMIN_PASSWORD yourpassword
 ```
 
 4. Push to platform.sh
