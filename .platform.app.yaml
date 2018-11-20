@@ -48,9 +48,9 @@ disk: 2048
 # The keys are directory paths relative to the application root. The values are a
 # mount definition. In this case, `web-files` is just a unique name for the mount.
 mounts:
-    'admin-fwp/import'
+    'admin-fwp/import':
         source: local
-        source_path: 'admin-fwp/import'
+        source_path: 'admin-fwp-import'
     'mails':
         source: local
         source_path: 'mails'
