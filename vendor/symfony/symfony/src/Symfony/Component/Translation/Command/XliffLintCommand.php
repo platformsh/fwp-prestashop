@@ -85,14 +85,14 @@ EOF
                 throw new RuntimeException('Please provide a filename or pipe file content to STDIN.');
             }
 
-            return $this->display($io, array($this->validate($stdin)));
+            return $this->display($io, [$this->validate($stdin)]);
         }
 
         if (!$this->isReadable($filename)) {
             throw new RuntimeException(sprintf('File or directory "%s" is not readable.', $filename));
         }
 
-        $filesInfo = array();
+        $filesInfo = [];
         foreach ($this->getFiles($filename) as $file) {
             $filesInfo[] = $this->validate(file_get_contents($file), $file);
         }
@@ -104,7 +104,7 @@ EOF
     {
         // Avoid: Warning DOMDocument::loadXML(): Empty string supplied as input
         if ('' === trim($content)) {
-            return array('file' => $file, 'valid' => true);
+            return ['file' => $file, 'valid' => true];
         }
 
         libxml_use_internal_errors(true);
@@ -112,21 +112,21 @@ EOF
         $document = new \DOMDocument();
         $document->loadXML($content);
         if ($document->schemaValidate(__DIR__.'/../Resources/schemas/xliff-core-1.2-strict.xsd')) {
-            return array('file' => $file, 'valid' => true);
+            return ['file' => $file, 'valid' => true];
         }
 
         $errorMessages = array_map(function ($error) {
-            return array(
+            return [
                 'line' => $error->line,
                 'column' => $error->column,
                 'message' => trim($error->message),
-            );
+            ];
         }, libxml_get_errors());
 
         libxml_clear_errors();
         libxml_use_internal_errors(false);
 
-        return array('file' => $file, 'valid' => false, 'messages' => $errorMessages);
+        return ['file' => $file, 'valid' => false, 'messages' => $errorMessages];
     }
 
     private function display(SymfonyStyle $io, array $files)
@@ -143,7 +143,7 @@ EOF
 
     private function displayTxt(SymfonyStyle $io, array $filesInfo)
     {
-        $countFiles = count($filesInfo);
+        $countFiles = \count($filesInfo);
         $erroredFiles = 0;
 
         foreach ($filesInfo as $info) {
@@ -193,7 +193,7 @@ EOF
         }
 
         foreach ($this->getDirectoryIterator($fileOrDirectory) as $file) {
-            if (!in_array($file->getExtension(), array('xlf', 'xliff'))) {
+            if (!\in_array($file->getExtension(), ['xlf', 'xliff'])) {
                 continue;
             }
 
@@ -225,7 +225,7 @@ EOF
         };
 
         if (null !== $this->directoryIteratorProvider) {
-            return call_user_func($this->directoryIteratorProvider, $directory, $default);
+            return \call_user_func($this->directoryIteratorProvider, $directory, $default);
         }
 
         return $default($directory);
@@ -238,7 +238,7 @@ EOF
         };
 
         if (null !== $this->isReadableProvider) {
-            return call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
+            return \call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
         }
 
         return $default($fileOrDirectory);

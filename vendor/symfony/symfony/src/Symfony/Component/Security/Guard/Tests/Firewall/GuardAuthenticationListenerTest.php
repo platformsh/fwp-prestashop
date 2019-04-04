@@ -15,12 +15,12 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Guard\AuthenticatorInterface;
 use Symfony\Component\Security\Guard\Firewall\GuardAuthenticationListener;
 use Symfony\Component\Security\Guard\GuardAuthenticatorInterface;
 use Symfony\Component\Security\Guard\Token\PreAuthenticationGuardToken;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 /**
  * @author Ryan Weaver <weaverryan@gmail.com>
@@ -41,7 +41,7 @@ class GuardAuthenticationListenerTest extends TestCase
         $authenticateToken = $this->getMockBuilder(TokenInterface::class)->getMock();
         $providerKey = 'my_firewall';
 
-        $credentials = array('username' => 'weaverryan', 'password' => 'all_your_base');
+        $credentials = ['username' => 'weaverryan', 'password' => 'all_your_base'];
 
         $authenticator
             ->expects($this->once())
@@ -77,7 +77,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -117,7 +117,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             'my_firewall',
-            array($authenticator1, $authenticator2),
+            [$authenticator1, $authenticator2],
             $this->logger
         );
 
@@ -139,7 +139,7 @@ class GuardAuthenticationListenerTest extends TestCase
             ->expects($this->once())
             ->method('getCredentials')
             ->with($this->equalTo($this->request))
-            ->will($this->returnValue(array('username' => 'anything_not_empty')));
+            ->will($this->returnValue(['username' => 'anything_not_empty']));
 
         $this->authenticationManager
             ->expects($this->once())
@@ -156,7 +156,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -185,7 +185,7 @@ class GuardAuthenticationListenerTest extends TestCase
         $authenticator
             ->expects($this->once())
             ->method('getCredentials')
-            ->will($this->throwException($authException));
+            ->willThrowException($authException);
 
         // this is not called
         $this->authenticationManager
@@ -201,7 +201,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -234,7 +234,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticatorA),
+            [$authenticatorA],
             $this->logger
         );
 
@@ -250,7 +250,7 @@ class GuardAuthenticationListenerTest extends TestCase
         $authenticateToken = $this->getMockBuilder(TokenInterface::class)->getMock();
         $providerKey = 'my_firewall';
 
-        $credentials = array('username' => 'weaverryan', 'password' => 'all_your_base');
+        $credentials = ['username' => 'weaverryan', 'password' => 'all_your_base'];
 
         $authenticator
             ->expects($this->once())
@@ -282,7 +282,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -326,7 +326,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticatorA, $authenticatorB),
+            [$authenticatorA, $authenticatorB],
             $this->logger
         );
 
@@ -352,7 +352,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -382,7 +382,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -413,7 +413,7 @@ class GuardAuthenticationListenerTest extends TestCase
             $this->guardAuthenticatorHandler,
             $this->authenticationManager,
             $providerKey,
-            array($authenticator),
+            [$authenticator],
             $this->logger
         );
 
@@ -430,11 +430,11 @@ class GuardAuthenticationListenerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->request = new Request(array(), array(), array(), array(), array(), array());
+        $this->request = new Request([], [], [], [], [], []);
 
         $this->event = $this->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseEvent')
             ->disableOriginalConstructor()
-            ->setMethods(array('getRequest'))
+            ->setMethods(['getRequest'])
             ->getMock();
         $this->event
             ->expects($this->any())

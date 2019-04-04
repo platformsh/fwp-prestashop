@@ -47,11 +47,11 @@ final class ArgumentMetadataFactory implements ArgumentMetadataFactoryInterface
      */
     public function createArgumentMetadata($controller)
     {
-        $arguments = array();
+        $arguments = [];
 
-        if (is_array($controller)) {
+        if (\is_array($controller)) {
             $reflection = new \ReflectionMethod($controller[0], $controller[1]);
-        } elseif (is_object($controller) && !$controller instanceof \Closure) {
+        } elseif (\is_object($controller) && !$controller instanceof \Closure) {
             $reflection = (new \ReflectionObject($controller))->getMethod('__invoke');
         } else {
             $reflection = new \ReflectionFunction($controller);
@@ -105,7 +105,7 @@ final class ArgumentMetadataFactory implements ArgumentMetadataFactoryInterface
      *
      * @param \ReflectionParameter $parameter
      *
-     * @return null|string
+     * @return string|null
      */
     private function getType(\ReflectionParameter $parameter, \ReflectionFunctionAbstract $function)
     {

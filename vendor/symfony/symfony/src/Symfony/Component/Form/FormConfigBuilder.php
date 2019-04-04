@@ -11,14 +11,14 @@
 
 namespace Symfony\Component\Form;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\ImmutableEventDispatcher;
 use Symfony\Component\Form\Exception\BadMethodCallException;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyPath;
 use Symfony\Component\PropertyAccess\PropertyPathInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\EventDispatcher\ImmutableEventDispatcher;
 
 /**
  * A basic form configuration.
@@ -39,13 +39,13 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      *
      * @var array
      */
-    private static $allowedMethods = array(
+    private static $allowedMethods = [
         'GET',
         'PUT',
         'POST',
         'DELETE',
         'PATCH',
-    );
+    ];
 
     /**
      * @var bool
@@ -95,12 +95,12 @@ class FormConfigBuilder implements FormConfigBuilderInterface
     /**
      * @var array
      */
-    private $viewTransformers = array();
+    private $viewTransformers = [];
 
     /**
      * @var array
      */
-    private $modelTransformers = array();
+    private $modelTransformers = [];
 
     /**
      * @var DataMapperInterface
@@ -130,7 +130,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
     /**
      * @var array
      */
-    private $attributes = array();
+    private $attributes = [];
 
     /**
      * @var mixed
@@ -138,7 +138,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
     private $data;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $dataClass;
 
@@ -181,14 +181,14 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      * Creates an empty form configuration.
      *
      * @param string|int               $name       The form name
-     * @param string                   $dataClass  The class of the form's data
+     * @param string|null              $dataClass  The class of the form's data
      * @param EventDispatcherInterface $dispatcher The event dispatcher
      * @param array                    $options    The form options
      *
      * @throws InvalidArgumentException if the data class is not a valid class or if
      *                                  the name contains invalid characters
      */
-    public function __construct($name, $dataClass, EventDispatcherInterface $dispatcher, array $options = array())
+    public function __construct($name, $dataClass, EventDispatcherInterface $dispatcher, array $options = [])
     {
         self::validateName($name);
 
@@ -257,7 +257,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
             throw new BadMethodCallException('FormConfigBuilder methods cannot be accessed anymore once the builder is turned into a FormConfigInterface instance.');
         }
 
-        $this->viewTransformers = array();
+        $this->viewTransformers = [];
 
         return $this;
     }
@@ -289,7 +289,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
             throw new BadMethodCallException('FormConfigBuilder methods cannot be accessed anymore once the builder is turned into a FormConfigInterface instance.');
         }
 
-        $this->modelTransformers = array();
+        $this->modelTransformers = [];
 
         return $this;
     }
@@ -790,12 +790,8 @@ class FormConfigBuilder implements FormConfigBuilderInterface
 
         $upperCaseMethod = strtoupper($method);
 
-        if (!in_array($upperCaseMethod, self::$allowedMethods)) {
-            throw new InvalidArgumentException(sprintf(
-                'The form method is "%s", but should be one of "%s".',
-                $method,
-                implode('", "', self::$allowedMethods)
-            ));
+        if (!\in_array($upperCaseMethod, self::$allowedMethods)) {
+            throw new InvalidArgumentException(sprintf('The form method is "%s", but should be one of "%s".', $method, implode('", "', self::$allowedMethods)));
         }
 
         $this->method = $upperCaseMethod;
@@ -857,15 +853,12 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      */
     public static function validateName($name)
     {
-        if (null !== $name && !is_string($name) && !is_int($name)) {
+        if (null !== $name && !\is_string($name) && !\is_int($name)) {
             throw new UnexpectedTypeException($name, 'string, integer or null');
         }
 
         if (!self::isValidName($name)) {
-            throw new InvalidArgumentException(sprintf(
-                'The name "%s" contains illegal characters. Names should start with a letter, digit or underscore and only contain letters, digits, numbers, underscores ("_"), hyphens ("-") and colons (":").',
-                $name
-            ));
+            throw new InvalidArgumentException(sprintf('The name "%s" contains illegal characters. Names should start with a letter, digit or underscore and only contain letters, digits, numbers, underscores ("_"), hyphens ("-") and colons (":").', $name));
         }
     }
 

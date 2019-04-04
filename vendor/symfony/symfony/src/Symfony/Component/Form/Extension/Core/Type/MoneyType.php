@@ -12,15 +12,15 @@
 namespace Symfony\Component\Form\Extension\Core\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\DataTransformer\MoneyToLocalizedStringTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class MoneyType extends AbstractType
 {
-    protected static $patterns = array();
+    protected static $patterns = [];
 
     /**
      * {@inheritdoc}
@@ -50,13 +50,13 @@ class MoneyType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'scale' => 2,
             'grouping' => false,
             'divisor' => 1,
             'currency' => 'EUR',
             'compound' => false,
-        ));
+        ]);
 
         $resolver->setAllowedTypes('scale', 'int');
     }
@@ -84,7 +84,7 @@ class MoneyType extends AbstractType
         $locale = \Locale::getDefault();
 
         if (!isset(self::$patterns[$locale])) {
-            self::$patterns[$locale] = array();
+            self::$patterns[$locale] = [];
         }
 
         if (!isset(self::$patterns[$locale][$currency])) {

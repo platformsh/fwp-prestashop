@@ -73,9 +73,9 @@ class HttpFoundationRequestHandler implements RequestHandlerInterface
                 $form->submit(null, false);
 
                 $form->addError(new FormError(
-                    call_user_func($form->getConfig()->getOption('upload_max_size_message')),
+                    \call_user_func($form->getConfig()->getOption('upload_max_size_message')),
                     null,
-                    array('{{ max }}' => $this->serverParams->getNormalizedIniPostMaxSize())
+                    ['{{ max }}' => $this->serverParams->getNormalizedIniPostMaxSize()]
                 ));
 
                 return;
@@ -85,7 +85,7 @@ class HttpFoundationRequestHandler implements RequestHandlerInterface
                 $params = $request->request->all();
                 $files = $request->files->all();
             } elseif ($request->request->has($name) || $request->files->has($name)) {
-                $default = $form->getConfig()->getCompound() ? array() : null;
+                $default = $form->getConfig()->getCompound() ? [] : null;
                 $params = $request->request->get($name, $default);
                 $files = $request->files->get($name, $default);
             } else {
@@ -93,7 +93,7 @@ class HttpFoundationRequestHandler implements RequestHandlerInterface
                 return;
             }
 
-            if (is_array($params) && is_array($files)) {
+            if (\is_array($params) && \is_array($files)) {
                 $data = array_replace_recursive($params, $files);
             } else {
                 $data = $params ?: $files;
@@ -101,7 +101,7 @@ class HttpFoundationRequestHandler implements RequestHandlerInterface
         }
 
         // Don't auto-submit the form unless at least one field is present.
-        if ('' === $name && count(array_intersect_key($data, $form->all())) <= 0) {
+        if ('' === $name && \count(array_intersect_key($data, $form->all())) <= 0) {
             return;
         }
 

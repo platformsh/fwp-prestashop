@@ -38,7 +38,7 @@ class DebugCommand extends Command
     private $extensions;
     private $guessers;
 
-    public function __construct(FormRegistryInterface $formRegistry, array $namespaces = array('Symfony\Component\Form\Extension\Core\Type'), array $types = array(), array $extensions = array(), array $guessers = array())
+    public function __construct(FormRegistryInterface $formRegistry, array $namespaces = ['Symfony\Component\Form\Extension\Core\Type'], array $types = [], array $extensions = [], array $guessers = [])
     {
         parent::__construct();
 
@@ -55,11 +55,11 @@ class DebugCommand extends Command
     protected function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputArgument('class', InputArgument::OPTIONAL, 'The form type class'),
                 new InputArgument('option', InputArgument::OPTIONAL, 'The form type option'),
                 new InputOption('format', null, InputOption::VALUE_REQUIRED, 'The output format (txt or json)', 'txt'),
-            ))
+            ])
             ->setDescription('Displays form type information')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command displays information about form types.
@@ -111,10 +111,10 @@ EOF
                 $object = $resolvedType->getOptionsResolver();
 
                 if (!$object->isDefined($option)) {
-                    $message = sprintf('Option "%s" is not defined in "%s".', $option, get_class($resolvedType->getInnerType()));
+                    $message = sprintf('Option "%s" is not defined in "%s".', $option, \get_class($resolvedType->getInnerType()));
 
                     if ($alternatives = $this->findAlternatives($option, $object->getDefinedOptions())) {
-                        if (1 == count($alternatives)) {
+                        if (1 == \count($alternatives)) {
                             $message .= "\n\nDid you mean this?\n    ";
                         } else {
                             $message .= "\n\nDid you mean one of these?\n    ";
@@ -139,7 +139,7 @@ EOF
 
     private function getFqcnTypeClass(InputInterface $input, SymfonyStyle $io, $shortClassName)
     {
-        $classes = array();
+        $classes = [];
         sort($this->namespaces);
         foreach ($this->namespaces as $namespace) {
             if (class_exists($fqcn = $namespace.'\\'.$shortClassName)) {
@@ -147,12 +147,12 @@ EOF
             }
         }
 
-        if (0 === $count = count($classes)) {
+        if (0 === $count = \count($classes)) {
             $message = sprintf("Could not find type \"%s\" into the following namespaces:\n    %s", $shortClassName, implode("\n    ", $this->namespaces));
 
             $allTypes = array_merge($this->getCoreTypes(), $this->types);
             if ($alternatives = $this->findAlternatives($shortClassName, $allTypes)) {
-                if (1 == count($alternatives)) {
+                if (1 == \count($alternatives)) {
                     $message .= "\n\nDid you mean this?\n    ";
                 } else {
                     $message .= "\n\nDid you mean one of these?\n    ";
@@ -178,7 +178,7 @@ EOF
         $loadTypesRefMethod = (new \ReflectionObject($coreExtension))->getMethod('loadTypes');
         $loadTypesRefMethod->setAccessible(true);
         $coreTypes = $loadTypesRefMethod->invoke($coreExtension);
-        $coreTypes = array_map(function (FormTypeInterface $type) { return get_class($type); }, $coreTypes);
+        $coreTypes = array_map(function (FormTypeInterface $type) { return \get_class($type); }, $coreTypes);
         sort($coreTypes);
 
         return $coreTypes;
@@ -186,10 +186,10 @@ EOF
 
     private function findAlternatives($name, array $collection)
     {
-        $alternatives = array();
+        $alternatives = [];
         foreach ($collection as $item) {
             $lev = levenshtein($name, $item);
-            if ($lev <= strlen($name) / 3 || false !== strpos($item, $name)) {
+            if ($lev <= \strlen($name) / 3 || false !== strpos($item, $name)) {
                 $alternatives[$item] = isset($alternatives[$item]) ? $alternatives[$item] - $lev : $lev;
             }
         }

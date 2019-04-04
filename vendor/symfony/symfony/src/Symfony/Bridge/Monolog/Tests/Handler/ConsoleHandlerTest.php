@@ -14,13 +14,13 @@ namespace Symfony\Bridge\Monolog\Tests\Handler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Console\Command\Command;
 
 /**
  * Tests the ConsoleHandler and also the ConsoleFormatter.
@@ -38,13 +38,13 @@ class ConsoleHandlerTest extends TestCase
     public function testIsHandling()
     {
         $handler = new ConsoleHandler();
-        $this->assertFalse($handler->isHandling(array()), '->isHandling returns false when no output is set');
+        $this->assertFalse($handler->isHandling([]), '->isHandling returns false when no output is set');
     }
 
     /**
      * @dataProvider provideVerbosityMappingTests
      */
-    public function testVerbosityMapping($verbosity, $level, $isHandling, array $map = array())
+    public function testVerbosityMapping($verbosity, $level, $isHandling, array $map = [])
     {
         $output = $this->getMockBuilder('Symfony\Component\Console\Output\OutputInterface')->getMock();
         $output
@@ -53,7 +53,7 @@ class ConsoleHandlerTest extends TestCase
             ->will($this->returnValue($verbosity))
         ;
         $handler = new ConsoleHandler($output, true, $map);
-        $this->assertSame($isHandling, $handler->isHandling(array('level' => $level)),
+        $this->assertSame($isHandling, $handler->isHandling(['level' => $level]),
             '->isHandling returns correct value depending on console verbosity and log level'
         );
 
@@ -61,12 +61,12 @@ class ConsoleHandlerTest extends TestCase
         $levelName = Logger::getLevelName($level);
         $levelName = sprintf('%-9s', $levelName);
 
-        $realOutput = $this->getMockBuilder('Symfony\Component\Console\Output\Output')->setMethods(array('doWrite'))->getMock();
+        $realOutput = $this->getMockBuilder('Symfony\Component\Console\Output\Output')->setMethods(['doWrite'])->getMock();
         $realOutput->setVerbosity($verbosity);
         if ($realOutput->isDebug()) {
-            $log = "16:21:54 $levelName [app] My info message\n[]\n[]\n";
+            $log = "16:21:54 $levelName [app] My info message\n";
         } else {
-            $log = "16:21:54 $levelName [app] My info message [] []\n";
+            $log = "16:21:54 $levelName [app] My info message\n";
         }
         $realOutput
             ->expects($isHandling ? $this->once() : $this->never())
@@ -74,38 +74,38 @@ class ConsoleHandlerTest extends TestCase
             ->with($log, false);
         $handler = new ConsoleHandler($realOutput, true, $map);
 
-        $infoRecord = array(
+        $infoRecord = [
             'message' => 'My info message',
-            'context' => array(),
+            'context' => [],
             'level' => $level,
             'level_name' => Logger::getLevelName($level),
             'channel' => 'app',
             'datetime' => new \DateTime('2013-05-29 16:21:54'),
-            'extra' => array(),
-        );
+            'extra' => [],
+        ];
         $this->assertFalse($handler->handle($infoRecord), 'The handler finished handling the log.');
     }
 
     public function provideVerbosityMappingTests()
     {
-        return array(
-            array(OutputInterface::VERBOSITY_QUIET, Logger::ERROR, true),
-            array(OutputInterface::VERBOSITY_QUIET, Logger::WARNING, false),
-            array(OutputInterface::VERBOSITY_NORMAL, Logger::WARNING, true),
-            array(OutputInterface::VERBOSITY_NORMAL, Logger::NOTICE, false),
-            array(OutputInterface::VERBOSITY_VERBOSE, Logger::NOTICE, true),
-            array(OutputInterface::VERBOSITY_VERBOSE, Logger::INFO, false),
-            array(OutputInterface::VERBOSITY_VERY_VERBOSE, Logger::INFO, true),
-            array(OutputInterface::VERBOSITY_VERY_VERBOSE, Logger::DEBUG, false),
-            array(OutputInterface::VERBOSITY_DEBUG, Logger::DEBUG, true),
-            array(OutputInterface::VERBOSITY_DEBUG, Logger::EMERGENCY, true),
-            array(OutputInterface::VERBOSITY_NORMAL, Logger::NOTICE, true, array(
+        return [
+            [OutputInterface::VERBOSITY_QUIET, Logger::ERROR, true],
+            [OutputInterface::VERBOSITY_QUIET, Logger::WARNING, false],
+            [OutputInterface::VERBOSITY_NORMAL, Logger::WARNING, true],
+            [OutputInterface::VERBOSITY_NORMAL, Logger::NOTICE, false],
+            [OutputInterface::VERBOSITY_VERBOSE, Logger::NOTICE, true],
+            [OutputInterface::VERBOSITY_VERBOSE, Logger::INFO, false],
+            [OutputInterface::VERBOSITY_VERY_VERBOSE, Logger::INFO, true],
+            [OutputInterface::VERBOSITY_VERY_VERBOSE, Logger::DEBUG, false],
+            [OutputInterface::VERBOSITY_DEBUG, Logger::DEBUG, true],
+            [OutputInterface::VERBOSITY_DEBUG, Logger::EMERGENCY, true],
+            [OutputInterface::VERBOSITY_NORMAL, Logger::NOTICE, true, [
                 OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
-            )),
-            array(OutputInterface::VERBOSITY_DEBUG, Logger::NOTICE, true, array(
+            ]],
+            [OutputInterface::VERBOSITY_DEBUG, Logger::NOTICE, true, [
                 OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
-            )),
-        );
+            ]],
+        ];
     }
 
     public function testVerbosityChanged()
@@ -122,10 +122,10 @@ class ConsoleHandlerTest extends TestCase
             ->will($this->returnValue(OutputInterface::VERBOSITY_DEBUG))
         ;
         $handler = new ConsoleHandler($output);
-        $this->assertFalse($handler->isHandling(array('level' => Logger::NOTICE)),
+        $this->assertFalse($handler->isHandling(['level' => Logger::NOTICE]),
             'when verbosity is set to quiet, the handler does not handle the log'
         );
-        $this->assertTrue($handler->isHandling(array('level' => Logger::NOTICE)),
+        $this->assertTrue($handler->isHandling(['level' => Logger::NOTICE]),
             'since the verbosity of the output increased externally, the handler is now handling the log'
         );
     }
@@ -149,21 +149,21 @@ class ConsoleHandlerTest extends TestCase
         $output
             ->expects($this->once())
             ->method('write')
-            ->with("16:21:54 <fg=green>INFO     </> <comment>[app]</> My info message\n[]\n[]\n")
+            ->with("16:21:54 <fg=green>INFO     </> <comment>[app]</> My info message\n")
         ;
 
         $handler = new ConsoleHandler(null, false);
         $handler->setOutput($output);
 
-        $infoRecord = array(
+        $infoRecord = [
             'message' => 'My info message',
-            'context' => array(),
+            'context' => [],
             'level' => Logger::INFO,
             'level_name' => Logger::getLevelName(Logger::INFO),
             'channel' => 'app',
             'datetime' => new \DateTime('2013-05-29 16:21:54'),
-            'extra' => array(),
-        );
+            'extra' => [],
+        ];
 
         $this->assertTrue($handler->handle($infoRecord), 'The handler finished handling the log as bubble is false.');
     }

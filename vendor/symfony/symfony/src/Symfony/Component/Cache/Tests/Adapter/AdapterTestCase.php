@@ -21,7 +21,7 @@ abstract class AdapterTestCase extends CachePoolTest
     {
         parent::setUp();
 
-        if (!array_key_exists('testDeferredSaveWithoutCommit', $this->skippedTests) && defined('HHVM_VERSION')) {
+        if (!array_key_exists('testDeferredSaveWithoutCommit', $this->skippedTests) && \defined('HHVM_VERSION')) {
             $this->skippedTests['testDeferredSaveWithoutCommit'] = 'Destructors are called late on HHVM.';
         }
 
@@ -85,11 +85,11 @@ abstract class AdapterTestCase extends CachePoolTest
         $item = $cache->getItem('foo');
         $this->assertFalse($item->isHit());
 
-        foreach ($cache->getItems(array('foo')) as $item) {
+        foreach ($cache->getItems(['foo']) as $item) {
         }
         $cache->save($item->set(new NotUnserializable()));
 
-        foreach ($cache->getItems(array('foo')) as $item) {
+        foreach ($cache->getItems(['foo']) as $item) {
         }
         $this->assertFalse($item->isHit());
     }

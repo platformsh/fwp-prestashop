@@ -21,7 +21,7 @@ class NonTraversableArrayObject implements \ArrayAccess, \Countable, \Serializab
 
     public function __construct(array $array = null)
     {
-        $this->array = $array ?: array();
+        $this->array = $array ?: [];
     }
 
     public function offsetExists($offset)
@@ -50,7 +50,7 @@ class NonTraversableArrayObject implements \ArrayAccess, \Countable, \Serializab
 
     public function count()
     {
-        return count($this->array);
+        return \count($this->array);
     }
 
     public function serialize()

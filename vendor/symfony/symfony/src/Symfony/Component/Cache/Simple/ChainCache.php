@@ -27,7 +27,7 @@ use Symfony\Component\Cache\ResettableInterface;
 class ChainCache implements CacheInterface, PruneableInterface, ResettableInterface
 {
     private $miss;
-    private $caches = array();
+    private $caches = [];
     private $defaultLifetime;
     private $cacheCount;
 
@@ -43,13 +43,13 @@ class ChainCache implements CacheInterface, PruneableInterface, ResettableInterf
 
         foreach ($caches as $cache) {
             if (!$cache instanceof CacheInterface) {
-                throw new InvalidArgumentException(sprintf('The class "%s" does not implement the "%s" interface.', get_class($cache), CacheInterface::class));
+                throw new InvalidArgumentException(sprintf('The class "%s" does not implement the "%s" interface.', \get_class($cache), CacheInterface::class));
             }
         }
 
         $this->miss = new \stdClass();
         $this->caches = array_values($caches);
-        $this->cacheCount = count($this->caches);
+        $this->cacheCount = \count($this->caches);
         $this->defaultLifetime = 0 < $defaultLifetime ? (int) $defaultLifetime : null;
     }
 
@@ -87,7 +87,7 @@ class ChainCache implements CacheInterface, PruneableInterface, ResettableInterf
 
     private function generateItems($values, $cacheIndex, $miss, $default)
     {
-        $missing = array();
+        $missing = [];
         $nextCacheIndex = $cacheIndex + 1;
         $nextCache = isset($this->caches[$nextCacheIndex]) ? $this->caches[$nextCacheIndex] : null;
 
@@ -201,7 +201,7 @@ class ChainCache implements CacheInterface, PruneableInterface, ResettableInterf
         if ($values instanceof \Traversable) {
             $valuesIterator = $values;
             $values = function () use ($valuesIterator, &$values) {
-                $generatedValues = array();
+                $generatedValues = [];
 
                 foreach ($valuesIterator as $key => $value) {
                     yield $key => $value;

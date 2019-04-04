@@ -11,13 +11,13 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
+use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\Config\Loader\FileLoader as BaseFileLoader;
+use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\Config\Loader\FileLoader as BaseFileLoader;
-use Symfony\Component\Config\FileLocatorInterface;
-use Symfony\Component\Config\Resource\GlobResource;
 
 /**
  * FileLoader is the abstract class used by all built-in loaders that are file based.
@@ -28,7 +28,7 @@ abstract class FileLoader extends BaseFileLoader
 {
     protected $container;
     protected $isLoadingInstanceof = false;
-    protected $instanceof = array();
+    protected $instanceof = [];
 
     public function __construct(ContainerBuilder $container, FileLocatorInterface $locator)
     {
@@ -57,8 +57,8 @@ abstract class FileLoader extends BaseFileLoader
         $classes = $this->findClasses($namespace, $resource, $exclude);
         // prepare for deep cloning
         $serializedPrototype = serialize($prototype);
-        $interfaces = array();
-        $singlyImplemented = array();
+        $interfaces = [];
+        $singlyImplemented = [];
 
         foreach ($classes as $class => $errorMessage) {
             if (interface_exists($class, false)) {
@@ -93,7 +93,7 @@ abstract class FileLoader extends BaseFileLoader
     {
         if ($this->isLoadingInstanceof) {
             if (!$definition instanceof ChildDefinition) {
-                throw new InvalidArgumentException(sprintf('Invalid type definition "%s": ChildDefinition expected, "%s" given.', $id, get_class($definition)));
+                throw new InvalidArgumentException(sprintf('Invalid type definition "%s": ChildDefinition expected, "%s" given.', $id, \get_class($definition)));
             }
             $this->instanceof[$id] = $definition;
         } else {
@@ -105,7 +105,7 @@ abstract class FileLoader extends BaseFileLoader
     {
         $parameterBag = $this->container->getParameterBag();
 
-        $excludePaths = array();
+        $excludePaths = [];
         $excludePrefix = null;
         if ($excludePattern) {
             $excludePattern = $parameterBag->unescapeValue($parameterBag->resolveValue($excludePattern));
@@ -120,12 +120,12 @@ abstract class FileLoader extends BaseFileLoader
         }
 
         $pattern = $parameterBag->unescapeValue($parameterBag->resolveValue($pattern));
-        $classes = array();
-        $extRegexp = defined('HHVM_VERSION') ? '/\\.(?:php|hh)$/' : '/\\.php$/';
+        $classes = [];
+        $extRegexp = \defined('HHVM_VERSION') ? '/\\.(?:php|hh)$/' : '/\\.php$/';
         $prefixLen = null;
         foreach ($this->glob($pattern, true, $resource) as $path => $info) {
             if (null === $prefixLen) {
-                $prefixLen = strlen($resource->getPrefix());
+                $prefixLen = \strlen($resource->getPrefix());
 
                 if ($excludePrefix && 0 !== strpos($excludePrefix, $resource->getPrefix())) {
                     throw new InvalidArgumentException(sprintf('Invalid "exclude" pattern when importing classes for "%s": make sure your "exclude" pattern (%s) is a subset of the "resource" pattern (%s)', $namespace, $excludePattern, $pattern));
@@ -139,7 +139,7 @@ abstract class FileLoader extends BaseFileLoader
             if (!preg_match($extRegexp, $path, $m) || !$info->isReadable()) {
                 continue;
             }
-            $class = $namespace.ltrim(str_replace('/', '\\', substr($path, $prefixLen, -strlen($m[0]))), '\\');
+            $class = $namespace.ltrim(str_replace('/', '\\', substr($path, $prefixLen, -\strlen($m[0]))), '\\');
 
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*+(?:\\\\[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*+)*+$/', $class)) {
                 continue;

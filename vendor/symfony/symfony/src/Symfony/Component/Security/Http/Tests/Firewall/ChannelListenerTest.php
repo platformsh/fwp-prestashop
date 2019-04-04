@@ -12,8 +12,8 @@
 namespace Symfony\Component\Security\Http\Tests\Firewall;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Http\Firewall\ChannelListener;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Firewall\ChannelListener;
 
 class ChannelListenerTest extends TestCase
 {
@@ -31,7 +31,7 @@ class ChannelListenerTest extends TestCase
             ->expects($this->any())
             ->method('getPatterns')
             ->with($this->equalTo($request))
-            ->will($this->returnValue(array(array(), 'http')))
+            ->will($this->returnValue([[], 'http']))
         ;
 
         $entryPoint = $this->getMockBuilder('Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface')->getMock();
@@ -69,7 +69,7 @@ class ChannelListenerTest extends TestCase
             ->expects($this->any())
             ->method('getPatterns')
             ->with($this->equalTo($request))
-            ->will($this->returnValue(array(array(), 'https')))
+            ->will($this->returnValue([[], 'https']))
         ;
 
         $entryPoint = $this->getMockBuilder('Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface')->getMock();
@@ -109,7 +109,7 @@ class ChannelListenerTest extends TestCase
             ->expects($this->any())
             ->method('getPatterns')
             ->with($this->equalTo($request))
-            ->will($this->returnValue(array(array(), 'https')))
+            ->will($this->returnValue([[], 'https']))
         ;
 
         $entryPoint = $this->getMockBuilder('Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface')->getMock();
@@ -152,7 +152,7 @@ class ChannelListenerTest extends TestCase
             ->expects($this->any())
             ->method('getPatterns')
             ->with($this->equalTo($request))
-            ->will($this->returnValue(array(array(), 'http')))
+            ->will($this->returnValue([[], 'http']))
         ;
 
         $entryPoint = $this->getMockBuilder('Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface')->getMock();

@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -23,6 +23,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
 namespace PrestaShopBundle\DependencyInjection;
 
 use Tools;
@@ -42,6 +43,31 @@ class AddOnsConfiguration implements ConfigurationInterface
             ->children()
                 ->arrayNode('addons')
                     ->children()
+                        ->arrayNode('categories')
+                            ->arrayPrototype()
+                                ->children()
+                                    ->scalarNode('id_category')->isRequired()->end()
+                                    ->scalarNode('name')->isRequired()->end()
+                                    ->scalarNode('order')->isRequired()->end()
+                                    ->scalarNode('link')->isRequired()->end()
+                                    ->scalarNode('id_parent')->isRequired()->end()
+                                    ->scalarNode('parent_link')->isRequired()->end()
+                                    ->scalarNode('tab')->isRequired()->end()
+                                    ->arrayNode('categories')
+                                        ->arrayPrototype()
+                                            ->children()
+                                                ->scalarNode('id_category')->isRequired()->end()
+                                                ->scalarNode('name')->isRequired()->end()
+                                                ->scalarNode('link')->isRequired()->end()
+                                                ->scalarNode('id_parent')->isRequired()->end()
+                                                ->scalarNode('link_rewrite')->isRequired()->end()
+                                                ->scalarNode('tab')->end()
+                                            ->end()
+                                        ->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
                         ->arrayNode('prestatrust')
                             ->children()
                                 ->booleanNode('enabled')

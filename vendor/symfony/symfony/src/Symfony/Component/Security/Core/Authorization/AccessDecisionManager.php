@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Security\Core\Authorization;
 
-use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use Symfony\Component\Security\Core\Exception\LogicException;
 
 /**
@@ -40,10 +40,10 @@ class AccessDecisionManager implements AccessDecisionManagerInterface
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($voters = array(), $strategy = self::STRATEGY_AFFIRMATIVE, $allowIfAllAbstainDecisions = false, $allowIfEqualGrantedDeniedDecisions = true)
+    public function __construct($voters = [], $strategy = self::STRATEGY_AFFIRMATIVE, $allowIfAllAbstainDecisions = false, $allowIfEqualGrantedDeniedDecisions = true)
     {
         $strategyMethod = 'decide'.ucfirst($strategy);
-        if (!is_callable(array($this, $strategyMethod))) {
+        if (!\is_callable([$this, $strategyMethod])) {
             throw new \InvalidArgumentException(sprintf('The strategy "%s" is not supported.', $strategy));
         }
 
@@ -167,7 +167,7 @@ class AccessDecisionManager implements AccessDecisionManagerInterface
         $grant = 0;
         foreach ($this->voters as $voter) {
             foreach ($attributes as $attribute) {
-                $result = $this->vote($voter, $token, $object, array($attribute));
+                $result = $this->vote($voter, $token, $object, [$attribute]);
 
                 switch ($result) {
                     case VoterInterface::ACCESS_GRANTED:
@@ -212,6 +212,6 @@ class AccessDecisionManager implements AccessDecisionManagerInterface
             return $voter->vote($token, $subject, $attributes);
         }
 
-        throw new LogicException(sprintf('%s should implement the %s interface when used as voter.', get_class($voter), VoterInterface::class));
+        throw new LogicException(sprintf('%s should implement the %s interface when used as voter.', \get_class($voter), VoterInterface::class));
     }
 }

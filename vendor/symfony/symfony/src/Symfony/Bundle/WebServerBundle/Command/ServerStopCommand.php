@@ -13,9 +13,9 @@ namespace Symfony\Bundle\WebServerBundle\Command;
 
 use Symfony\Bundle\WebServerBundle\WebServer;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -33,9 +33,9 @@ class ServerStopCommand extends ServerCommand
     protected function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputOption('pidfile', null, InputOption::VALUE_REQUIRED, 'PID file'),
-            ))
+            ])
             ->setDescription('Stops the local web server that was started with the server:start command')
             ->setHelp(<<<'EOF'
 <info>%command.name%</info> stops the local web server:

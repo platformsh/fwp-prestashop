@@ -12,17 +12,17 @@
 namespace Symfony\Component\DependencyInjection\Loader;
 
 use Symfony\Component\Config\Util\XmlUtils;
-use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
-use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 /**
@@ -63,7 +63,7 @@ class XmlFileLoader extends FileLoader
         try {
             $this->parseDefinitions($xml, $path, $defaults);
         } finally {
-            $this->instanceof = array();
+            $this->instanceof = [];
         }
     }
 
@@ -72,7 +72,7 @@ class XmlFileLoader extends FileLoader
      */
     public function supports($resource, $type = null)
     {
-        if (!is_string($resource)) {
+        if (!\is_string($resource)) {
             return false;
         }
 
@@ -111,7 +111,7 @@ class XmlFileLoader extends FileLoader
             return;
         }
 
-        $defaultDirectory = dirname($file);
+        $defaultDirectory = \dirname($file);
         foreach ($imports as $import) {
             $this->setCurrentDir($defaultDirectory);
             $this->import($import->getAttribute('resource'), XmlUtils::phpize($import->getAttribute('type')) ?: null, (bool) XmlUtils::phpize($import->getAttribute('ignore-errors')), $file);
@@ -132,13 +132,13 @@ class XmlFileLoader extends FileLoader
         if (false === $services = $xpath->query('//container:services/container:service|//container:services/container:prototype')) {
             return;
         }
-        $this->setCurrentDir(dirname($file));
+        $this->setCurrentDir(\dirname($file));
 
-        $this->instanceof = array();
+        $this->instanceof = [];
         $this->isLoadingInstanceof = true;
         $instanceof = $xpath->query('//container:services/container:instanceof');
         foreach ($instanceof as $service) {
-            $this->setDefinition((string) $service->getAttribute('id'), $this->parseDefinition($service, $file, array()));
+            $this->setDefinition((string) $service->getAttribute('id'), $this->parseDefinition($service, $file, []));
         }
 
         $this->isLoadingInstanceof = false;
@@ -164,12 +164,12 @@ class XmlFileLoader extends FileLoader
         $xpath->registerNamespace('container', self::NS);
 
         if (null === $defaultsNode = $xpath->query('//container:services/container:defaults')->item(0)) {
-            return array();
+            return [];
         }
-        $defaults = array(
+        $defaults = [
             'tags' => $this->getChildren($defaultsNode, 'tag'),
             'bind' => array_map(function ($v) { return new BoundArgument($v); }, $this->getArgumentsAsPhp($defaultsNode, 'bind', $file)),
-        );
+        ];
 
         foreach ($defaults['tags'] as $tag) {
             if ('' === $tag->getAttribute('name')) {
@@ -253,10 +253,10 @@ class XmlFileLoader extends FileLoader
                 $definition->setAutoconfigured($defaults['autoconfigure']);
             }
 
-            $definition->setChanges(array());
+            $definition->setChanges([]);
         }
 
-        foreach (array('class', 'public', 'shared', 'synthetic', 'lazy', 'abstract') as $key) {
+        foreach (['class', 'public', 'shared', 'synthetic', 'lazy', 'abstract'] as $key) {
             if ($value = $service->getAttribute($key)) {
                 $method = 'set'.$key;
                 $definition->$method(XmlUtils::phpize($value));
@@ -297,7 +297,7 @@ class XmlFileLoader extends FileLoader
                     $class = $factory->hasAttribute('class') ? $factory->getAttribute('class') : null;
                 }
 
-                $definition->setFactory(array($class, $factory->getAttribute('method')));
+                $definition->setFactory([$class, $factory->getAttribute('method')]);
             }
         }
 
@@ -312,7 +312,7 @@ class XmlFileLoader extends FileLoader
                     $class = $configurator->getAttribute('class');
                 }
 
-                $definition->setConfigurator(array($class, $configurator->getAttribute('method')));
+                $definition->setConfigurator([$class, $configurator->getAttribute('method')]);
             }
         }
 
@@ -327,7 +327,7 @@ class XmlFileLoader extends FileLoader
         }
 
         foreach ($tags as $tag) {
-            $parameters = array();
+            $parameters = [];
             foreach ($tag->attributes as $name => $node) {
                 if ('name' === $name) {
                     continue;
@@ -381,9 +381,9 @@ class XmlFileLoader extends FileLoader
     private function parseFileToDOM($file)
     {
         try {
-            $dom = XmlUtils::loadFile($file, array($this, 'validateSchema'));
+            $dom = XmlUtils::loadFile($file, [$this, 'validateSchema']);
         } catch (\InvalidArgumentException $e) {
-            throw new InvalidArgumentException(sprintf('Unable to parse file "%s".', $file), $e->getCode(), $e);
+            throw new InvalidArgumentException(sprintf('Unable to parse file "%s": %s', $file, $e->getMessage()), $e->getCode(), $e);
         }
 
         $this->validateExtensions($dom, $file);
@@ -400,9 +400,9 @@ class XmlFileLoader extends FileLoader
      */
     private function processAnonymousServices(\DOMDocument $xml, $file, $defaults)
     {
-        $definitions = array();
+        $definitions = [];
         $count = 0;
-        $suffix = ContainerBuilder::hash($file);
+        $suffix = '~'.ContainerBuilder::hash($file);
 
         $xpath = new \DOMXPath($xml);
         $xpath->registerNamespace('container', self::NS);
@@ -412,11 +412,11 @@ class XmlFileLoader extends FileLoader
             foreach ($nodes as $node) {
                 if ($services = $this->getChildren($node, 'service')) {
                     // give it a unique name
-                    $id = sprintf('%d_%s', ++$count, preg_replace('/^.*\\\\/', '', $services[0]->getAttribute('class')).'~'.$suffix);
+                    $id = sprintf('%d_%s', ++$count, preg_replace('/^.*\\\\/', '', $services[0]->getAttribute('class')).$suffix);
                     $node->setAttribute('id', $id);
                     $node->setAttribute('service', $id);
 
-                    $definitions[$id] = array($services[0], $file, false);
+                    $definitions[$id] = [$services[0], $file, false];
                     $services[0]->setAttribute('id', $id);
 
                     // anonymous services are always private
@@ -434,14 +434,14 @@ class XmlFileLoader extends FileLoader
                 // give it a unique name
                 $id = sprintf('%d_%s', ++$count, preg_replace('/^.*\\\\/', '', $node->getAttribute('class')).$suffix);
                 $node->setAttribute('id', $id);
-                $definitions[$id] = array($node, $file, true);
+                $definitions[$id] = [$node, $file, true];
             }
         }
 
         // resolve definitions
         uksort($definitions, 'strnatcmp');
         foreach (array_reverse($definitions) as $id => list($domElement, $file, $wild)) {
-            if (null !== $definition = $this->parseDefinition($domElement, $file, $wild ? $defaults : array())) {
+            if (null !== $definition = $this->parseDefinition($domElement, $file, $wild ? $defaults : [])) {
                 $this->setDefinition($id, $definition);
             }
 
@@ -465,7 +465,7 @@ class XmlFileLoader extends FileLoader
      */
     private function getArgumentsAsPhp(\DOMElement $node, $name, $file, $lowercase = true, $isChildDefinition = false)
     {
-        $arguments = array();
+        $arguments = [];
         foreach ($this->getChildren($node, $name) as $arg) {
             if ($arg->hasAttribute('name')) {
                 $arg->setAttribute('key', $arg->getAttribute('name'));
@@ -496,7 +496,7 @@ class XmlFileLoader extends FileLoader
 
             switch ($arg->getAttribute('type')) {
                 case 'service':
-                    if (!$arg->getAttribute('id')) {
+                    if ('' === $arg->getAttribute('id')) {
                         throw new InvalidArgumentException(sprintf('Tag "<%s>" with type="service" has no or empty "id" attribute in "%s".', $name, $file));
                     }
                     if ($arg->hasAttribute('strict')) {
@@ -533,7 +533,7 @@ class XmlFileLoader extends FileLoader
                     $arguments[$key] = $arg->nodeValue;
                     break;
                 case 'constant':
-                    $arguments[$key] = constant(trim($arg->nodeValue));
+                    $arguments[$key] = \constant(trim($arg->nodeValue));
                     break;
                 default:
                     $arguments[$key] = XmlUtils::phpize($arg->nodeValue);
@@ -549,11 +549,11 @@ class XmlFileLoader extends FileLoader
      * @param \DOMNode $node
      * @param mixed    $name
      *
-     * @return array
+     * @return \DOMElement[]
      */
     private function getChildren(\DOMNode $node, $name)
     {
-        $children = array();
+        $children = [];
         foreach ($node->childNodes as $child) {
             if ($child instanceof \DOMElement && $child->localName === $name && self::NS === $child->namespaceURI) {
                 $children[] = $child;
@@ -574,11 +574,11 @@ class XmlFileLoader extends FileLoader
      */
     public function validateSchema(\DOMDocument $dom)
     {
-        $schemaLocations = array('http://symfony.com/schema/dic/services' => str_replace('\\', '/', __DIR__.'/schema/dic/services/services-1.0.xsd'));
+        $schemaLocations = ['http://symfony.com/schema/dic/services' => str_replace('\\', '/', __DIR__.'/schema/dic/services/services-1.0.xsd')];
 
         if ($element = $dom->documentElement->getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'schemaLocation')) {
             $items = preg_split('/\s+/', $element);
-            for ($i = 0, $nb = count($items); $i < $nb; $i += 2) {
+            for ($i = 0, $nb = \count($items); $i < $nb; $i += 2) {
                 if (!$this->container->hasExtension($items[$i])) {
                     continue;
                 }
@@ -587,7 +587,7 @@ class XmlFileLoader extends FileLoader
                     $path = str_replace($extension->getNamespace(), str_replace('\\', '/', $extension->getXsdValidationBasePath()).'/', $items[$i + 1]);
 
                     if (!is_file($path)) {
-                        throw new RuntimeException(sprintf('Extension "%s" references a non-existent XSD file "%s"', get_class($extension), $path));
+                        throw new RuntimeException(sprintf('Extension "%s" references a non-existent XSD file "%s"', \get_class($extension), $path));
                     }
 
                     $schemaLocations[$items[$i]] = $path;
@@ -595,7 +595,7 @@ class XmlFileLoader extends FileLoader
             }
         }
 
-        $tmpfiles = array();
+        $tmpfiles = [];
         $imports = '';
         foreach ($schemaLocations as $namespace => $location) {
             $parts = explode('/', $location);
@@ -611,7 +611,7 @@ class XmlFileLoader extends FileLoader
                     $locationstart = 'phar:///';
                 }
             }
-            $drive = '\\' === DIRECTORY_SEPARATOR ? array_shift($parts).'/' : '';
+            $drive = '\\' === \DIRECTORY_SEPARATOR ? array_shift($parts).'/' : '';
             $location = $locationstart.$drive.implode('/', array_map('rawurlencode', $parts));
 
             $imports .= sprintf('  <xsd:import namespace="%s" schemaLocation="%s" />'."\n", $namespace, $location);
@@ -650,7 +650,7 @@ EOF
     private function validateAlias(\DOMElement $alias, $file)
     {
         foreach ($alias->attributes as $name => $node) {
-            if (!in_array($name, array('alias', 'id', 'public'))) {
+            if (!\in_array($name, ['alias', 'id', 'public'])) {
                 @trigger_error(sprintf('Using the attribute "%s" is deprecated for the service "%s" which is defined as an alias in "%s". Allowed attributes for service aliases are "alias", "id" and "public". The XmlFileLoader will raise an exception in Symfony 4.0, instead of silently ignoring unsupported attributes.', $name, $alias->getAttribute('id'), $file), E_USER_DEPRECATED);
             }
         }
@@ -680,13 +680,7 @@ EOF
             // can it be handled by an extension?
             if (!$this->container->hasExtension($node->namespaceURI)) {
                 $extensionNamespaces = array_filter(array_map(function ($ext) { return $ext->getNamespace(); }, $this->container->getExtensions()));
-                throw new InvalidArgumentException(sprintf(
-                    'There is no extension able to load the configuration for "%s" (in %s). Looked for namespace "%s", found %s',
-                    $node->tagName,
-                    $file,
-                    $node->namespaceURI,
-                    $extensionNamespaces ? sprintf('"%s"', implode('", "', $extensionNamespaces)) : 'none'
-                ));
+                throw new InvalidArgumentException(sprintf('There is no extension able to load the configuration for "%s" (in %s). Looked for namespace "%s", found %s', $node->tagName, $file, $node->namespaceURI, $extensionNamespaces ? sprintf('"%s"', implode('", "', $extensionNamespaces)) : 'none'));
             }
         }
     }
@@ -704,8 +698,8 @@ EOF
             }
 
             $values = static::convertDomElementToArray($node);
-            if (!is_array($values)) {
-                $values = array();
+            if (!\is_array($values)) {
+                $values = [];
             }
 
             $this->container->loadFromExtension($node->namespaceURI, $values);

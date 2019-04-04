@@ -49,7 +49,7 @@ class WebTestCase extends BaseWebTestCase
         return 'Symfony\Bundle\SecurityBundle\Tests\Functional\app\AppKernel';
     }
 
-    protected static function createKernel(array $options = array())
+    protected static function createKernel(array $options = [])
     {
         $class = self::getKernelClass();
 
@@ -68,6 +68,6 @@ class WebTestCase extends BaseWebTestCase
 
     protected static function getVarDir()
     {
-        return 'SB'.substr(strrchr(get_called_class(), '\\'), 1);
+        return 'SB'.substr(strrchr(\get_called_class(), '\\'), 1);
     }
 }

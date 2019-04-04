@@ -12,9 +12,9 @@
 namespace Symfony\Component\Security\Http\Tests\Firewall;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Firewall\RememberMeListener;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\SecurityEvents;
 
 class RememberMeListenerTest extends TestCase
@@ -90,7 +90,7 @@ class RememberMeListenerTest extends TestCase
         $manager
             ->expects($this->once())
             ->method('authenticate')
-            ->will($this->throwException($exception))
+            ->willThrowException($exception)
         ;
 
         $event = $this->getGetResponseEvent();
@@ -132,7 +132,7 @@ class RememberMeListenerTest extends TestCase
         $manager
             ->expects($this->once())
             ->method('authenticate')
-            ->will($this->throwException($exception))
+            ->willThrowException($exception)
         ;
 
         $event = $this->getGetResponseEvent();
@@ -159,7 +159,7 @@ class RememberMeListenerTest extends TestCase
         $service
             ->expects($this->once())
             ->method('autoLogin')
-            ->will($this->throwException($exception))
+            ->willThrowException($exception)
         ;
 
         $service
@@ -420,7 +420,7 @@ class RememberMeListenerTest extends TestCase
             $sessionStrategy = ($withSessionStrategy ? $this->getSessionStrategy() : null)
         );
 
-        return array($listener, $tokenStorage, $service, $manager, $logger, $dispatcher, $sessionStrategy);
+        return [$listener, $tokenStorage, $service, $manager, $logger, $dispatcher, $sessionStrategy];
     }
 
     protected function getLogger()

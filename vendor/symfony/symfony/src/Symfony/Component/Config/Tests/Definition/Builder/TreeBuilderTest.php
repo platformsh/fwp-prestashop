@@ -12,8 +12,8 @@
 namespace Symfony\Component\Config\Tests\Definition\Builder;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Config\Tests\Fixtures\Builder\NodeBuilder as CustomNodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Tests\Fixtures\Builder\NodeBuilder as CustomNodeBuilder;
 
 class TreeBuilderTest extends TestCase
 {
@@ -119,7 +119,7 @@ class TreeBuilderTest extends TestCase
         $builder = new TreeBuilder();
 
         $builder->root('test')
-            ->example(array('key' => 'value'))
+            ->example(['key' => 'value'])
             ->children()
                 ->node('child', 'variable')->info('child info')->defaultValue('default')->example('example')
             ->end()

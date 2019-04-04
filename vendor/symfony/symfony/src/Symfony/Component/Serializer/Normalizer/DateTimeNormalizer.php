@@ -28,11 +28,11 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
     private $format;
     private $timezone;
 
-    private static $supportedTypes = array(
+    private static $supportedTypes = [
         \DateTimeInterface::class => true,
         \DateTimeImmutable::class => true,
         \DateTime::class => true,
-    );
+    ];
 
     /**
      * @param string             $format
@@ -49,7 +49,7 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
      *
      * @throws InvalidArgumentException
      */
-    public function normalize($object, $format = null, array $context = array())
+    public function normalize($object, $format = null, array $context = [])
     {
         if (!$object instanceof \DateTimeInterface) {
             throw new InvalidArgumentException('The object must implement the "\DateTimeInterface".');
@@ -59,7 +59,8 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
         $timezone = $this->getTimezone($context);
 
         if (null !== $timezone) {
-            $object = (new \DateTimeImmutable('@'.$object->getTimestamp()))->setTimezone($timezone);
+            $object = clone $object;
+            $object = $object->setTimezone($timezone);
         }
 
         return $object->format($format);
@@ -78,7 +79,7 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
      *
      * @throws NotNormalizableValueException
      */
-    public function denormalize($data, $class, $format = null, array $context = array())
+    public function denormalize($data, $class, $format = null, array $context = [])
     {
         $dateTimeFormat = isset($context[self::FORMAT_KEY]) ? $context[self::FORMAT_KEY] : null;
         $timezone = $this->getTimezone($context);
@@ -88,7 +89,7 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
         }
 
         if (null !== $dateTimeFormat) {
-            if (null === $timezone && PHP_VERSION_ID < 70000) {
+            if (null === $timezone && \PHP_VERSION_ID < 70000) {
                 // https://bugs.php.net/bug.php?id=68669
                 $object = \DateTime::class === $class ? \DateTime::createFromFormat($dateTimeFormat, $data) : \DateTimeImmutable::createFromFormat($dateTimeFormat, $data);
             } else {
@@ -132,7 +133,7 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
      */
     private function formatDateTimeErrors(array $errors)
     {
-        $formattedErrors = array();
+        $formattedErrors = [];
 
         foreach ($errors as $pos => $message) {
             $formattedErrors[] = sprintf('at position %d: %s', $pos, $message);

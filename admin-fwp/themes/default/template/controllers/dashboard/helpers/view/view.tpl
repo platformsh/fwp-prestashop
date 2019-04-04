@@ -64,7 +64,7 @@
 					</div>
 					<input type="hidden" name="datepickerFrom" id="datepickerFrom" value="{$date_from|escape}" class="form-control">
 					<input type="hidden" name="datepickerTo" id="datepickerTo" value="{$date_to|escape}" class="form-control">
-					<input type="hidden" name="preselectDateRange" id="preselectDateRange" value="{if isset($preselect_date_range)}{$preselect_date_range}{/if}" class="form-control">
+					<input type="hidden" name="preselectDateRange" id="preselectDateRange" value="{if isset($preselect_date_range)}{$preselect_date_range|escape:'html'}{/if}" class="form-control">
 					<div class="form-group pull-right">
 						<button id="datepickerExpand" class="btn btn-default" type="button">
 							<i class="icon-calendar-empty"></i>
@@ -107,7 +107,7 @@
 			<section class="dash_links panel">
 				<h3><i class="icon-link"></i> {l s="Useful links" d='Admin.Dashboard.Feature'}</h3>
 					<dl>
-						<dt><a href="http://doc.prestashop.com/display/PS16?utm_source=back-office&amp;utm_medium=dashboard&amp;utm_campaign=back-office-{$lang_iso|upper}&amp;utm_content={if $host_mode}cloud{else}download{/if}" class="_blank">{l s="Official Documentation" d='Admin.Dashboard.Feature'}</a></dt>
+						<dt><a href="http://doc.prestashop.com/display/PS17?utm_source=back-office&amp;utm_medium=dashboard&amp;utm_campaign=back-office-{$lang_iso|upper}&amp;utm_content={if $host_mode}cloud{else}download{/if}" class="_blank">{l s="Official Documentation" d='Admin.Dashboard.Feature'}</a></dt>
 						<dd>{l s="User, Developer and Designer Guides" d='Admin.Dashboard.Feature'}</dd>
 					</dl>
 					<dl>
@@ -119,7 +119,7 @@
 						<dd>{l s="Enhance your store with templates & modules" d='Admin.Dashboard.Feature'}</dd>
 					</dl>
 					<dl>
-						<dt><a href="http://forge.prestashop.com?utm_source=back-office&amp;utm_medium=dashboard&amp;utm_campaign=back-office-{$lang_iso|upper}&amp;utm_content={if $host_mode}cloud{else}download{/if}" class="_blank">{l s="The Forge" d='Admin.Dashboard.Feature'}</a></dt>
+						<dt><a href="https://github.com/PrestaShop/PrestaShop/issues" class="_blank">{l s="Bug Tracker" d='Admin.Global'}</a></dt>
 						<dd>{l s="Report issues in the Bug Tracker" d='Admin.Dashboard.Feature'}</dd>
 					</dl>
 					<dl>

@@ -28,9 +28,9 @@ class TextDescriptor extends Descriptor
     protected function describeDefaults(array $options)
     {
         $this->output->section('Built-in form types (Symfony\Component\Form\Extension\Core\Type)');
-        $shortClassNames = array_map(function ($fqcn) { return array_slice(explode('\\', $fqcn), -1)[0]; }, $options['core_types']);
-        for ($i = 0; $i * 5 < count($shortClassNames); ++$i) {
-            $this->output->writeln(' '.implode(', ', array_slice($shortClassNames, $i * 5, 5)));
+        $shortClassNames = array_map(function ($fqcn) { return \array_slice(explode('\\', $fqcn), -1)[0]; }, $options['core_types']);
+        for ($i = 0; $i * 5 < \count($shortClassNames); ++$i) {
+            $this->output->writeln(' '.implode(', ', \array_slice($shortClassNames, $i * 5, 5)));
         }
 
         $this->output->section('Service form types');
@@ -43,34 +43,34 @@ class TextDescriptor extends Descriptor
         $this->output->listing($options['guessers']);
     }
 
-    protected function describeResolvedFormType(ResolvedFormTypeInterface $resolvedFormType, array $options = array())
+    protected function describeResolvedFormType(ResolvedFormTypeInterface $resolvedFormType, array $options = [])
     {
         $this->collectOptions($resolvedFormType);
 
-        $formOptions = $this->normalizeAndSortOptionsColumns(array_filter(array(
+        $formOptions = $this->normalizeAndSortOptionsColumns(array_filter([
             'own' => $this->ownOptions,
             'overridden' => $this->overriddenOptions,
             'parent' => $this->parentOptions,
             'extension' => $this->extensionOptions,
-        )));
+        ]));
 
         // setting headers and column order
-        $tableHeaders = array_intersect_key(array(
+        $tableHeaders = array_intersect_key([
             'own' => 'Options',
             'overridden' => 'Overridden options',
             'parent' => 'Parent options',
             'extension' => 'Extension options',
-        ), $formOptions);
+        ], $formOptions);
 
-        $tableRows = array();
-        $count = count(max($formOptions));
+        $tableRows = [];
+        $count = \count(max($formOptions));
         for ($i = 0; $i < $count; ++$i) {
-            $cells = array();
+            $cells = [];
             foreach (array_keys($tableHeaders) as $group) {
                 if (isset($formOptions[$group][$i])) {
                     $option = $formOptions[$group][$i];
 
-                    if (is_string($option) && in_array($option, $this->requiredOptions)) {
+                    if (\is_string($option) && \in_array($option, $this->requiredOptions)) {
                         $option .= ' <info>(required)</info>';
                     }
 
@@ -82,7 +82,7 @@ class TextDescriptor extends Descriptor
             $tableRows[] = $cells;
         }
 
-        $this->output->title(sprintf('%s (Block prefix: "%s")', get_class($resolvedFormType->getInnerType()), $resolvedFormType->getInnerType()->getBlockPrefix()));
+        $this->output->title(sprintf('%s (Block prefix: "%s")', \get_class($resolvedFormType->getInnerType()), $resolvedFormType->getInnerType()->getBlockPrefix()));
         $this->output->table($tableHeaders, $tableRows);
 
         if ($this->parents) {
@@ -101,27 +101,27 @@ class TextDescriptor extends Descriptor
         $definition = $this->getOptionDefinition($optionsResolver, $options['option']);
 
         $dump = $this->getDumpFunction();
-        $map = array(
+        $map = [
             'Required' => 'required',
             'Default' => 'default',
             'Allowed types' => 'allowedTypes',
             'Allowed values' => 'allowedValues',
             'Normalizer' => 'normalizer',
-        );
-        $rows = array();
+        ];
+        $rows = [];
         foreach ($map as $label => $name) {
             $value = array_key_exists($name, $definition) ? $dump($definition[$name]) : '-';
             if ('default' === $name && isset($definition['lazy'])) {
                 $value = "Value: $value\n\nClosure(s): ".$dump($definition['lazy']);
             }
 
-            $rows[] = array("<info>$label</info>", $value);
+            $rows[] = ["<info>$label</info>", $value];
             $rows[] = new TableSeparator();
         }
         array_pop($rows);
 
-        $this->output->title(sprintf('%s (%s)', get_class($options['type']), $options['option']));
-        $this->output->table(array(), $rows);
+        $this->output->title(sprintf('%s (%s)', \get_class($options['type']), $options['option']));
+        $this->output->table([], $rows);
     }
 
     private function normalizeAndSortOptionsColumns(array $options)
@@ -129,16 +129,16 @@ class TextDescriptor extends Descriptor
         foreach ($options as $group => $opts) {
             $sorted = false;
             foreach ($opts as $class => $opt) {
-                if (is_string($class)) {
+                if (\is_string($class)) {
                     unset($options[$group][$class]);
                 }
 
-                if (!is_array($opt) || 0 === count($opt)) {
+                if (!\is_array($opt) || 0 === \count($opt)) {
                     continue;
                 }
 
                 if (!$sorted) {
-                    $options[$group] = array();
+                    $options[$group] = [];
                 } else {
                     $options[$group][] = null;
                 }
@@ -161,15 +161,15 @@ class TextDescriptor extends Descriptor
     private function getDumpFunction()
     {
         $cloner = new VarCloner();
-        $cloner->addCasters(array('Closure' => function ($c, $a) {
+        $cloner->addCasters(['Closure' => function ($c, $a) {
             $prefix = Caster::PREFIX_VIRTUAL;
 
-            return array(
-                $prefix.'parameters' => isset($a[$prefix.'parameters']) ? count($a[$prefix.'parameters']->value) : 0,
+            return [
+                $prefix.'parameters' => isset($a[$prefix.'parameters']) ? \count($a[$prefix.'parameters']->value) : 0,
                 $prefix.'file' => $a[$prefix.'file'],
                 $prefix.'line' => $a[$prefix.'line'],
-            );
-        }));
+            ];
+        }]);
         $dumper = new CliDumper(null, null, CliDumper::DUMP_LIGHT_ARRAY | CliDumper::DUMP_COMMA_SEPARATOR);
         $dumper->setColors($this->output->isDecorated());
 

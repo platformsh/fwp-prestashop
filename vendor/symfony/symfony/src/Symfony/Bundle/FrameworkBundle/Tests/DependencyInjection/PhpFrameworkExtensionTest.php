@@ -11,9 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\Config\FileLocator;
 
 class PhpFrameworkExtensionTest extends FrameworkExtensionTest
 {
@@ -29,12 +29,12 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTest
     public function testAssetsCannotHavePathAndUrl()
     {
         $this->createContainerFromClosure(function ($container) {
-            $container->loadFromExtension('framework', array(
-                'assets' => array(
+            $container->loadFromExtension('framework', [
+                'assets' => [
                     'base_urls' => 'http://cdn.example.com',
                     'base_path' => '/foo',
-                ),
-            ));
+                ],
+            ]);
         });
     }
 
@@ -44,16 +44,16 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTest
     public function testAssetPackageCannotHavePathAndUrl()
     {
         $this->createContainerFromClosure(function ($container) {
-            $container->loadFromExtension('framework', array(
-                'assets' => array(
-                    'packages' => array(
-                        'impossible' => array(
+            $container->loadFromExtension('framework', [
+                'assets' => [
+                    'packages' => [
+                        'impossible' => [
                             'base_urls' => 'http://cdn.example.com',
                             'base_path' => '/foo',
-                        ),
-                    ),
-                ),
-            ));
+                        ],
+                    ],
+                ],
+            ]);
         });
     }
 }

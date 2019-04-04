@@ -11,12 +11,12 @@
 
 namespace Symfony\Bridge\Doctrine\Tests\Form\Type;
 
-use Symfony\Component\Form\Test\FormPerformanceTestCase;
-use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdEntity;
 use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Bridge\Doctrine\Test\DoctrineTestHelper;
-use Symfony\Component\Form\Extension\Core\CoreExtension;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
+use Symfony\Bridge\Doctrine\Test\DoctrineTestHelper;
+use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdEntity;
+use Symfony\Component\Form\Extension\Core\CoreExtension;
+use Symfony\Component\Form\Test\FormPerformanceTestCase;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -42,10 +42,10 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
             ->method('getManagerForClass')
             ->will($this->returnValue($this->em));
 
-        return array(
+        return [
             new CoreExtension(),
             new DoctrineOrmExtension($manager),
-        );
+        ];
     }
 
     protected function setUp()
@@ -55,9 +55,9 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         parent::setUp();
 
         $schemaTool = new SchemaTool($this->em);
-        $classes = array(
+        $classes = [
             $this->em->getClassMetadata(self::ENTITY_CLASS),
-        );
+        ];
 
         try {
             $schemaTool->dropSchema($classes);
@@ -72,7 +72,7 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         $ids = range(1, 300);
 
         foreach ($ids as $id) {
-            $name = 65 + (int) chr($id % 57);
+            $name = 65 + (int) \chr($id % 57);
             $this->em->persist(new SingleIntIdEntity($id, $name));
         }
 
@@ -90,9 +90,9 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         $this->setMaxRunningTime(1);
 
         for ($i = 0; $i < 40; ++$i) {
-            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, array(
+            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, [
                 'class' => self::ENTITY_CLASS,
-            ));
+            ]);
 
             // force loading of the choice list
             $form->createView();
@@ -108,10 +108,10 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         $this->setMaxRunningTime(1);
 
         for ($i = 0; $i < 40; ++$i) {
-            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, array(
+            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, [
                 'class' => self::ENTITY_CLASS,
                 'choices' => $choices,
-            ));
+            ]);
 
             // force loading of the choice list
             $form->createView();
@@ -127,10 +127,10 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         $this->setMaxRunningTime(1);
 
         for ($i = 0; $i < 40; ++$i) {
-            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, array(
+            $form = $this->factory->create('Symfony\Bridge\Doctrine\Form\Type\EntityType', null, [
                     'class' => self::ENTITY_CLASS,
                     'preferred_choices' => $choices,
-                ));
+                ]);
 
             // force loading of the choice list
             $form->createView();

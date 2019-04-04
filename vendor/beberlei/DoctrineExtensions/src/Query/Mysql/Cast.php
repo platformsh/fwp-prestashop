@@ -2,12 +2,13 @@
 
 namespace DoctrineExtensions\Query\Mysql;
 
-use Doctrine\ORM\Query\AST\Functions\FunctionNode,
-    Doctrine\ORM\Query\AST\Node,
-    Doctrine\ORM\Query\Lexer,
-    Doctrine\ORM\Query\Parser,
-    Doctrine\ORM\Query\QueryException,
-    Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\AST\Literal;
+use Doctrine\ORM\Query\AST\Node;
+use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\Parser;
+use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Query\SqlWalker;
 
 /**
  * "CAST" "(" "$fieldIdentifierExpression" "AS" "$castingTypeExpression" ")"
@@ -41,7 +42,27 @@ class Cast extends FunctionNode
         $parser->match(Lexer::T_AS);
         $parser->match(Lexer::T_IDENTIFIER);
 
-        $this->castingTypeExpression = $parser->getLexer()->token['value'];
+        $type = $parser->getLexer()->token['value'];
+
+        if ($parser->getLexer()->isNextToken(Lexer::T_OPEN_PARENTHESIS)) {
+            $parser->match(Lexer::T_OPEN_PARENTHESIS);
+            /** @var Literal $parameter */
+            $parameter = $parser->Literal();
+            $parameters = [$parameter->value];
+
+            if ($parser->getLexer()->isNextToken(Lexer::T_COMMA)) {
+                while ($parser->getLexer()->isNextToken(Lexer::T_COMMA)) {
+                    $parser->match(Lexer::T_COMMA);
+                    $parameter = $parser->Literal();
+                    $parameters[] = $parameter->value;
+                }
+            }
+
+            $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+            $type .= '('.implode(', ', $parameters).')';
+        }
+
+        $this->castingTypeExpression = $type;
 
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }

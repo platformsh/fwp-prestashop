@@ -73,15 +73,21 @@ class GlobResource implements \IteratorAggregate, SelfCheckingResourceInterface,
         return $this->hash === $hash;
     }
 
+    /**
+     * @internal
+     */
     public function serialize()
     {
         if (null === $this->hash) {
             $this->hash = $this->computeHash();
         }
 
-        return serialize(array($this->prefix, $this->pattern, $this->recursive, $this->hash));
+        return serialize([$this->prefix, $this->pattern, $this->recursive, $this->hash]);
     }
 
+    /**
+     * @internal
+     */
     public function unserialize($serialized)
     {
         list($this->prefix, $this->pattern, $this->recursive, $this->hash) = unserialize($serialized);
@@ -93,8 +99,8 @@ class GlobResource implements \IteratorAggregate, SelfCheckingResourceInterface,
             return;
         }
 
-        if (0 !== strpos($this->prefix, 'phar://') && false === strpos($this->pattern, '/**/') && (defined('GLOB_BRACE') || false === strpos($this->pattern, '{'))) {
-            foreach (glob($this->prefix.$this->pattern, defined('GLOB_BRACE') ? GLOB_BRACE : 0) as $path) {
+        if (0 !== strpos($this->prefix, 'phar://') && false === strpos($this->pattern, '/**/') && (\defined('GLOB_BRACE') || false === strpos($this->pattern, '{'))) {
+            foreach (glob($this->prefix.$this->pattern, \defined('GLOB_BRACE') ? GLOB_BRACE : 0) as $path) {
                 if ($this->recursive && is_dir($path)) {
                     $files = iterator_to_array(new \RecursiveIteratorIterator(
                         new \RecursiveCallbackFilterIterator(
@@ -130,7 +136,7 @@ class GlobResource implements \IteratorAggregate, SelfCheckingResourceInterface,
             $regex = substr_replace($regex, '(/|$)', -2, 1);
         }
 
-        $prefixLen = strlen($this->prefix);
+        $prefixLen = \strlen($this->prefix);
         foreach ($finder->followLinks()->sortByName()->in($this->prefix) as $path => $info) {
             if (preg_match($regex, substr('\\' === \DIRECTORY_SEPARATOR ? str_replace('\\', '/', $path) : $path, $prefixLen)) && $info->isFile()) {
                 yield $path => $info;

@@ -11,13 +11,13 @@
 
 namespace Symfony\Component\HttpKernel\EventListener;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\FinishRequestEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Sets the session in the request.
@@ -26,7 +26,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 abstract class AbstractSessionListener implements EventSubscriberInterface
 {
-    private $sessionUsageStack = array();
+    private $sessionUsageStack = [];
 
     public function onKernelRequest(GetResponseEvent $event)
     {
@@ -74,12 +74,12 @@ abstract class AbstractSessionListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return array(
-            KernelEvents::REQUEST => array('onKernelRequest', 128),
+        return [
+            KernelEvents::REQUEST => ['onKernelRequest', 128],
             // low priority to come after regular response listeners, same as SaveSessionListener
-            KernelEvents::RESPONSE => array('onKernelResponse', -1000),
-            KernelEvents::FINISH_REQUEST => array('onFinishRequest'),
-        );
+            KernelEvents::RESPONSE => ['onKernelResponse', -1000],
+            KernelEvents::FINISH_REQUEST => ['onFinishRequest'],
+        ];
     }
 
     /**

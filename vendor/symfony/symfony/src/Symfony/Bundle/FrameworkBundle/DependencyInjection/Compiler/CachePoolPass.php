@@ -17,8 +17,8 @@ use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @author Nicolas Grekas <p@tchwork.com>
@@ -37,14 +37,14 @@ class CachePoolPass implements CompilerPassInterface
         }
         $seed .= '.'.$container->getParameter('kernel.name').'.'.$container->getParameter('kernel.environment');
 
-        $pools = array();
-        $clearers = array();
-        $attributes = array(
+        $pools = [];
+        $clearers = [];
+        $attributes = [
             'provider',
             'namespace',
             'default_lifetime',
             'reset',
-        );
+        ];
         foreach ($container->findTaggedServiceIds('cache.pool') as $id => $tags) {
             $adapter = $pool = $container->getDefinition($id);
             if ($pool->isAbstract()) {
@@ -78,7 +78,7 @@ class CachePoolPass implements CompilerPassInterface
                     // no-op
                 } elseif ('reset' === $attr) {
                     if ($tags[0][$attr]) {
-                        $pool->addTag('kernel.reset', array('method' => $tags[0][$attr]));
+                        $pool->addTag('kernel.reset', ['method' => $tags[0][$attr]]);
                     }
                 } elseif ('namespace' !== $attr || ArrayAdapter::class !== $adapter->getClass()) {
                     $pool->replaceArgument($i++, $tags[0][$attr]);
@@ -137,8 +137,8 @@ class CachePoolPass implements CompilerPassInterface
             if (!$container->hasDefinition($name = 'cache_connection.'.ContainerBuilder::hash($dsn))) {
                 $definition = new Definition(AbstractAdapter::class);
                 $definition->setPublic(false);
-                $definition->setFactory(array(AbstractAdapter::class, 'createConnection'));
-                $definition->setArguments(array($dsn, array('lazy' => true)));
+                $definition->setFactory([AbstractAdapter::class, 'createConnection']);
+                $definition->setArguments([$dsn, ['lazy' => true]]);
                 $container->setDefinition($name, $definition);
             }
         }

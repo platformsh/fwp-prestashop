@@ -36,7 +36,7 @@ class statscheckup extends Module
     {
         $this->name = 'statscheckup';
         $this->tab = 'analytics_stats';
-        $this->version = '2.0.0';
+        $this->version = '2.0.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -156,7 +156,7 @@ class statscheckup extends Module
             'DESCRIPTIONS' => array('name' => $this->trans('Descriptions', array(), 'Modules.Statscheckup.Admin'), 'text' => $this->trans('chars (without HTML)', array(), 'Modules.Statscheckup.Admin')),
             'IMAGES' => array('name' => $this->trans('Images', array(), 'Admin.Global'), 'text' => $this->trans('images', array(), 'Admin.Global')),
             'SALES' => array('name' => $this->trans('Sales', array(), 'Admin.Global'), 'text' => $this->trans('orders / month', array(), 'Modules.Statscheckup.Admin')),
-            'STOCK' => array('name' => $this->trans('Available quantity for sale', array(), 'Admin.Global'))
+            'STOCK' => array('name' => $this->trans('Available quantity for sale', array(), 'Admin.Global'), 'text' => $this->trans('items', array(), 'Modules.Statscheckup.Admin'))
         );
 
         $this->html = '

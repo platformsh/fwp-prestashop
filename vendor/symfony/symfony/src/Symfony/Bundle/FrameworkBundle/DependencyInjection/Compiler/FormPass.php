@@ -13,9 +13,9 @@ namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
 @trigger_error(sprintf('The %s class is deprecated since Symfony 3.3 and will be removed in 4.0. Use Symfony\Component\Form\DependencyInjection\FormPass instead.', FormPass::class), E_USER_DEPRECATED);
 
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 /**
@@ -39,7 +39,7 @@ class FormPass implements CompilerPassInterface
         $definition = $container->getDefinition('form.extension');
 
         // Builds an array with fully-qualified type class names as keys and service IDs as values
-        $types = array();
+        $types = [];
 
         foreach ($container->findTaggedServiceIds('form.type') as $serviceId => $tag) {
             $serviceDefinition = $container->getDefinition($serviceId);
@@ -53,7 +53,7 @@ class FormPass implements CompilerPassInterface
 
         $definition->replaceArgument(1, $types);
 
-        $typeExtensions = array();
+        $typeExtensions = [];
 
         foreach ($this->findAndSortTaggedServices('form.type_extension', $container) as $reference) {
             $serviceId = (string) $reference;

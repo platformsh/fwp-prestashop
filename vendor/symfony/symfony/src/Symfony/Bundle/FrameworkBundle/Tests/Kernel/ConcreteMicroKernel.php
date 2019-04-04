@@ -12,8 +12,8 @@
 namespace Symfony\Bundle\FrameworkBundle\Tests\Kernel;
 
 use Psr\Log\NullLogger;
-use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -49,9 +49,9 @@ class ConcreteMicroKernel extends Kernel implements EventSubscriberInterface
 
     public function registerBundles()
     {
-        return array(
+        return [
             new FrameworkBundle(),
-        );
+        ];
     }
 
     public function getCacheDir()
@@ -79,9 +79,9 @@ class ConcreteMicroKernel extends Kernel implements EventSubscriberInterface
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
         $c->register('logger', NullLogger::class);
-        $c->loadFromExtension('framework', array(
+        $c->loadFromExtension('framework', [
             'secret' => '$ecret',
-        ));
+        ]);
 
         $c->setParameter('halloween', 'Have a great day!');
         $c->register('halloween', 'stdClass')->setPublic(true);
@@ -92,9 +92,9 @@ class ConcreteMicroKernel extends Kernel implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             KernelEvents::EXCEPTION => 'onKernelException',
-        );
+        ];
     }
 }
 

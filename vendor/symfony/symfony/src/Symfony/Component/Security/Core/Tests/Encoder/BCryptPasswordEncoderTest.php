@@ -49,7 +49,7 @@ class BCryptPasswordEncoderTest extends TestCase
     public function validRangeData()
     {
         $costs = range(4, 31);
-        array_walk($costs, function (&$cost) { $cost = array($cost); });
+        array_walk($costs, function (&$cost) { $cost = [$cost]; });
 
         return $costs;
     }
@@ -58,7 +58,7 @@ class BCryptPasswordEncoderTest extends TestCase
     {
         $encoder = new BCryptPasswordEncoder(self::VALID_COST);
         $result = $encoder->encodePassword(self::PASSWORD, null);
-        $this->assertEquals(60, strlen($result));
+        $this->assertEquals(60, \strlen($result));
     }
 
     public function testValidation()
