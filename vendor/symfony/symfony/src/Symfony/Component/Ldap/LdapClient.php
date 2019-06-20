@@ -42,7 +42,7 @@ final class LdapClient implements LdapClientInterface
     /**
      * {@inheritdoc}
      */
-    public function query($dn, $query, array $options = array())
+    public function query($dn, $query, array $options = [])
     {
         return $this->ldap->query($dn, $query, $options);
     }
@@ -62,36 +62,36 @@ final class LdapClient implements LdapClientInterface
     {
         @trigger_error('The "find" method is deprecated since Symfony 3.1 and will be removed in 4.0. Use the "query" method instead.', E_USER_DEPRECATED);
 
-        $query = $this->ldap->query($dn, $query, array('filter' => $filter));
+        $query = $this->ldap->query($dn, $query, ['filter' => $filter]);
         $entries = $query->execute();
-        $result = array(
+        $result = [
             'count' => 0,
-        );
+        ];
 
         foreach ($entries as $entry) {
-            $resultEntry = array();
+            $resultEntry = [];
 
             foreach ($entry->getAttributes() as $attribute => $values) {
-                $resultAttribute = array(
-                    'count' => count($values),
-                );
+                $resultAttribute = [
+                    'count' => \count($values),
+                ];
 
                 foreach ($values as $val) {
                     $resultAttribute[] = $val;
                 }
                 $attributeName = strtolower($attribute);
 
-                $resultAttribute['count'] = count($values);
+                $resultAttribute['count'] = \count($values);
                 $resultEntry[$attributeName] = $resultAttribute;
                 $resultEntry[] = $attributeName;
             }
 
-            $resultEntry['count'] = count($resultEntry) / 2;
+            $resultEntry['count'] = \count($resultEntry) / 2;
             $resultEntry['dn'] = $entry->getDn();
             $result[] = $resultEntry;
         }
 
-        $result['count'] = count($result) - 1;
+        $result['count'] = \count($result) - 1;
 
         return $result;
     }
@@ -114,14 +114,14 @@ final class LdapClient implements LdapClientInterface
             $encryption = 'none';
         }
 
-        return array(
+        return [
             'host' => $host,
             'port' => $port,
             'encryption' => $encryption,
-            'options' => array(
+            'options' => [
                 'protocol_version' => $version,
                 'referrals' => (bool) $optReferrals,
-            ),
-        );
+            ],
+        ];
     }
 }

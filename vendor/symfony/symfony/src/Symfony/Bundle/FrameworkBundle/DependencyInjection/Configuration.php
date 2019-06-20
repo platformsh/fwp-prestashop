@@ -18,9 +18,11 @@ use Symfony\Component\Asset\Package;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Lock\Lock;
 use Symfony\Component\Lock\Store\SemaphoreStore;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Translation\Translator;
@@ -58,7 +60,7 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
                 ->ifTrue(function ($v) { return !isset($v['assets']) && isset($v['templating']) && class_exists(Package::class); })
                 ->then(function ($v) {
-                    $v['assets'] = array();
+                    $v['assets'] = [];
 
                     return $v;
                 })
@@ -73,9 +75,9 @@ class Configuration implements ConfigurationInterface
                     ->setDeprecated('The "%path%.%node%" configuration key has been deprecated in Symfony 3.3. Use the Request::setTrustedProxies() method in your front controller instead.')
                     ->beforeNormalization()
                         ->ifTrue(function ($v) {
-                            return !is_array($v) && null !== $v;
+                            return !\is_array($v) && null !== $v;
                         })
-                        ->then(function ($v) { return is_bool($v) ? array() : preg_split('/\s*,\s*/', $v); })
+                        ->then(function ($v) { return \is_bool($v) ? [] : preg_split('/\s*,\s*/', $v); })
                     ->end()
                     ->prototype('scalar')
                         ->validate()
@@ -106,7 +108,7 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('test')->end()
                 ->scalarNode('default_locale')->defaultValue('en')->end()
                 ->arrayNode('trusted_hosts')
-                    ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                    ->beforeNormalization()->ifString()->then(function ($v) { return [$v]; })->end()
                     ->prototype('scalar')->end()
                 ->end()
             ->end()
@@ -143,9 +145,9 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->arrayNode('csrf_protection')
-                    ->treatFalseLike(array('enabled' => false))
-                    ->treatTrueLike(array('enabled' => true))
-                    ->treatNullLike(array('enabled' => true))
+                    ->treatFalseLike(['enabled' => false])
+                    ->treatTrueLike(['enabled' => true])
+                    ->treatNullLike(['enabled' => true])
                     ->addDefaultsIfNotSet()
                     ->children()
                         // defaults to framework.session.enabled && !class_exists(FullStack::class) && interface_exists(CsrfTokenManagerInterface::class)
@@ -165,9 +167,9 @@ class Configuration implements ConfigurationInterface
                     ->{!class_exists(FullStack::class) && class_exists(Form::class) ? 'canBeDisabled' : 'canBeEnabled'}()
                     ->children()
                         ->arrayNode('csrf_protection')
-                            ->treatFalseLike(array('enabled' => false))
-                            ->treatTrueLike(array('enabled' => true))
-                            ->treatNullLike(array('enabled' => true))
+                            ->treatFalseLike(['enabled' => false])
+                            ->treatTrueLike(['enabled' => true])
+                            ->treatNullLike(['enabled' => true])
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->booleanNode('enabled')->defaultNull()->end() // defaults to framework.csrf_protection.enabled
@@ -242,7 +244,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->scalarNode('service')->end()
                                 ->arrayNode('ips')
-                                    ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                                    ->beforeNormalization()->ifString()->then(function ($v) { return [$v]; })->end()
                                     ->prototype('scalar')->end()
                                 ->end()
                             ->end()
@@ -266,14 +268,26 @@ class Configuration implements ConfigurationInterface
                                 $workflows = $v;
                                 unset($workflows['enabled']);
 
-                                if (1 === count($workflows) && isset($workflows[0]['enabled'])) {
-                                    $workflows = array();
+                                if (1 === \count($workflows) && isset($workflows[0]['enabled']) && 1 === \count($workflows[0])) {
+                                    $workflows = [];
                                 }
 
-                                $v = array(
+                                if (1 === \count($workflows) && isset($workflows['workflows']) && array_keys($workflows['workflows']) !== range(0, \count($workflows) - 1) && !empty(array_diff(array_keys($workflows['workflows']), ['audit_trail', 'type', 'marking_store', 'supports', 'support_strategy', 'initial_place', 'places', 'transitions']))) {
+                                    $workflows = $workflows['workflows'];
+                                }
+
+                                foreach ($workflows as $key => $workflow) {
+                                    if (isset($workflow['enabled']) && false === $workflow['enabled']) {
+                                        throw new LogicException(sprintf('Cannot disable a single workflow. Remove the configuration for the workflow "%s" instead.', $workflow['name']));
+                                    }
+
+                                    unset($workflows[$key]['enabled']);
+                                }
+
+                                $v = [
                                     'enabled' => true,
                                     'workflows' => $workflows,
-                                );
+                                ];
                             }
 
                             return $v;
@@ -291,18 +305,18 @@ class Configuration implements ConfigurationInterface
                                         ->canBeEnabled()
                                     ->end()
                                     ->enumNode('type')
-                                        ->values(array('workflow', 'state_machine'))
+                                        ->values(['workflow', 'state_machine'])
                                     ->end()
                                     ->arrayNode('marking_store')
                                         ->fixXmlConfig('argument')
                                         ->children()
                                             ->enumNode('type')
-                                                ->values(array('multiple_state', 'single_state'))
+                                                ->values(['multiple_state', 'single_state'])
                                             ->end()
                                             ->arrayNode('arguments')
                                                 ->beforeNormalization()
                                                     ->ifString()
-                                                    ->then(function ($v) { return array($v); })
+                                                    ->then(function ($v) { return [$v]; })
                                                 ->end()
                                                 ->requiresAtLeastOneElement()
                                                 ->prototype('scalar')
@@ -324,7 +338,7 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('supports')
                                         ->beforeNormalization()
                                             ->ifString()
-                                            ->then(function ($v) { return array($v); })
+                                            ->then(function ($v) { return [$v]; })
                                         ->end()
                                         ->prototype('scalar')
                                             ->cannotBeEmpty()
@@ -383,7 +397,7 @@ class Configuration implements ConfigurationInterface
                                                 ->arrayNode('from')
                                                     ->beforeNormalization()
                                                         ->ifString()
-                                                        ->then(function ($v) { return array($v); })
+                                                        ->then(function ($v) { return [$v]; })
                                                     ->end()
                                                     ->requiresAtLeastOneElement()
                                                     ->prototype('scalar')
@@ -393,7 +407,7 @@ class Configuration implements ConfigurationInterface
                                                 ->arrayNode('to')
                                                     ->beforeNormalization()
                                                         ->ifString()
-                                                        ->then(function ($v) { return array($v); })
+                                                        ->then(function ($v) { return [$v]; })
                                                     ->end()
                                                     ->requiresAtLeastOneElement()
                                                     ->prototype('scalar')
@@ -508,12 +522,12 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->beforeNormalization()
-                                    ->ifTrue(function ($v) { return is_array($v) && isset($v['mime_type']); })
+                                    ->ifTrue(function ($v) { return \is_array($v) && isset($v['mime_type']); })
                                     ->then(function ($v) { return $v['mime_type']; })
                                 ->end()
                                 ->beforeNormalization()
-                                    ->ifTrue(function ($v) { return !is_array($v); })
-                                    ->then(function ($v) { return array($v); })
+                                    ->ifTrue(function ($v) { return !\is_array($v); })
+                                    ->then(function ($v) { return [$v]; })
                                 ->end()
                                 ->prototype('scalar')->end()
                             ->end()
@@ -532,8 +546,8 @@ class Configuration implements ConfigurationInterface
                     ->info('templating configuration')
                     ->canBeEnabled()
                     ->beforeNormalization()
-                        ->ifTrue(function ($v) { return false === $v || is_array($v) && false === $v['enabled']; })
-                        ->then(function () { return array('enabled' => false, 'engines' => false); })
+                        ->ifTrue(function ($v) { return false === $v || \is_array($v) && false === $v['enabled']; })
+                        ->then(function () { return ['enabled' => false, 'engines' => false]; })
                     ->end()
                     ->children()
                         ->scalarNode('hinclude_default_template')->defaultNull()->end()
@@ -546,9 +560,9 @@ class Configuration implements ConfigurationInterface
                                     ->addDefaultChildrenIfNoneSet()
                                     ->prototype('scalar')->defaultValue('FrameworkBundle:Form')->end()
                                     ->validate()
-                                        ->ifTrue(function ($v) {return !in_array('FrameworkBundle:Form', $v); })
+                                        ->ifTrue(function ($v) {return !\in_array('FrameworkBundle:Form', $v); })
                                         ->then(function ($v) {
-                                            return array_merge(array('FrameworkBundle:Form'), $v);
+                                            return array_merge(['FrameworkBundle:Form'], $v);
                                         })
                                     ->end()
                                 ->end()
@@ -558,13 +572,13 @@ class Configuration implements ConfigurationInterface
                     ->fixXmlConfig('engine')
                     ->children()
                         ->arrayNode('engines')
-                            ->example(array('twig'))
+                            ->example(['twig'])
                             ->isRequired()
                             ->requiresAtLeastOneElement()
                             ->canBeUnset()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v) && false !== $v; })
-                                ->then(function ($v) { return array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v) && false !== $v; })
+                                ->then(function ($v) { return [$v]; })
                             ->end()
                             ->prototype('scalar')->end()
                         ->end()
@@ -573,8 +587,8 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->arrayNode('loaders')
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
-                                ->then(function ($v) { return array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
+                                ->then(function ($v) { return [$v]; })
                              ->end()
                             ->prototype('scalar')->end()
                         ->end()
@@ -601,8 +615,8 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('base_urls')
                             ->requiresAtLeastOneElement()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
-                                ->then(function ($v) { return array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
+                                ->then(function ($v) { return [$v]; })
                             ->end()
                             ->prototype('scalar')->end()
                         ->end()
@@ -628,6 +642,7 @@ class Configuration implements ConfigurationInterface
                     ->fixXmlConfig('package')
                     ->children()
                         ->arrayNode('packages')
+                            ->normalizeKeys(false)
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->fixXmlConfig('base_url')
@@ -645,8 +660,8 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('base_urls')
                                         ->requiresAtLeastOneElement()
                                         ->beforeNormalization()
-                                            ->ifTrue(function ($v) { return !is_array($v); })
-                                            ->then(function ($v) { return array($v); })
+                                            ->ifTrue(function ($v) { return !\is_array($v); })
+                                            ->then(function ($v) { return [$v]; })
                                         ->end()
                                         ->prototype('scalar')->end()
                                     ->end()
@@ -688,9 +703,9 @@ class Configuration implements ConfigurationInterface
                     ->fixXmlConfig('path')
                     ->children()
                         ->arrayNode('fallbacks')
-                            ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                            ->beforeNormalization()->ifString()->then(function ($v) { return [$v]; })->end()
                             ->prototype('scalar')->end()
-                            ->defaultValue(array('en'))
+                            ->defaultValue(['en'])
                         ->end()
                         ->booleanNode('logging')->defaultValue($this->debug)->end()
                         ->scalarNode('formatter')->defaultValue('translator.formatter.default')->end()
@@ -730,11 +745,11 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->booleanNode('enable_annotations')->{!class_exists(FullStack::class) && class_exists(Annotation::class) ? 'defaultTrue' : 'defaultFalse'}()->end()
                         ->arrayNode('static_method')
-                            ->defaultValue(array('loadValidatorMetadata'))
+                            ->defaultValue(['loadValidatorMetadata'])
                             ->prototype('scalar')->end()
-                            ->treatFalseLike(array())
+                            ->treatFalseLike([])
                             ->validate()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return (array) $v; })
                             ->end()
                         ->end()
@@ -823,7 +838,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('property_info')
                     ->info('Property info configuration')
-                    ->canBeEnabled()
+                    ->{!class_exists(FullStack::class) && interface_exists(PropertyInfoExtractorInterface::class) ? 'canBeDisabled' : 'canBeEnabled'}()
                 ->end()
             ->end()
         ;
@@ -911,15 +926,15 @@ class Configuration implements ConfigurationInterface
                     ->info('Lock configuration')
                     ->{!class_exists(FullStack::class) && class_exists(Lock::class) ? 'canBeDisabled' : 'canBeEnabled'}()
                     ->beforeNormalization()
-                        ->ifString()->then(function ($v) { return array('enabled' => true, 'resources' => $v); })
+                        ->ifString()->then(function ($v) { return ['enabled' => true, 'resources' => $v]; })
                     ->end()
                     ->beforeNormalization()
-                        ->ifTrue(function ($v) { return is_array($v) && !isset($v['resources']); })
+                        ->ifTrue(function ($v) { return \is_array($v) && !isset($v['resources']); })
                         ->then(function ($v) {
                             $e = $v['enabled'];
                             unset($v['enabled']);
 
-                            return array('enabled' => $e, 'resources' => $v);
+                            return ['enabled' => $e, 'resources' => $v];
                         })
                     ->end()
                     ->addDefaultsIfNotSet()
@@ -927,16 +942,16 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->arrayNode('resources')
                             ->requiresAtLeastOneElement()
-                            ->defaultValue(array('default' => array(class_exists(SemaphoreStore::class) && SemaphoreStore::isSupported() ? 'semaphore' : 'flock')))
+                            ->defaultValue(['default' => [class_exists(SemaphoreStore::class) && SemaphoreStore::isSupported() ? 'semaphore' : 'flock']])
                             ->beforeNormalization()
-                                ->ifString()->then(function ($v) { return array('default' => $v); })
+                                ->ifString()->then(function ($v) { return ['default' => $v]; })
                             ->end()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return is_array($v) && array_keys($v) === range(0, count($v) - 1); })
-                                ->then(function ($v) { return array('default' => $v); })
+                                ->ifTrue(function ($v) { return \is_array($v) && array_keys($v) === range(0, \count($v) - 1); })
+                                ->then(function ($v) { return ['default' => $v]; })
                             ->end()
                             ->prototype('array')
-                                ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                                ->beforeNormalization()->ifString()->then(function ($v) { return [$v]; })->end()
                                 ->prototype('scalar')->end()
                             ->end()
                         ->end()

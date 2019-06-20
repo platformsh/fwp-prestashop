@@ -31,15 +31,15 @@ final class HttpHeaderSerializer
      */
     public function serialize($links)
     {
-        $elements = array();
+        $elements = [];
         foreach ($links as $link) {
             if ($link->isTemplated()) {
                 continue;
             }
 
-            $attributesParts = array('', sprintf('rel="%s"', implode(' ', $link->getRels())));
+            $attributesParts = ['', sprintf('rel="%s"', implode(' ', $link->getRels()))];
             foreach ($link->getAttributes() as $key => $value) {
-                if (is_array($value)) {
+                if (\is_array($value)) {
                     foreach ($value as $v) {
                         $attributesParts[] = sprintf('%s="%s"', $key, $v);
                     }
@@ -47,7 +47,7 @@ final class HttpHeaderSerializer
                     continue;
                 }
 
-                if (!is_bool($value)) {
+                if (!\is_bool($value)) {
                     $attributesParts[] = sprintf('%s="%s"', $key, $value);
 
                     continue;

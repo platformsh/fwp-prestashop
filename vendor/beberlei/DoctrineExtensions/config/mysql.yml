@@ -87,7 +87,14 @@ doctrine:
                  ifelse: DoctrineExtensions\Query\Mysql\IfElse
                  ifnull: DoctrineExtensions\Query\Mysql\IfNull
                  inet_aton: DoctrineExtensions\Query\Mysql\InetAton
+                 inet_ntoa: DoctrineExtensions\Query\Mysql\InetNtoa
+                 inet6_aton: DoctrineExtensions\Query\Mysql\Inet6Aton
+                 inet6_ntoa: DoctrineExtensions\Query\Mysql\Inet6Ntoa
                  instr: DoctrineExtensions\Query\Mysql\Instr
+                 is_ipv4: DoctrineExtensions\Query\Mysql\IsIpv4
+                 is_ipv4_compat: DoctrineExtensions\Query\Mysql\IsIpv4Compat
+                 is_ipv4_mapped: DoctrineExtensions\Query\Mysql\IsIpv4Mapped
+                 is_ipv6: DoctrineExtensions\Query\Mysql\IsIpv6
                  least: DoctrineExtensions\Query\Mysql\Least
                  lpad: DoctrineExtensions\Query\Mysql\Lpad
                  match: DoctrineExtensions\Query\Mysql\MatchAgainst

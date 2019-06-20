@@ -24,17 +24,17 @@ class CachePoolPrunerPassTest extends TestCase
     public function testCompilerPassReplacesCommandArgument()
     {
         $container = new ContainerBuilder();
-        $container->register('console.command.cache_pool_prune')->addArgument(array());
+        $container->register('console.command.cache_pool_prune')->addArgument([]);
         $container->register('pool.foo', FilesystemAdapter::class)->addTag('cache.pool');
         $container->register('pool.bar', PhpFilesAdapter::class)->addTag('cache.pool');
 
         $pass = new CachePoolPrunerPass();
         $pass->process($container);
 
-        $expected = array(
+        $expected = [
             'pool.foo' => new Reference('pool.foo'),
             'pool.bar' => new Reference('pool.bar'),
-        );
+        ];
         $argument = $container->getDefinition('console.command.cache_pool_prune')->getArgument(0);
 
         $this->assertInstanceOf(IteratorArgument::class, $argument);
@@ -45,8 +45,8 @@ class CachePoolPrunerPassTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $definitionsBefore = count($container->getDefinitions());
-        $aliasesBefore = count($container->getAliases());
+        $definitionsBefore = \count($container->getDefinitions());
+        $aliasesBefore = \count($container->getAliases());
 
         $pass = new CachePoolPrunerPass();
         $pass->process($container);
@@ -63,7 +63,7 @@ class CachePoolPrunerPassTest extends TestCase
     public function testCompilerPassThrowsOnInvalidDefinitionClass()
     {
         $container = new ContainerBuilder();
-        $container->register('console.command.cache_pool_prune')->addArgument(array());
+        $container->register('console.command.cache_pool_prune')->addArgument([]);
         $container->register('pool.not-found', NotFound::class)->addTag('cache.pool');
 
         $pass = new CachePoolPrunerPass();

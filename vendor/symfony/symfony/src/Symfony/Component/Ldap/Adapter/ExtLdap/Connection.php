@@ -137,14 +137,14 @@ class Connection extends AbstractConnection
             throw new LdapException(sprintf('Could not connect to Ldap server: %s.', ldap_error($this->connection)));
         }
 
-        if ('tls' === $this->config['encryption'] && false === ldap_start_tls($this->connection)) {
+        if ('tls' === $this->config['encryption'] && false === @ldap_start_tls($this->connection)) {
             throw new LdapException(sprintf('Could not initiate TLS connection: %s.', ldap_error($this->connection)));
         }
     }
 
     private function disconnect()
     {
-        if ($this->connection && is_resource($this->connection)) {
+        if ($this->connection && \is_resource($this->connection)) {
             ldap_unbind($this->connection);
         }
 

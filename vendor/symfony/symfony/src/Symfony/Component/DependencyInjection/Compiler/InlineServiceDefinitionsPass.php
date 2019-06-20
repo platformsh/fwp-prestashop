@@ -23,8 +23,8 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class InlineServiceDefinitionsPass extends AbstractRecursivePass implements RepeatablePassInterface
 {
-    private $cloningIds = array();
-    private $inlinedServiceIds = array();
+    private $cloningIds = [];
+    private $inlinedServiceIds = [];
 
     /**
      * {@inheritdoc}
@@ -88,7 +88,7 @@ class InlineServiceDefinitionsPass extends AbstractRecursivePass implements Repe
             $ids = array_keys($this->cloningIds);
             $ids[] = $id;
 
-            throw new ServiceCircularReferenceException($id, array_slice($ids, array_search($id, $ids)));
+            throw new ServiceCircularReferenceException($id, \array_slice($ids, array_search($id, $ids)));
         }
 
         $this->cloningIds[$id] = true;
@@ -126,22 +126,28 @@ class InlineServiceDefinitionsPass extends AbstractRecursivePass implements Repe
             return false;
         }
 
-        $ids = array();
+        $ids = [];
+        $isReferencedByConstructor = false;
         foreach ($graph->getNode($id)->getInEdges() as $edge) {
-            if ($edge->isWeak()) {
+            $isReferencedByConstructor = $isReferencedByConstructor || $edge->isReferencedByConstructor();
+            if ($edge->isWeak() || $edge->isLazy()) {
                 return false;
             }
             $ids[] = $edge->getSourceNode()->getId();
         }
 
-        if (count(array_unique($ids)) > 1) {
+        if (!$ids) {
+            return true;
+        }
+
+        if (\count(array_unique($ids)) > 1) {
             return false;
         }
 
-        if (count($ids) > 1 && is_array($factory = $definition->getFactory()) && ($factory[0] instanceof Reference || $factory[0] instanceof Definition)) {
+        if (\count($ids) > 1 && \is_array($factory = $definition->getFactory()) && ($factory[0] instanceof Reference || $factory[0] instanceof Definition)) {
             return false;
         }
 
-        return !$ids || $this->container->getDefinition($ids[0])->isShared();
+        return $this->container->getDefinition($ids[0])->isShared();
     }
 }

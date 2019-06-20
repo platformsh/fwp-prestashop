@@ -30,7 +30,7 @@ trait PhpFilesTrait
 
     public static function isSupported()
     {
-        return function_exists('opcache_invalidate') && ini_get('opcache.enable');
+        return \function_exists('opcache_invalidate') && filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -40,7 +40,7 @@ trait PhpFilesTrait
     {
         $time = time();
         $pruned = true;
-        $allowCompile = 'cli' !== PHP_SAPI || ini_get('opcache.enable_cli');
+        $allowCompile = 'cli' !== \PHP_SAPI || filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOLEAN);
 
         set_error_handler($this->includeHandler);
         try {
@@ -67,7 +67,7 @@ trait PhpFilesTrait
      */
     protected function doFetch(array $ids)
     {
-        $values = array();
+        $values = [];
         $now = time();
 
         if ($this->zendDetectUnicode) {
@@ -109,7 +109,7 @@ trait PhpFilesTrait
      */
     protected function doHave($id)
     {
-        return (bool) $this->doFetch(array($id));
+        return (bool) $this->doFetch([$id]);
     }
 
     /**
@@ -118,8 +118,8 @@ trait PhpFilesTrait
     protected function doSave(array $values, $lifetime)
     {
         $ok = true;
-        $data = array($lifetime ? time() + $lifetime : PHP_INT_MAX, '');
-        $allowCompile = 'cli' !== PHP_SAPI || ini_get('opcache.enable_cli');
+        $data = [$lifetime ? time() + $lifetime : PHP_INT_MAX, ''];
+        $allowCompile = 'cli' !== \PHP_SAPI || filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOLEAN);
 
         foreach ($values as $key => $value) {
             if (null === $value || \is_object($value)) {
@@ -137,7 +137,7 @@ trait PhpFilesTrait
                     $value = serialize($value);
                 }
             } elseif (!\is_scalar($value)) {
-                throw new InvalidArgumentException(sprintf('Cache key "%s" has non-serializable %s value.', $key, gettype($value)));
+                throw new InvalidArgumentException(sprintf('Cache key "%s" has non-serializable %s value.', $key, \gettype($value)));
             }
 
             $data[1] = $value;

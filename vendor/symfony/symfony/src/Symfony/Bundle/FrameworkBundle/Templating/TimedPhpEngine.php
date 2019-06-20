@@ -12,9 +12,9 @@
 namespace Symfony\Bundle\FrameworkBundle\Templating;
 
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Templating\TemplateNameParserInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Templating\Loader\LoaderInterface;
+use Symfony\Component\Templating\TemplateNameParserInterface;
 
 /**
  * Times the time spent to render a template.
@@ -35,7 +35,7 @@ class TimedPhpEngine extends PhpEngine
     /**
      * {@inheritdoc}
      */
-    public function render($name, array $parameters = array())
+    public function render($name, array $parameters = [])
     {
         $e = $this->stopwatch->start(sprintf('template.php (%s)', $name), 'template');
 

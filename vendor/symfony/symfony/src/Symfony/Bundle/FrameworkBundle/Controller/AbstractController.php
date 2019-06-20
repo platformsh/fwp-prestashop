@@ -11,8 +11,8 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Controller;
 
-use Psr\Container\ContainerInterface;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ServiceSubscriberInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -54,7 +54,7 @@ abstract class AbstractController implements ServiceSubscriberInterface
 
     public static function getSubscribedServices()
     {
-        return array(
+        return [
             'router' => '?'.RouterInterface::class,
             'request_stack' => '?'.RequestStack::class,
             'http_kernel' => '?'.HttpKernelInterface::class,
@@ -67,6 +67,6 @@ abstract class AbstractController implements ServiceSubscriberInterface
             'form.factory' => '?'.FormFactoryInterface::class,
             'security.token_storage' => '?'.TokenStorageInterface::class,
             'security.csrf.token_manager' => '?'.CsrfTokenManagerInterface::class,
-        );
+        ];
     }
 }

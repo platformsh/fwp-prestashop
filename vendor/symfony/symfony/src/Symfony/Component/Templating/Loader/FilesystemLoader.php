@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Templating\Loader;
 
-use Symfony\Component\Templating\Storage\Storage;
 use Symfony\Component\Templating\Storage\FileStorage;
+use Symfony\Component\Templating\Storage\Storage;
 use Symfony\Component\Templating\TemplateReferenceInterface;
 
 /**
@@ -45,16 +45,16 @@ class FilesystemLoader extends Loader
             return new FileStorage($file);
         }
 
-        $replacements = array();
+        $replacements = [];
         foreach ($template->all() as $key => $value) {
             $replacements['%'.$key.'%'] = $value;
         }
 
-        $fileFailures = array();
+        $fileFailures = [];
         foreach ($this->templatePathPatterns as $templatePathPattern) {
             if (is_file($file = strtr($templatePathPattern, $replacements)) && is_readable($file)) {
                 if (null !== $this->logger) {
-                    $this->logger->debug('Loaded template file.', array('file' => $file));
+                    $this->logger->debug('Loaded template file.', ['file' => $file]);
                 }
 
                 return new FileStorage($file);
@@ -68,7 +68,7 @@ class FilesystemLoader extends Loader
         // only log failures if no template could be loaded at all
         foreach ($fileFailures as $file) {
             if (null !== $this->logger) {
-                $this->logger->debug('Failed loading template file.', array('file' => $file));
+                $this->logger->debug('Failed loading template file.', ['file' => $file]);
             }
         }
 
@@ -102,7 +102,7 @@ class FilesystemLoader extends Loader
     protected static function isAbsolutePath($file)
     {
         if ('/' == $file[0] || '\\' == $file[0]
-            || (strlen($file) > 3 && ctype_alpha($file[0])
+            || (\strlen($file) > 3 && ctype_alpha($file[0])
                 && ':' == $file[1]
                 && ('\\' == $file[2] || '/' == $file[2])
             )

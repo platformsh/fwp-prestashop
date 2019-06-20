@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -19,41 +19,60 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2017 PrestaShop SA
+ * @copyright 2007-2018 PrestaShop SA
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
 namespace PrestaShop\PrestaShop\Core\Search;
 
+use PrestaShopBundle\Entity\Repository\AdminFilterRepository;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Retrieve filters parameters if any from the User request.
- * @param array $defaultValues if a filter is not found, set the default value
  */
-final class SearchParameters
+final class SearchParameters implements SearchParametersInterface
 {
-    private $filterTypes = array(
-        'limit',
-        'offset',
-        'orderBy',
-        'sortOrder',
-        'filters'
-    );
+    /**
+     * @var AdminFilterRepository
+     */
+    private $adminFilterRepository;
+
+    public function __construct(AdminFilterRepository $adminFilterRepository)
+    {
+        $this->adminFilterRepository = $adminFilterRepository;
+    }
 
     /**
-     * @param Request $request
-     * @param array $defaultValues
-     * @return array
+     * {@inheritdoc}
      */
-    public function getFiltersFromRequest(Request $request, array $defaultValues)
+    public function getFiltersFromRequest(Request $request, $filterClass)
     {
-        $filters = array();
+        $filters = [];
 
-        foreach ($this->filterTypes as $type) {
-            $filters[$type] = $request->get($type, $defaultValues[$type]);
+        foreach (self::FILTER_TYPES as $type) {
+            if ($request->request->has($type)) {
+                $filters[$type] = $request->request->get($type);
+            } elseif ($request->query->has($type)) {
+                $filters[$type] = $request->query->get($type);
+            }
         }
 
-        return $filters;
+        return new $filterClass($filters);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFiltersFromRepository($employeeId, $shopId, $controller, $action, $filterClass)
+    {
+        $adminFilter = $this->adminFilterRepository
+            ->findByEmployeeAndRouteParams($employeeId, $shopId, $controller, $action)
+        ;
+
+        $filters = null !== $adminFilter ? json_decode($adminFilter->getFilter(), true) : [];
+
+        return new $filterClass($filters);
     }
 }

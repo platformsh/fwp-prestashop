@@ -23,12 +23,12 @@ class TranslationPassTest extends TestCase
     public function testValidCollector()
     {
         $loader = (new Definition())
-            ->addTag('translation.loader', array('alias' => 'xliff', 'legacy-alias' => 'xlf'));
+            ->addTag('translation.loader', ['alias' => 'xliff', 'legacy-alias' => 'xlf']);
 
         $reader = new Definition();
 
         $translator = (new Definition())
-            ->setArguments(array(null, null, null, null));
+            ->setArguments([null, null, null, null]);
 
         $container = new ContainerBuilder();
         $container->setDefinition('translator.default', $translator);
@@ -39,25 +39,25 @@ class TranslationPassTest extends TestCase
         $pass->process($container);
 
         $expectedReader = (new Definition())
-            ->addMethodCall('addLoader', array('xliff', new Reference('translation.xliff_loader')))
-            ->addMethodCall('addLoader', array('xlf', new Reference('translation.xliff_loader')))
+            ->addMethodCall('addLoader', ['xliff', new Reference('translation.xliff_loader')])
+            ->addMethodCall('addLoader', ['xlf', new Reference('translation.xliff_loader')])
         ;
         $this->assertEquals($expectedReader, $reader);
 
         $expectedLoader = (new Definition())
-            ->addTag('translation.loader', array('alias' => 'xliff', 'legacy-alias' => 'xlf'))
+            ->addTag('translation.loader', ['alias' => 'xliff', 'legacy-alias' => 'xlf'])
         ;
         $this->assertEquals($expectedLoader, $loader);
 
-        $this->assertSame(array('translation.xliff_loader' => array('xliff', 'xlf')), $translator->getArgument(3));
+        $this->assertSame(['translation.xliff_loader' => ['xliff', 'xlf']], $translator->getArgument(3));
 
-        $expected = array('translation.xliff_loader' => new ServiceClosureArgument(new Reference('translation.xliff_loader')));
+        $expected = ['translation.xliff_loader' => new ServiceClosureArgument(new Reference('translation.xliff_loader'))];
         $this->assertEquals($expected, $container->getDefinition((string) $translator->getArgument(0))->getArgument(0));
     }
 
     /**
      * @group legacy
-     * @expectedDeprecation The default value for $readerServiceId will change in 4.0 to "translation.reader".
+     * @expectedDeprecation The default value for $readerServiceId in "Symfony\Component\Translation\DependencyInjection\TranslatorPass::__construct()" will change in 4.0 to "translation.reader".
      *
      * A test that verifies the deprecated "translation.loader" gets the LoaderInterfaces added.
      *
@@ -66,13 +66,13 @@ class TranslationPassTest extends TestCase
     public function testValidCollectorWithDeprecatedTranslationLoader()
     {
         $loader = (new Definition())
-            ->addTag('translation.loader', array('alias' => 'xliff', 'legacy-alias' => 'xlf'));
+            ->addTag('translation.loader', ['alias' => 'xliff', 'legacy-alias' => 'xlf']);
 
         $legacyReader = new Definition();
         $reader = new Definition();
 
         $translator = (new Definition())
-            ->setArguments(array(null, null, null, null));
+            ->setArguments([null, null, null, null]);
 
         $container = new ContainerBuilder();
         $container->setDefinition('translator.default', $translator);
@@ -84,20 +84,20 @@ class TranslationPassTest extends TestCase
         $pass->process($container);
 
         $expectedReader = (new Definition())
-            ->addMethodCall('addLoader', array('xliff', new Reference('translation.xliff_loader')))
-            ->addMethodCall('addLoader', array('xlf', new Reference('translation.xliff_loader')))
+            ->addMethodCall('addLoader', ['xliff', new Reference('translation.xliff_loader')])
+            ->addMethodCall('addLoader', ['xlf', new Reference('translation.xliff_loader')])
         ;
         $this->assertEquals($expectedReader, $legacyReader);
         $this->assertEquals($expectedReader, $reader);
 
         $expectedLoader = (new Definition())
-            ->addTag('translation.loader', array('alias' => 'xliff', 'legacy-alias' => 'xlf'))
+            ->addTag('translation.loader', ['alias' => 'xliff', 'legacy-alias' => 'xlf'])
         ;
         $this->assertEquals($expectedLoader, $loader);
 
-        $this->assertSame(array('translation.xliff_loader' => array('xliff', 'xlf')), $translator->getArgument(3));
+        $this->assertSame(['translation.xliff_loader' => ['xliff', 'xlf']], $translator->getArgument(3));
 
-        $expected = array('translation.xliff_loader' => new ServiceClosureArgument(new Reference('translation.xliff_loader')));
+        $expected = ['translation.xliff_loader' => new ServiceClosureArgument(new Reference('translation.xliff_loader'))];
         $this->assertEquals($expected, $container->getDefinition((string) $translator->getArgument(0))->getArgument(0));
     }
 }

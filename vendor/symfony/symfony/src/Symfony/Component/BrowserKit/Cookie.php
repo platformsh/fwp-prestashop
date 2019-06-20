@@ -22,7 +22,7 @@ class Cookie
      * Handles dates as defined by RFC 2616 section 3.3.1, and also some other
      * non-standard, but common formats.
      */
-    private static $dateFormats = array(
+    private static $dateFormats = [
         'D, d M Y H:i:s T',
         'D, d-M-y H:i:s T',
         'D, d-M-Y H:i:s T',
@@ -30,7 +30,7 @@ class Cookie
         'D, d-m-Y H:i:s T',
         'D M j G:i:s Y',
         'D M d H:i:s Y T',
-    );
+    ];
 
     protected $name;
     protected $value;
@@ -129,7 +129,7 @@ class Cookie
 
         list($name, $value) = explode('=', array_shift($parts), 2);
 
-        $values = array(
+        $values = [
             'name' => trim($name),
             'value' => trim($value),
             'expires' => null,
@@ -138,7 +138,7 @@ class Cookie
             'secure' => false,
             'httponly' => false,
             'passedRawValue' => true,
-        );
+        ];
 
         if (null !== $url) {
             if ((false === $urlParts = parse_url($url)) || !isset($urlParts['host'])) {
@@ -169,7 +169,7 @@ class Cookie
                 continue;
             }
 
-            if (2 === count($elements = explode('=', $part, 2))) {
+            if (2 === \count($elements = explode('=', $part, 2))) {
                 if ('expires' === strtolower($elements[0])) {
                     $elements[1] = self::parseDate($elements[1]);
                 }
@@ -193,7 +193,7 @@ class Cookie
     private static function parseDate($dateValue)
     {
         // trim single quotes around date if present
-        if (($length = strlen($dateValue)) > 1 && "'" === $dateValue[0] && "'" === $dateValue[$length - 1]) {
+        if (($length = \strlen($dateValue)) > 1 && "'" === $dateValue[0] && "'" === $dateValue[$length - 1]) {
             $dateValue = substr($dateValue, 1, -1);
         }
 

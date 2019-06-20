@@ -12,14 +12,14 @@
 namespace Symfony\Component\Security\Core\Tests\Authentication\Provider;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Ldap\LdapInterface;
-use Symfony\Component\Ldap\Entry;
-use Symfony\Component\Ldap\Adapter\QueryInterface;
 use Symfony\Component\Ldap\Adapter\CollectionInterface;
+use Symfony\Component\Ldap\Adapter\QueryInterface;
+use Symfony\Component\Ldap\Entry;
+use Symfony\Component\Ldap\Exception\ConnectionException;
+use Symfony\Component\Ldap\LdapInterface;
 use Symfony\Component\Security\Core\Authentication\Provider\LdapBindAuthenticationProvider;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\User;
-use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -73,7 +73,7 @@ class LdapBindAuthenticationProviderTest extends TestCase
         $ldap
             ->expects($this->once())
             ->method('bind')
-            ->will($this->throwException(new ConnectionException()))
+            ->willThrowException(new ConnectionException())
         ;
         $userChecker = $this->getMockBuilder(UserCheckerInterface::class)->getMock();
 
@@ -107,7 +107,7 @@ class LdapBindAuthenticationProviderTest extends TestCase
     {
         $userProvider = $this->getMockBuilder(UserProviderInterface::class)->getMock();
 
-        $collection = new \ArrayIterator(array(new Entry('')));
+        $collection = new \ArrayIterator([new Entry('')]);
 
         $query = $this->getMockBuilder(QueryInterface::class)->getMock();
         $query

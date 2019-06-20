@@ -13,6 +13,7 @@ namespace Symfony\Bridge\ProxyManager\Tests\LazyProxy\PhpDumper;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**
@@ -97,18 +98,18 @@ class ProxyDumperTest extends TestCase
 
     public function getPrivatePublicDefinitions()
     {
-        return array(
-            array(
+        return [
+            [
                 (new Definition(__CLASS__))
                     ->setPublic(false),
-                'privates',
-            ),
-            array(
+                \method_exists(ContainerBuilder::class, 'addClassResource') ? 'services' : 'privates',
+            ],
+            [
                 (new Definition(__CLASS__))
                     ->setPublic(true),
                 'services',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -133,12 +134,12 @@ class ProxyDumperTest extends TestCase
      */
     public function getProxyCandidates()
     {
-        $definitions = array(
-            array(new Definition(__CLASS__), true),
-            array(new Definition('stdClass'), true),
-            array(new Definition(uniqid('foo', true)), false),
-            array(new Definition(), false),
-        );
+        $definitions = [
+            [new Definition(__CLASS__), true],
+            [new Definition('stdClass'), true],
+            [new Definition(uniqid('foo', true)), false],
+            [new Definition(), false],
+        ];
 
         array_map(
             function ($definition) {

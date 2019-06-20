@@ -11,17 +11,17 @@
 
 namespace Symfony\Component\Cache\Tests\Adapter;
 
-use Symfony\Component\Cache\Simple\FilesystemCache;
 use Symfony\Component\Cache\Adapter\SimpleCacheAdapter;
+use Symfony\Component\Cache\Simple\FilesystemCache;
 
 /**
  * @group time-sensitive
  */
 class SimpleCacheAdapterTest extends AdapterTestCase
 {
-    protected $skippedTests = array(
+    protected $skippedTests = [
         'testPrune' => 'SimpleCache just proxies',
-    );
+    ];
 
     public function createCachePool($defaultLifetime = 0)
     {

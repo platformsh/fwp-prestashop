@@ -44,7 +44,7 @@ class DoctrineChoiceLoader implements ChoiceLoaderInterface
      * @param ObjectManager              $manager      The object manager
      * @param string                     $class        The class name of the loaded objects
      * @param IdReader                   $idReader     The reader for the object IDs
-     * @param null|EntityLoaderInterface $objectLoader The objects loader
+     * @param EntityLoaderInterface|null $objectLoader The objects loader
      * @param ChoiceListFactoryInterface $factory      The factory for creating the loaded choice list
      */
     public function __construct($manager, $class, $idReader = null, $objectLoader = null, $factory = null)
@@ -92,16 +92,16 @@ class DoctrineChoiceLoader implements ChoiceLoaderInterface
     {
         // Performance optimization
         if (empty($choices)) {
-            return array();
+            return [];
         }
 
         // Optimize performance for single-field identifiers. We already
         // know that the IDs are used as values
-        $optimize = null === $value || is_array($value) && $value[0] === $this->idReader;
+        $optimize = null === $value || \is_array($value) && $value[0] === $this->idReader;
 
         // Attention: This optimization does not check choices for existence
         if ($optimize && !$this->choiceList && $this->idReader->isSingleId()) {
-            $values = array();
+            $values = [];
 
             // Maintain order and indices of the given objects
             foreach ($choices as $i => $object) {
@@ -129,17 +129,17 @@ class DoctrineChoiceLoader implements ChoiceLoaderInterface
         // statements, consequently no test fails when this code is removed.
         // https://github.com/symfony/symfony/pull/8981#issuecomment-24230557
         if (empty($values)) {
-            return array();
+            return [];
         }
 
         // Optimize performance in case we have an object loader and
         // a single-field identifier
-        $optimize = null === $value || is_array($value) && $this->idReader === $value[0];
+        $optimize = null === $value || \is_array($value) && $this->idReader === $value[0];
 
         if ($optimize && !$this->choiceList && $this->objectLoader && $this->idReader->isSingleId()) {
             $unorderedObjects = $this->objectLoader->getEntitiesByIds($this->idReader->getIdField(), $values);
-            $objectsById = array();
-            $objects = array();
+            $objectsById = [];
+            $objects = [];
 
             // Maintain order and indices from the given $values
             // An alternative approach to the following loop is to add the

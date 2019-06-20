@@ -47,7 +47,7 @@ class ConstraintValidatorFactory extends ContainerConstraintValidatorFactory
     protected $container;
     protected $validators;
 
-    public function __construct(ContainerInterface $container, array $validators = array())
+    public function __construct(ContainerInterface $container, array $validators = [])
     {
         parent::__construct($container);
 
@@ -71,7 +71,7 @@ class ConstraintValidatorFactory extends ContainerConstraintValidatorFactory
             return parent::getInstance($constraint);
         }
 
-        if (is_string($this->validators[$name])) {
+        if (\is_string($this->validators[$name])) {
             $this->validators[$name] = $this->container->get($this->validators[$name]);
         }
 

@@ -45,7 +45,7 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
      */
     public function get($key, $default = null)
     {
-        foreach ($this->getMultiple(array($key), $default) as $v) {
+        foreach ($this->getMultiple([$key], $default) as $v) {
             return $v;
         }
     }
@@ -58,7 +58,7 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
         if ($keys instanceof \Traversable) {
             $keys = iterator_to_array($keys, false);
         } elseif (!\is_array($keys)) {
-            throw new InvalidArgumentException(sprintf('Cache keys must be array or Traversable, "%s" given', is_object($keys) ? get_class($keys) : gettype($keys)));
+            throw new InvalidArgumentException(sprintf('Cache keys must be array or Traversable, "%s" given', \is_object($keys) ? \get_class($keys) : \gettype($keys)));
         }
         foreach ($keys as $key) {
             CacheItem::validateKey($key);
@@ -73,7 +73,7 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
     public function deleteMultiple($keys)
     {
         if (!\is_array($keys) && !$keys instanceof \Traversable) {
-            throw new InvalidArgumentException(sprintf('Cache keys must be array or Traversable, "%s" given', is_object($keys) ? get_class($keys) : gettype($keys)));
+            throw new InvalidArgumentException(sprintf('Cache keys must be array or Traversable, "%s" given', \is_object($keys) ? \get_class($keys) : \gettype($keys)));
         }
         foreach ($keys as $key) {
             $this->delete($key);
@@ -89,7 +89,7 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
     {
         CacheItem::validateKey($key);
 
-        return $this->setMultiple(array($key => $value), $ttl);
+        return $this->setMultiple([$key => $value], $ttl);
     }
 
     /**
@@ -98,9 +98,9 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
     public function setMultiple($values, $ttl = null)
     {
         if (!\is_array($values) && !$values instanceof \Traversable) {
-            throw new InvalidArgumentException(sprintf('Cache values must be array or Traversable, "%s" given', is_object($values) ? get_class($values) : gettype($values)));
+            throw new InvalidArgumentException(sprintf('Cache values must be array or Traversable, "%s" given', \is_object($values) ? \get_class($values) : \gettype($values)));
         }
-        $valuesArray = array();
+        $valuesArray = [];
 
         foreach ($values as $key => $value) {
             \is_int($key) || CacheItem::validateKey($key);
@@ -114,8 +114,8 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
                 try {
                     $valuesArray[$key] = serialize($value);
                 } catch (\Exception $e) {
-                    $type = is_object($value) ? get_class($value) : gettype($value);
-                    CacheItem::log($this->logger, 'Failed to save key "{key}" ({type})', array('key' => $key, 'type' => $type, 'exception' => $e));
+                    $type = \is_object($value) ? \get_class($value) : \gettype($value);
+                    CacheItem::log($this->logger, 'Failed to save key "{key}" ({type})', ['key' => $key, 'type' => $type, 'exception' => $e]);
 
                     return false;
                 }
@@ -143,6 +143,6 @@ class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInte
             return 0 < $ttl ? $ttl : false;
         }
 
-        throw new InvalidArgumentException(sprintf('Expiration date must be an integer, a DateInterval or null, "%s" given', is_object($ttl) ? get_class($ttl) : gettype($ttl)));
+        throw new InvalidArgumentException(sprintf('Expiration date must be an integer, a DateInterval or null, "%s" given', \is_object($ttl) ? \get_class($ttl) : \gettype($ttl)));
     }
 }

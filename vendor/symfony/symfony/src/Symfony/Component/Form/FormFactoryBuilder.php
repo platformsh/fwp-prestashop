@@ -26,22 +26,22 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
     /**
      * @var FormExtensionInterface[]
      */
-    private $extensions = array();
+    private $extensions = [];
 
     /**
      * @var FormTypeInterface[]
      */
-    private $types = array();
+    private $types = [];
 
     /**
      * @var FormTypeExtensionInterface[]
      */
-    private $typeExtensions = array();
+    private $typeExtensions = [];
 
     /**
      * @var FormTypeGuesserInterface[]
      */
-    private $typeGuessers = array();
+    private $typeGuessers = [];
 
     /**
      * {@inheritdoc}
@@ -144,8 +144,8 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
     {
         $extensions = $this->extensions;
 
-        if (count($this->types) > 0 || count($this->typeExtensions) > 0 || count($this->typeGuessers) > 0) {
-            if (count($this->typeGuessers) > 1) {
+        if (\count($this->types) > 0 || \count($this->typeExtensions) > 0 || \count($this->typeGuessers) > 0) {
+            if (\count($this->typeGuessers) > 1) {
                 $typeGuesser = new FormTypeGuesserChain($this->typeGuessers);
             } else {
                 $typeGuesser = isset($this->typeGuessers[0]) ? $this->typeGuessers[0] : null;

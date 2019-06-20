@@ -121,8 +121,8 @@ abstract class ConstraintValidatorTestCase extends TestCase
     protected function setObject($object)
     {
         $this->object = $object;
-        $this->metadata = is_object($object)
-            ? new ClassMetadata(get_class($object))
+        $this->metadata = \is_object($object)
+            ? new ClassMetadata(\get_class($object))
             : null;
 
         $this->context->setNode($this->value, $this->object, $this->metadata, $this->propertyPath);
@@ -131,8 +131,8 @@ abstract class ConstraintValidatorTestCase extends TestCase
     protected function setProperty($object, $property)
     {
         $this->object = $object;
-        $this->metadata = is_object($object)
-            ? new PropertyMetadata(get_class($object), $property)
+        $this->metadata = \is_object($object)
+            ? new PropertyMetadata(\get_class($object), $property)
             : null;
 
         $this->context->setNode($this->value, $this->object, $this->metadata, $this->propertyPath);
@@ -175,7 +175,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
             ->will($this->returnValue($validator));
         $validator->expects($this->at(2 * $i + 1))
             ->method('validate')
-            ->with($value, $this->logicalOr(null, array(), $this->isInstanceOf('\Symfony\Component\Validator\Constraints\Valid')), $group);
+            ->with($value, $this->logicalOr(null, [], $this->isInstanceOf('\Symfony\Component\Validator\Constraints\Valid')), $group);
     }
 
     protected function expectValidateValueAt($i, $propertyPath, $value, $constraints, $group = null)
@@ -192,7 +192,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
 
     protected function assertNoViolation()
     {
-        $this->assertSame(0, $violationsCount = count($this->context->getViolations()), sprintf('0 violation expected. Got %u.', $violationsCount));
+        $this->assertSame(0, $violationsCount = \count($this->context->getViolations()), sprintf('0 violation expected. Got %u.', $violationsCount));
     }
 
     /**
@@ -224,7 +224,7 @@ class ConstraintViolationAssertion
     private $assertions;
 
     private $message;
-    private $parameters = array();
+    private $parameters = [];
     private $invalidValue = 'InvalidValue';
     private $propertyPath = 'property.path';
     private $plural;
@@ -232,7 +232,7 @@ class ConstraintViolationAssertion
     private $constraint;
     private $cause;
 
-    public function __construct(ExecutionContextInterface $context, $message, Constraint $constraint = null, array $assertions = array())
+    public function __construct(ExecutionContextInterface $context, $message, Constraint $constraint = null, array $assertions = [])
     {
         $this->context = $context;
         $this->message = $message;
@@ -306,7 +306,7 @@ class ConstraintViolationAssertion
 
     public function assertRaised()
     {
-        $expected = array();
+        $expected = [];
         foreach ($this->assertions as $assertion) {
             $expected[] = $assertion->getViolation();
         }
@@ -314,7 +314,7 @@ class ConstraintViolationAssertion
 
         $violations = iterator_to_array($this->context->getViolations());
 
-        Assert::assertSame($expectedCount = count($expected), $violationsCount = count($violations), sprintf('%u violation(s) expected. Got %u.', $expectedCount, $violationsCount));
+        Assert::assertSame($expectedCount = \count($expected), $violationsCount = \count($violations), sprintf('%u violation(s) expected. Got %u.', $expectedCount, $violationsCount));
 
         reset($violations);
 

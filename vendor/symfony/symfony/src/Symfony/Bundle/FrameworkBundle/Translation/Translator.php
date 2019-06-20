@@ -14,9 +14,9 @@ namespace Symfony\Bundle\FrameworkBundle\Translation;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as SymfonyContainerInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
-use Symfony\Component\Translation\Translator as BaseTranslator;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\Formatter\MessageFormatterInterface;
+use Symfony\Component\Translation\Translator as BaseTranslator;
 
 /**
  * Translator.
@@ -28,11 +28,11 @@ class Translator extends BaseTranslator implements WarmableInterface
     protected $container;
     protected $loaderIds;
 
-    protected $options = array(
+    protected $options = [
         'cache_dir' => null,
         'debug' => false,
-        'resource_files' => array(),
-    );
+        'resource_files' => [],
+    ];
 
     /**
      * @var array
@@ -45,7 +45,7 @@ class Translator extends BaseTranslator implements WarmableInterface
      *
      * @var array
      */
-    private $resources = array();
+    private $resources = [];
 
     /**
      * Constructor.
@@ -64,10 +64,10 @@ class Translator extends BaseTranslator implements WarmableInterface
      *
      * @throws InvalidArgumentException
      */
-    public function __construct(ContainerInterface $container, $formatter, $defaultLocale = null, array $loaderIds = array(), array $options = array())
+    public function __construct(ContainerInterface $container, $formatter, $defaultLocale = null, array $loaderIds = [], array $options = [])
     {
         // BC 3.x, to be removed in 4.0 along with the $defaultLocale default value
-        if (is_array($defaultLocale) || 3 > func_num_args()) {
+        if (\is_array($defaultLocale) || 3 > \func_num_args()) {
             if (!$container instanceof SymfonyContainerInterface) {
                 throw new \InvalidArgumentException('Missing third $defaultLocale argument.');
             }
@@ -75,7 +75,7 @@ class Translator extends BaseTranslator implements WarmableInterface
             $options = $loaderIds;
             $loaderIds = $defaultLocale;
             $defaultLocale = $container->getParameter('kernel.default_locale');
-            @trigger_error(sprintf('Method %s() takes the default locale as 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.', __METHOD__), E_USER_DEPRECATED);
+            @trigger_error(sprintf('The "%s()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.', __METHOD__), E_USER_DEPRECATED);
         }
 
         $this->container = $container;
@@ -103,7 +103,7 @@ class Translator extends BaseTranslator implements WarmableInterface
             return;
         }
 
-        $locales = array_merge($this->getFallbackLocales(), array($this->getLocale()), $this->resourceLocales);
+        $locales = array_merge($this->getFallbackLocales(), [$this->getLocale()], $this->resourceLocales);
         foreach (array_unique($locales) as $locale) {
             // reset catalogue in case it's already loaded during the dump of the other locales.
             if (isset($this->catalogues[$locale])) {
@@ -116,7 +116,7 @@ class Translator extends BaseTranslator implements WarmableInterface
 
     public function addResource($format, $resource, $locale, $domain = null)
     {
-        $this->resources[] = array($format, $resource, $locale, $domain);
+        $this->resources[] = [$format, $resource, $locale, $domain];
     }
 
     /**
@@ -134,7 +134,7 @@ class Translator extends BaseTranslator implements WarmableInterface
             list($format, $resource, $locale, $domain) = $params;
             parent::addResource($format, $resource, $locale, $domain);
         }
-        $this->resources = array();
+        $this->resources = [];
 
         foreach ($this->loaderIds as $id => $aliases) {
             foreach ($aliases as $alias) {

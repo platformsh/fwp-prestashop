@@ -14,9 +14,9 @@ namespace Symfony\Bundle\TwigBundle;
 use Symfony\Bridge\Twig\TwigEngine as BaseEngine;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
-use Symfony\Component\Templating\TemplateNameParserInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Templating\TemplateNameParserInterface;
 use Twig\Environment;
 use Twig\Error\Error;
 
@@ -39,7 +39,7 @@ class TwigEngine extends BaseEngine implements EngineInterface
     /**
      * {@inheritdoc}
      */
-    public function render($name, array $parameters = array())
+    public function render($name, array $parameters = [])
     {
         try {
             return parent::render($name, $parameters);
@@ -63,7 +63,7 @@ class TwigEngine extends BaseEngine implements EngineInterface
      *
      * @throws Error if something went wrong like a thrown exception while rendering the template
      */
-    public function renderResponse($view, array $parameters = array(), Response $response = null)
+    public function renderResponse($view, array $parameters = [], Response $response = null)
     {
         if (null === $response) {
             $response = new Response();

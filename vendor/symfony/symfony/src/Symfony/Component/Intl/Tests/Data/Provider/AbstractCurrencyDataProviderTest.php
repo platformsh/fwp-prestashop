@@ -22,7 +22,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 {
     // The below arrays document the state of the ICU data bundled with this package.
 
-    protected static $currencies = array(
+    protected static $currencies = [
         'ADP',
         'AED',
         'AFA',
@@ -281,9 +281,11 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'UYI',
         'UYP',
         'UYU',
+        'UYW',
         'UZS',
         'VEB',
         'VEF',
+        'VES',
         'VND',
         'VNN',
         'VUV',
@@ -311,9 +313,9 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'ZWD',
         'ZWL',
         'ZWR',
-    );
+    ];
 
-    protected static $alpha3ToNumeric = array(
+    protected static $alpha3ToNumeric = [
         'AFA' => 4,
         'ALK' => 8,
         'ALL' => 8,
@@ -360,8 +362,8 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'CNY' => 156,
         'COP' => 170,
         'KMF' => 174,
-        'ZRN' => 180,
         'ZRZ' => 180,
+        'ZRN' => 180,
         'CRC' => 188,
         'HRK' => 191,
         'HRD' => 191,
@@ -390,23 +392,23 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'GIP' => 292,
         'GRD' => 300,
         'GTQ' => 320,
-        'GNF' => 324,
         'GNS' => 324,
+        'GNF' => 324,
         'GYD' => 328,
         'HTG' => 332,
         'HNL' => 340,
         'HKD' => 344,
         'HUF' => 348,
-        'ISK' => 352,
         'ISJ' => 352,
+        'ISK' => 352,
         'INR' => 356,
         'IDR' => 360,
         'IRR' => 364,
         'IQD' => 368,
         'IEP' => 372,
-        'ILS' => 376,
         'ILP' => 376,
         'ILR' => 376,
+        'ILS' => 376,
         'ITL' => 380,
         'JMD' => 388,
         'JPY' => 392,
@@ -420,12 +422,12 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'LAK' => 418,
         'LBP' => 422,
         'LSL' => 426,
-        'LVL' => 428,
         'LVR' => 428,
+        'LVL' => 428,
         'LRD' => 430,
         'LYD' => 434,
-        'LTT' => 440,
         'LTL' => 440,
+        'LTT' => 440,
         'LUF' => 442,
         'MOP' => 446,
         'MGF' => 450,
@@ -433,17 +435,17 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'MYR' => 458,
         'MVR' => 462,
         'MLF' => 466,
-        'MTP' => 470,
         'MTL' => 470,
+        'MTP' => 470,
         'MRO' => 478,
         'MUR' => 480,
-        'MXN' => 484,
         'MXP' => 484,
+        'MXN' => 484,
         'MNT' => 496,
         'MDL' => 498,
         'MAD' => 504,
-        'MZM' => 508,
         'MZE' => 508,
+        'MZM' => 508,
         'OMR' => 512,
         'NAD' => 516,
         'NPR' => 524,
@@ -452,8 +454,8 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'AWG' => 533,
         'VUV' => 548,
         'NZD' => 554,
-        'NIO' => 558,
         'NIC' => 558,
+        'NIO' => 558,
         'NGN' => 566,
         'NOK' => 578,
         'PKR' => 586,
@@ -461,8 +463,8 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'PGK' => 598,
         'PYG' => 600,
         'PEI' => 604,
-        'PEN' => 604,
         'PES' => 604,
+        'PEN' => 604,
         'PHP' => 608,
         'PLZ' => 616,
         'PTE' => 620,
@@ -484,13 +486,13 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'SIT' => 705,
         'SOS' => 706,
         'ZAR' => 710,
-        'RHD' => 716,
         'ZWD' => 716,
+        'RHD' => 716,
         'YDD' => 720,
         'ESP' => 724,
         'SSP' => 728,
-        'SDP' => 736,
         'SDD' => 736,
+        'SDP' => 736,
         'SRG' => 740,
         'SZL' => 748,
         'SEK' => 752,
@@ -504,8 +506,8 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'TND' => 788,
         'TRL' => 792,
         'TMM' => 795,
-        'UGS' => 800,
         'UGX' => 800,
+        'UGS' => 800,
         'UAK' => 804,
         'MKD' => 807,
         'RUR' => 810,
@@ -514,18 +516,20 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'GBP' => 826,
         'TZS' => 834,
         'USD' => 840,
-        'UYU' => 858,
         'UYP' => 858,
+        'UYU' => 858,
         'UZS' => 860,
         'VEB' => 862,
         'WST' => 882,
         'YER' => 886,
         'YUN' => 890,
-        'CSD' => 891,
         'YUM' => 891,
         'YUD' => 891,
+        'CSD' => 891,
         'ZMK' => 894,
         'TWD' => 901,
+        'UYW' => 927,
+        'VES' => 928,
         'MRU' => 929,
         'STN' => 930,
         'CUC' => 931,
@@ -580,7 +584,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'ESA' => 996,
         'USN' => 997,
         'USS' => 998,
-    );
+    ];
 
     /**
      * @var CurrencyDataProvider
@@ -655,7 +659,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
     public function testGetName($displayLocale)
     {
         $expected = $this->dataProvider->getNames($displayLocale);
-        $actual = array();
+        $actual = [];
 
         foreach ($expected as $currency => $name) {
             $actual[$currency] = $this->dataProvider->getName($currency, $displayLocale);
@@ -669,7 +673,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         Locale::setDefault('de_AT');
 
         $expected = $this->dataProvider->getNames('de_AT');
-        $actual = array();
+        $actual = [];
 
         foreach ($expected as $currency => $name) {
             $actual[$currency] = $this->dataProvider->getName($currency);
@@ -693,7 +697,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
     public function provideCurrencies()
     {
         return array_map(
-            function ($currency) { return array($currency); },
+            function ($currency) { return [$currency]; },
             static::$currencies
         );
     }
@@ -717,7 +721,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
     public function provideCurrenciesWithNumericEquivalent()
     {
         return array_map(
-            function ($value) { return array($value); },
+            function ($value) { return [$value]; },
             array_keys(static::$alpha3ToNumeric)
         );
     }
@@ -733,7 +737,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
     public function provideCurrenciesWithoutNumericEquivalent()
     {
         return array_map(
-            function ($value) { return array($value); },
+            function ($value) { return [$value]; },
             array_diff(static::$currencies, array_keys(static::$alpha3ToNumeric))
         );
     }
@@ -752,7 +756,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         $numericToAlpha3 = $this->getNumericToAlpha3Mapping();
 
         return array_map(
-            function ($numeric, $alpha3) { return array($numeric, $alpha3); },
+            function ($numeric, $alpha3) { return [$numeric, $alpha3]; },
             array_keys($numericToAlpha3),
             $numericToAlpha3
         );
@@ -778,7 +782,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         $invalidNumericCodes = array_diff(range(0, 1000), $validNumericCodes);
 
         return array_map(
-            function ($value) { return array($value); },
+            function ($value) { return [$value]; },
             $invalidNumericCodes
         );
     }
@@ -794,11 +798,11 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 
     private function getNumericToAlpha3Mapping()
     {
-        $numericToAlpha3 = array();
+        $numericToAlpha3 = [];
 
         foreach (static::$alpha3ToNumeric as $alpha3 => $numeric) {
             if (!isset($numericToAlpha3[$numeric])) {
-                $numericToAlpha3[$numeric] = array();
+                $numericToAlpha3[$numeric] = [];
             }
 
             $numericToAlpha3[$numeric][] = $alpha3;

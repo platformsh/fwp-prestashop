@@ -77,7 +77,7 @@ class YamlFileLoader extends FileLoader
                 }
 
                 if (isset($data['max_depth'])) {
-                    if (!is_int($data['max_depth'])) {
+                    if (!\is_int($data['max_depth'])) {
                         throw new MappingException(sprintf('The "max_depth" value must be an integer in "%s" for the attribute "%s" of the class "%s".', $this->file, $attribute, $classMetadata->getName()));
                     }
 
@@ -116,7 +116,7 @@ class YamlFileLoader extends FileLoader
         $classes = $this->yamlParser->parseFile($this->file);
 
         if (empty($classes)) {
-            return array();
+            return [];
         }
 
         if (!\is_array($classes)) {

@@ -12,8 +12,8 @@
 namespace Symfony\Component\Cache\Traits;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
 
@@ -33,7 +33,7 @@ trait PdoTrait
     private $timeCol = 'item_time';
     private $username = '';
     private $password = '';
-    private $connectionOptions = array();
+    private $connectionOptions = [];
     private $namespace;
 
     private function init($connOrDsn, $namespace, $defaultLifetime, array $options)
@@ -50,10 +50,10 @@ trait PdoTrait
             $this->conn = $connOrDsn;
         } elseif ($connOrDsn instanceof Connection) {
             $this->conn = $connOrDsn;
-        } elseif (is_string($connOrDsn)) {
+        } elseif (\is_string($connOrDsn)) {
             $this->dsn = $connOrDsn;
         } else {
-            throw new InvalidArgumentException(sprintf('"%s" requires PDO or Doctrine\DBAL\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, is_object($connOrDsn) ? get_class($connOrDsn) : gettype($connOrDsn)));
+            throw new InvalidArgumentException(sprintf('"%s" requires PDO or Doctrine\DBAL\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, \is_object($connOrDsn) ? \get_class($connOrDsn) : \gettype($connOrDsn)));
         }
 
         $this->table = isset($options['db_table']) ? $options['db_table'] : $this->table;
@@ -85,24 +85,24 @@ trait PdoTrait
         $conn = $this->getConnection();
 
         if ($conn instanceof Connection) {
-            $types = array(
+            $types = [
                 'mysql' => 'binary',
                 'sqlite' => 'text',
                 'pgsql' => 'string',
                 'oci' => 'string',
                 'sqlsrv' => 'string',
-            );
+            ];
             if (!isset($types[$this->driver])) {
                 throw new \DomainException(sprintf('Creating the cache table is currently not implemented for PDO driver "%s".', $this->driver));
             }
 
             $schema = new Schema();
             $table = $schema->createTable($this->table);
-            $table->addColumn($this->idCol, $types[$this->driver], array('length' => 255));
-            $table->addColumn($this->dataCol, 'blob', array('length' => 16777215));
-            $table->addColumn($this->lifetimeCol, 'integer', array('unsigned' => true, 'notnull' => false));
-            $table->addColumn($this->timeCol, 'integer', array('unsigned' => true));
-            $table->setPrimaryKey(array($this->idCol));
+            $table->addColumn($this->idCol, $types[$this->driver], ['length' => 255]);
+            $table->addColumn($this->dataCol, 'blob', ['length' => 16777215]);
+            $table->addColumn($this->lifetimeCol, 'integer', ['unsigned' => true, 'notnull' => false]);
+            $table->addColumn($this->timeCol, 'integer', ['unsigned' => true]);
+            $table->setPrimaryKey([$this->idCol]);
 
             foreach ($schema->toSql($conn->getDatabasePlatform()) as $sql) {
                 $conn->exec($sql);
@@ -166,9 +166,9 @@ trait PdoTrait
     protected function doFetch(array $ids)
     {
         $now = time();
-        $expired = array();
+        $expired = [];
 
-        $sql = str_pad('', (count($ids) << 1) - 1, '?,');
+        $sql = str_pad('', (\count($ids) << 1) - 1, '?,');
         $sql = "SELECT $this->idCol, CASE WHEN $this->lifetimeCol IS NULL OR $this->lifetimeCol + $this->timeCol > ? THEN $this->dataCol ELSE NULL END FROM $this->table WHERE $this->idCol IN ($sql)";
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->bindValue($i = 1, $now, \PDO::PARAM_INT);
@@ -181,12 +181,12 @@ trait PdoTrait
             if (null === $row[1]) {
                 $expired[] = $row[0];
             } else {
-                yield $row[0] => parent::unserialize(is_resource($row[1]) ? stream_get_contents($row[1]) : $row[1]);
+                yield $row[0] => parent::unserialize(\is_resource($row[1]) ? stream_get_contents($row[1]) : $row[1]);
             }
         }
 
         if ($expired) {
-            $sql = str_pad('', (count($expired) << 1) - 1, '?,');
+            $sql = str_pad('', (\count($expired) << 1) - 1, '?,');
             $sql = "DELETE FROM $this->table WHERE $this->lifetimeCol + $this->timeCol <= ? AND $this->idCol IN ($sql)";
             $stmt = $this->getConnection()->prepare($sql);
             $stmt->bindValue($i = 1, $now, \PDO::PARAM_INT);
@@ -239,7 +239,7 @@ trait PdoTrait
      */
     protected function doDelete(array $ids)
     {
-        $sql = str_pad('', (count($ids) << 1) - 1, '?,');
+        $sql = str_pad('', (\count($ids) << 1) - 1, '?,');
         $sql = "DELETE FROM $this->table WHERE $this->idCol IN ($sql)";
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute(array_values($ids));
@@ -252,8 +252,8 @@ trait PdoTrait
      */
     protected function doSave(array $values, $lifetime)
     {
-        $serialized = array();
-        $failed = array();
+        $serialized = [];
+        $failed = [];
 
         foreach ($values as $id => $value) {
             try {

@@ -12,9 +12,9 @@
 namespace Symfony\Bridge\Doctrine\Form\EventListener;
 
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 /**
  * Merge changes from the request to a Doctrine\Common\Collections\Collection instance.
@@ -35,12 +35,12 @@ class MergeDoctrineCollectionListener implements EventSubscriberInterface
     {
         // Higher priority than core MergeCollectionListener so that this one
         // is called before
-        return array(
-            FormEvents::SUBMIT => array(
-                array('onBind', 10), // deprecated
-                array('onSubmit', 5),
-            ),
-        );
+        return [
+            FormEvents::SUBMIT => [
+                ['onBind', 10], // deprecated
+                ['onSubmit', 5],
+            ],
+        ];
     }
 
     public function onSubmit(FormEvent $event)
@@ -60,7 +60,7 @@ class MergeDoctrineCollectionListener implements EventSubscriberInterface
 
         // If all items were removed, call clear which has a higher
         // performance on persistent collections
-        if ($collection instanceof Collection && 0 === count($data)) {
+        if ($collection instanceof Collection && 0 === \count($data)) {
             $collection->clear();
         }
     }
@@ -73,7 +73,7 @@ class MergeDoctrineCollectionListener implements EventSubscriberInterface
      */
     public function onBind(FormEvent $event)
     {
-        if (__CLASS__ === get_class($this)) {
+        if (__CLASS__ === \get_class($this)) {
             $this->bc = false;
         } else {
             // parent::onBind() has been called

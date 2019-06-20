@@ -11,18 +11,18 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
 /**
@@ -66,7 +66,7 @@ abstract class AbstractPreAuthenticatedListener implements ListenerInterface
         }
 
         if (null !== $this->logger) {
-            $this->logger->debug('Checking current security token.', array('token' => (string) $this->tokenStorage->getToken()));
+            $this->logger->debug('Checking current security token.', ['token' => (string) $this->tokenStorage->getToken()]);
         }
 
         if (null !== $token = $this->tokenStorage->getToken()) {
@@ -76,14 +76,14 @@ abstract class AbstractPreAuthenticatedListener implements ListenerInterface
         }
 
         if (null !== $this->logger) {
-            $this->logger->debug('Trying to pre-authenticate user.', array('username' => (string) $user));
+            $this->logger->debug('Trying to pre-authenticate user.', ['username' => (string) $user]);
         }
 
         try {
             $token = $this->authenticationManager->authenticate(new PreAuthenticatedToken($user, $credentials, $this->providerKey));
 
             if (null !== $this->logger) {
-                $this->logger->info('Pre-authentication successful.', array('token' => (string) $token));
+                $this->logger->info('Pre-authentication successful.', ['token' => (string) $token]);
             }
 
             $this->migrateSession($request, $token);
@@ -119,7 +119,7 @@ abstract class AbstractPreAuthenticatedListener implements ListenerInterface
             $this->tokenStorage->setToken(null);
 
             if (null !== $this->logger) {
-                $this->logger->info('Cleared security token due to an exception.', array('exception' => $exception));
+                $this->logger->info('Cleared security token due to an exception.', ['exception' => $exception]);
             }
         }
     }

@@ -11,9 +11,9 @@
 
 namespace Symfony\Bundle\TwigBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Adds tagged twig.extension services to twig service.
@@ -35,13 +35,13 @@ class TwigEnvironmentPass implements CompilerPassInterface
         // afterward. If not, the globals from the extensions will never
         // be registered.
         $currentMethodCalls = $definition->getMethodCalls();
-        $twigBridgeExtensionsMethodCalls = array();
-        $othersExtensionsMethodCalls = array();
+        $twigBridgeExtensionsMethodCalls = [];
+        $othersExtensionsMethodCalls = [];
         foreach ($container->findTaggedServiceIds('twig.extension', true) as $id => $attributes) {
-            $methodCall = array('addExtension', array(new Reference($id)));
+            $methodCall = ['addExtension', [new Reference($id)]];
             $extensionClass = $container->getDefinition($id)->getClass();
 
-            if (is_string($extensionClass) && 0 === strpos($extensionClass, 'Symfony\Bridge\Twig\Extension')) {
+            if (\is_string($extensionClass) && 0 === strpos($extensionClass, 'Symfony\Bridge\Twig\Extension')) {
                 $twigBridgeExtensionsMethodCalls[] = $methodCall;
             } else {
                 $othersExtensionsMethodCalls[] = $methodCall;

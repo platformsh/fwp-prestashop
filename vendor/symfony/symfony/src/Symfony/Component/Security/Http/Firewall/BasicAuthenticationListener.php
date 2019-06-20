@@ -11,15 +11,15 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
 /**
@@ -69,7 +69,7 @@ class BasicAuthenticationListener implements ListenerInterface
         }
 
         if (null !== $this->logger) {
-            $this->logger->info('Basic authentication Authorization header found for user.', array('username' => $username));
+            $this->logger->info('Basic authentication Authorization header found for user.', ['username' => $username]);
         }
 
         try {
@@ -85,7 +85,7 @@ class BasicAuthenticationListener implements ListenerInterface
             }
 
             if (null !== $this->logger) {
-                $this->logger->info('Basic authentication failed for user.', array('username' => $username, 'exception' => $e));
+                $this->logger->info('Basic authentication failed for user.', ['username' => $username, 'exception' => $e]);
             }
 
             if ($this->ignoreFailure) {

@@ -26,17 +26,17 @@ class CookieTest extends TestCase
 {
     public function invalidNames()
     {
-        return array(
-            array(''),
-            array(',MyName'),
-            array(';MyName'),
-            array(' MyName'),
-            array("\tMyName"),
-            array("\rMyName"),
-            array("\nMyName"),
-            array("\013MyName"),
-            array("\014MyName"),
-        );
+        return [
+            [''],
+            [',MyName'],
+            [';MyName'],
+            [' MyName'],
+            ["\tMyName"],
+            ["\rMyName"],
+            ["\nMyName"],
+            ["\013MyName"],
+            ["\014MyName"],
+        ];
     }
 
     /**
@@ -157,6 +157,18 @@ class CookieTest extends TestCase
         $cookie = new Cookie('foo', 'bar', time() - 20);
 
         $this->assertTrue($cookie->isCleared(), '->isCleared() returns true if the cookie has expired');
+
+        $cookie = new Cookie('foo', 'bar');
+
+        $this->assertFalse($cookie->isCleared());
+
+        $cookie = new Cookie('foo', 'bar', 0);
+
+        $this->assertFalse($cookie->isCleared());
+
+        $cookie = new Cookie('foo', 'bar', -1);
+
+        $this->assertFalse($cookie->isCleared());
     }
 
     public function testToString()

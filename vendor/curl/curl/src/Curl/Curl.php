@@ -93,12 +93,13 @@ class Curl
     public $error_message = null;
 
     /**
-     * @var booelan Whether an error occured or not
+     * @var bool Whether an error occured or not
      */
     public $curl_error = false;
 
     /**
-     * @var int Contains the error code of the curren request, 0 means no error happend
+     * @var int Contains the error code of the curren request, 0 means no error happend.
+     * @see https://curl.haxx.se/libcurl/c/libcurl-errors.html
      */
     public $curl_error_code = 0;
 
@@ -108,7 +109,7 @@ class Curl
     public $curl_error_message = null;
 
     /**
-     * @var booelan Whether an error occured or not
+     * @var bool Whether an error occured or not
      */
     public $http_error = false;
 
@@ -660,12 +661,12 @@ class Curl
      * ```
      * 
      * @param string $headerKey Optional key to get from the array.
-     * @return boolean|string
+     * @return bool|string
      * @since 1.9
      */
     public function getResponseHeaders($headerKey = null)
     {
-        $headers = [];
+        $headers = array();
         $headerKey = strtolower($headerKey);
         
         foreach ($this->response_headers as $header) {

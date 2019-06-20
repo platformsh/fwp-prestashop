@@ -48,7 +48,7 @@ class Ps_Linklist extends Module implements WidgetInterface
     {
         $this->name = 'ps_linklist';
         $this->author = 'PrestaShop';
-        $this->version = '2.1.5';
+        $this->version = '2.1.6';
         $this->need_instance = 0;
 
         $this->bootstrap = true;
@@ -126,6 +126,9 @@ class Ps_Linklist extends Module implements WidgetInterface
 
     public function renderWidget($hookName, array $configuration)
     {
+        if ($hookName == null && isset($configuration['hook'])) {
+            $hookName = $configuration['hook'];
+        }
         $key = 'ps_linklist|' . $hookName;
 
         if (!$this->isCached($this->templateFile, $this->getCacheId($key))) {

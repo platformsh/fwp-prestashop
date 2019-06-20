@@ -25,12 +25,12 @@ class FirewallContextTest extends TestCase
         $config = new FirewallConfig('main', 'user_checker', 'request_matcher');
         $exceptionListener = $this->getExceptionListenerMock();
         $logoutListener = $this->getLogoutListenerMock();
-        $listeners = array(
+        $listeners = [
             $this
                 ->getMockBuilder(ListenerInterface::class)
                 ->disableOriginalConstructor()
                 ->getMock(),
-        );
+        ];
 
         $context = new FirewallContext($listeners, $exceptionListener, $logoutListener, $config);
 
@@ -41,17 +41,17 @@ class FirewallContextTest extends TestCase
     }
 
     /**
-     * @expectedDeprecation Method Symfony\Bundle\SecurityBundle\Security\FirewallContext::getContext() is deprecated since Symfony 3.3 and will be removed in 4.0. Use Symfony\Bundle\SecurityBundle\Security\FirewallContext::getListeners/getExceptionListener() instead.
+     * @expectedDeprecation The "Symfony\Bundle\SecurityBundle\Security\FirewallContext::getContext()" method is deprecated since Symfony 3.3 and will be removed in 4.0. Use Symfony\Bundle\SecurityBundle\Security\FirewallContext::getListeners/getExceptionListener() instead.
      * @group legacy
      */
     public function testGetContext()
     {
         $exceptionListener = $this->getExceptionListenerMock();
         $logoutListener = $this->getLogoutListenerMock();
-        $context = (new FirewallContext($listeners = array(), $exceptionListener, $logoutListener, new FirewallConfig('main', 'request_matcher', 'user_checker')))
+        $context = (new FirewallContext($listeners = [], $exceptionListener, $logoutListener, new FirewallConfig('main', 'request_matcher', 'user_checker')))
             ->getContext();
 
-        $this->assertEquals(array($listeners, $exceptionListener, $logoutListener), $context);
+        $this->assertEquals([$listeners, $exceptionListener, $logoutListener], $context);
     }
 
     private function getExceptionListenerMock()
