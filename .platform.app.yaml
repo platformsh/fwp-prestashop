@@ -25,15 +25,15 @@ hooks:
     # Deploy hooks can access services but the file system is now read-only.
     deploy: |
         set -e
+        rsync -a init/modules/* modules/
+        rsync -a init/img/* img/
+        rsync -a init/config/* config/
+        rsync -a init/translations/* translations/
+        rsync -a init/resources-translations/* app/Resources/translations/
+        rsync -a init/app-config/* app/config/
+        rsync -a init/themes/* themes/
+        rsync -a init/admin-fwp/import/* admin-fwp/import/
         if [ ! -f var/writeable/installed.lock ]; then
-            cp -R init/modules/* modules/
-            cp -R init/img/* img/
-            cp -R init/config/* config/
-            cp -R init/translations/* translations/
-            cp -R init/resources-translations/* app/Resources/translations/
-            cp -R init/app-config/* app/config/
-            cp -R init/themes/* themes/
-            cp -R init/admin-fwp/import/* admin-fwp/import/
             wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq
             chmod +x /tmp/jq
             cd install-fwp && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --email=$ADMIN_EMAIL --password=$ADMIN_PASSWORD --domain=$(echo $PLATFORM_ROUTES | base64 -d | /tmp/jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
