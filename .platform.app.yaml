@@ -33,6 +33,7 @@ hooks:
         rsync -a init/app-config/* app/config/
         rsync -a init/themes/* themes/
         rsync -a init/admin-fwp/import/* admin-fwp/import/
+        rm -rf var/cache/*
         if [ ! -f var/writeable/installed.lock ]; then
             wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq
             chmod +x /tmp/jq

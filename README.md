@@ -1,4 +1,4 @@
-# Prestashop template for Platform.sh
+# Prestashop template for Flexible Web Publisher on Platform.sh
 
 ## How to install
 
