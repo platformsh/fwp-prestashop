@@ -4,3 +4,6 @@
 "http://{all}/":
   type: upstream
   upstream: "app:http"
+"https://www.{all}/":
+  type: redirect
+  to: "https://{all}/"
