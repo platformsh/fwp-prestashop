@@ -33,6 +33,7 @@ hooks:
         rsync -a init/app-config/* app/config/
         rsync -a init/themes/* themes/
         rsync -a init/admin-fwp/import/* admin-fwp/import/
+        rsync -a init/mails/* mails/
         rm -rf var/cache/*
         if [ ! -f var/writeable/installed.lock ]; then
             wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq
@@ -40,6 +41,16 @@ hooks:
             cd install-fwp && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --email=$ADMIN_EMAIL --password=$ADMIN_PASSWORD --domain=$(echo $PLATFORM_ROUTES | base64 -d | /tmp/jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
             mysql -h database.internal -u user -e "UPDATE ps_configuration SET value = 1 WHERE name ='PS_SSL_ENABLED' OR name='PS_SSL_ENABLED_EVERYWHERE';" main
             cd && touch var/writeable/installed.lock
+        elif [ $PLATFORM_BRANCH != 'master' ]; then
+            echo 'dans la condition branche'
+            wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq
+            chmod +x /tmp/jq
+            echo 'jq dl'
+            shop_url=$(echo $PLATFORM_ROUTES | base64 -d | /tmp/jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
+            echo $shop_url
+            echo 'update mysql'
+            mysql -h database.internal -u user -e "UPDATE ps_configuration SET value ='$shop_url' WHERE name='PS_SHOP_DOMAIN' OR name='PS_SHOP_DOMAIN_SSL';" main
+            mysql -h database.internal -u user -e "UPDATE ps_shop_url SET domain='$shop_url', domain_ssl='$shop_url';" main
         fi;
 
 # The size of the persistent disk of the application (in MB).
