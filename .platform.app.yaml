@@ -1,4 +1,4 @@
-# .platform.app.yaml
+    # .platform.app.yaml
 
 # The name of this application, which must be unique within a project.
 name: 'app'
