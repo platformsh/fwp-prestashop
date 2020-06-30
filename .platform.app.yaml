@@ -88,6 +88,9 @@ mounts:
     'var/logs':
         source: local
         source_path: 'var-logs'
+    'var/sessions':
+        source: local
+        source_path: 'var-sessions'
     'var/writeable':
         source: local
         source_path: 'var-writeable'
