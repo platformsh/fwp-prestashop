@@ -113,3 +113,7 @@ web:
             # The front-controller script which determines where to send
             # non-static requests.
             passthru: '/admin-fwp/index.php'
+        '/install-fwp':
+            root: 'install-fwp'
+            scripts: false
+            allow: false
