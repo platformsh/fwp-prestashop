@@ -12,14 +12,14 @@ platform project:create
 3. Add specific environment variables
 
 ```
-platform -p<project> variable:set ADMIN_EMAIL your@email.com
-platform -p<project> variable:set ADMIN_PASSWORD yourpassword
+platform variable:create -y -p <project> -e master --level environment --name env:ADMIN_EMAIL --value your@email.com
+platform variable:create -y -p <project> -e master --sensitive true --level environment --name env:ADMIN_PASSWORD --value yourpassword
 ```
 
 4. Push to platform.sh
 
 ```
-git remote add platform <project id>@git.<project region>.platform.sh:<project id>.git
+platform project:set-remote <project>
 git push platform master
 ```
 
