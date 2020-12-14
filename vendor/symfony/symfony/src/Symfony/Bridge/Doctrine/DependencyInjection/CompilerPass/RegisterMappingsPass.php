@@ -24,8 +24,8 @@ use Symfony\Component\DependencyInjection\Reference;
  * The compiler pass is meant to register the mappings with the metadata
  * chain driver corresponding to one of the object managers.
  *
- * For concrete implementations that are easy to use, see the
- * RegisterXyMappingsPass classes in the DoctrineBundle resp.
+ * For concrete implementations, see the RegisterXyMappingsPass classes
+ * in the DoctrineBundle resp.
  * DoctrineMongodbBundle, DoctrineCouchdbBundle and DoctrinePhpcrBundle.
  *
  * @author David Buchmann <david@liip.ch>
@@ -143,7 +143,7 @@ abstract class RegisterMappingsPass implements CompilerPassInterface
 
         $mappingDriverDef = $this->getDriver($container);
         $chainDriverDefService = $this->getChainDriverServiceName($container);
-        // Definition for a Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain
+        // Definition for a Doctrine\Persistence\Mapping\Driver\MappingDriverChain
         $chainDriverDef = $container->getDefinition($chainDriverDefService);
         foreach ($this->namespaces as $namespace) {
             $chainDriverDef->addMethodCall('addDriver', [$mappingDriverDef, $namespace]);
@@ -222,10 +222,7 @@ abstract class RegisterMappingsPass implements CompilerPassInterface
             }
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'Could not find the manager name parameter in the container. Tried the following parameter names: "%s"',
-            implode('", "', $this->managerParameters)
-        ));
+        throw new InvalidArgumentException(sprintf('Could not find the manager name parameter in the container. Tried the following parameter names: "%s"', implode('", "', $this->managerParameters)));
     }
 
     /**

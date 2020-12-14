@@ -68,11 +68,9 @@ class ArrayToPartsTransformerTest extends TestCase
         $this->assertSame($output, $this->transformer->transform(null));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testTransformRequiresArray()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $this->transformer->transform('12345');
     }
 
@@ -123,11 +121,9 @@ class ArrayToPartsTransformerTest extends TestCase
         $this->assertNull($this->transformer->reverseTransform($input));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testReverseTransformPartiallyNull()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $input = [
             'first' => [
                 'a' => '1',
@@ -140,11 +136,9 @@ class ArrayToPartsTransformerTest extends TestCase
         $this->transformer->reverseTransform($input);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testReverseTransformRequiresArray()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $this->transformer->reverseTransform('12345');
     }
 }

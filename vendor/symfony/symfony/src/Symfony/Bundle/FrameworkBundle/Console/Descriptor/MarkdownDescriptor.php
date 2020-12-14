@@ -249,7 +249,9 @@ class MarkdownDescriptor extends Descriptor
             ."\n".'- Public: '.($alias->isPublic() && !$alias->isPrivate() ? 'yes' : 'no');
 
         if (!isset($options['id'])) {
-            return $this->write($output);
+            $this->write($output);
+
+            return;
         }
 
         $this->write(sprintf("### %s\n\n%s\n", $options['id'], $output));
@@ -275,7 +277,7 @@ class MarkdownDescriptor extends Descriptor
      */
     protected function describeEventDispatcherListeners(EventDispatcherInterface $eventDispatcher, array $options = [])
     {
-        $event = array_key_exists('event', $options) ? $options['event'] : null;
+        $event = \array_key_exists('event', $options) ? $options['event'] : null;
 
         $title = 'Registered listeners';
         if (null !== $event) {

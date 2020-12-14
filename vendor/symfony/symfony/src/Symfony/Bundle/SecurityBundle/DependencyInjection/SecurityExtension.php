@@ -28,6 +28,8 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Security\Core\Authorization\ExpressionLanguage;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
+use Symfony\Component\Templating\Helper\Helper;
+use Twig\Extension\AbstractExtension;
 
 /**
  * SecurityExtension.
@@ -69,8 +71,18 @@ class SecurityExtension extends Extension
         $loader->load('security.xml');
         $loader->load('security_listeners.xml');
         $loader->load('security_rememberme.xml');
-        $loader->load('templating_php.xml');
-        $loader->load('templating_twig.xml');
+
+        if (class_exists(Helper::class)) {
+            $loader->load('templating_php.xml');
+
+            $container->getDefinition('templating.helper.logout_url')->setPrivate(true);
+            $container->getDefinition('templating.helper.security')->setPrivate(true);
+        }
+
+        if (class_exists(AbstractExtension::class)) {
+            $loader->load('templating_twig.xml');
+        }
+
         $loader->load('collectors.xml');
         $loader->load('guard.xml');
 
@@ -79,8 +91,6 @@ class SecurityExtension extends Extension
         $container->getDefinition('security.firewall.context')->setPrivate(true);
         $container->getDefinition('security.validator.user_password')->setPrivate(true);
         $container->getDefinition('security.rememberme.response_listener')->setPrivate(true);
-        $container->getDefinition('templating.helper.logout_url')->setPrivate(true);
-        $container->getDefinition('templating.helper.security')->setPrivate(true);
         $container->getAlias('security.encoder_factory')->setPrivate(true);
 
         if ($container->hasParameter('kernel.debug') && $container->getParameter('kernel.debug')) {
@@ -364,6 +374,7 @@ class SecurityExtension extends Extension
         $listeners[] = new Reference('security.channel_listener');
 
         $contextKey = null;
+        $contextListenerId = null;
         // Context serializer listener
         if (false === $firewall['stateless']) {
             $contextKey = $id;
@@ -380,7 +391,7 @@ class SecurityExtension extends Extension
             }
 
             $this->logoutOnUserChangeByContextKey[$contextKey] = [$id, $logoutOnUserChange];
-            $listeners[] = new Reference($this->createContextListener($container, $contextKey, $logoutOnUserChange));
+            $listeners[] = new Reference($contextListenerId = $this->createContextListener($container, $contextKey, $logoutOnUserChange));
             $sessionStrategyId = 'security.authentication.session_strategy';
         } else {
             $this->statelessFirewallKeys[] = $id;
@@ -453,7 +464,7 @@ class SecurityExtension extends Extension
         $configuredEntryPoint = isset($firewall['entry_point']) ? $firewall['entry_point'] : null;
 
         // Authentication listeners
-        list($authListeners, $defaultEntryPoint) = $this->createAuthenticationListeners($container, $id, $firewall, $authenticationProviders, $defaultProvider, $providerIds, $configuredEntryPoint);
+        list($authListeners, $defaultEntryPoint) = $this->createAuthenticationListeners($container, $id, $firewall, $authenticationProviders, $defaultProvider, $providerIds, $configuredEntryPoint, $contextListenerId);
 
         $config->replaceArgument(7, $configuredEntryPoint ?: $defaultEntryPoint);
 
@@ -479,7 +490,7 @@ class SecurityExtension extends Extension
         foreach ($this->factories as $position) {
             foreach ($position as $factory) {
                 $key = str_replace('-', '_', $factory->getKey());
-                if (array_key_exists($key, $firewall)) {
+                if (\array_key_exists($key, $firewall)) {
                     $listenerKeys[] = $key;
                 }
             }
@@ -509,7 +520,7 @@ class SecurityExtension extends Extension
         return $this->contextListeners[$contextKey] = $listenerId;
     }
 
-    private function createAuthenticationListeners($container, $id, $firewall, &$authenticationProviders, $defaultProvider = null, array $providerIds, $defaultEntryPoint)
+    private function createAuthenticationListeners($container, $id, $firewall, &$authenticationProviders, $defaultProvider = null, array $providerIds, $defaultEntryPoint, $contextListenerId = null)
     {
         $listeners = [];
         $hasListeners = false;
@@ -527,6 +538,9 @@ class SecurityExtension extends Extension
                     } elseif ('remember_me' === $key) {
                         // RememberMeFactory will use the firewall secret when created
                         $userProvider = null;
+                        if ($contextListenerId) {
+                            $container->getDefinition($contextListenerId)->addTag('security.remember_me_aware', ['id' => $id, 'provider' => 'none']);
+                        }
                     } else {
                         $userProvider = $defaultProvider ?: $this->getFirstProvider($id, $key, $providerIds);
                     }
@@ -575,7 +589,7 @@ class SecurityExtension extends Extension
     {
         $encoderMap = [];
         foreach ($encoders as $class => $encoder) {
-            $encoderMap[$class] = $this->createEncoder($encoder, $container);
+            $encoderMap[$class] = $this->createEncoder($encoder);
         }
 
         $container
@@ -584,7 +598,7 @@ class SecurityExtension extends Extension
         ;
     }
 
-    private function createEncoder($config, ContainerBuilder $container)
+    private function createEncoder($config)
     {
         // a custom encoder service
         if (isset($config['id'])) {
@@ -788,9 +802,7 @@ class SecurityExtension extends Extension
     }
 
     /**
-     * Returns the base path for the XSD files.
-     *
-     * @return string The XSD base path
+     * {@inheritdoc}
      */
     public function getXsdValidationBasePath()
     {

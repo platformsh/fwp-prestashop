@@ -46,3 +46,14 @@
 .stock-app .stock-overview .table .qty-update .material-icons {
   transform: scaleX(-1);
 }
+
+/* Fixes image flipping for RTL language */
+.img-rtl {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+/* Align order status dropdown correctly */
+.adminorders .dropdown-menu {
+  right: inherit;
+}

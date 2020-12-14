@@ -36,11 +36,9 @@ class LengthValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\UnexpectedTypeException
-     */
     public function testExpectsStringCompatibleType()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\UnexpectedTypeException');
         $this->validator->validate(new \stdClass(), new Length(5));
     }
 
@@ -237,11 +235,20 @@ class LengthValidatorTest extends ConstraintValidatorTestCase
         }
     }
 
-    public function testConstraintGetDefaultOption()
+    public function testConstraintDefaultOption()
     {
         $constraint = new Length(5);
 
         $this->assertEquals(5, $constraint->min);
         $this->assertEquals(5, $constraint->max);
+    }
+
+    public function testConstraintAnnotationDefaultOption()
+    {
+        $constraint = new Length(['value' => 5, 'exactMessage' => 'message']);
+
+        $this->assertEquals(5, $constraint->min);
+        $this->assertEquals(5, $constraint->max);
+        $this->assertEquals('message', $constraint->exactMessage);
     }
 }

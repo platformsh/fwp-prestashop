@@ -1,29 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
-
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -36,62 +35,73 @@ class dashtrends extends Module
     protected $dashboard_data_sum_compare;
     protected $data_trends;
 
+    /**
+     * @var Currency
+     */
+    public $currency;
+
+    /**
+     * @var string
+     */
+    public $push_filename;
+
     public function __construct()
     {
         $this->name = 'dashtrends';
         $this->tab = 'dashboard';
-        $this->version = '2.0.2';
+        $this->version = '2.0.3';
         $this->author = 'PrestaShop';
 
-        $this->push_filename = _PS_CACHE_DIR_.'push/trends';
+        $this->push_filename = _PS_CACHE_DIR_ . 'push/trends';
         $this->allow_push = true;
 
         parent::__construct();
-        $this->displayName = $this->trans('Dashboard Trends', array(), 'Modules.Dashtrends.Admin');
-        $this->description = $this->trans('Adds a block with a graphical representation of the development of your store(s) based on selected key data.', array(), 'Modules.Dashtrends.Admin');
-        $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
+        $this->displayName = $this->trans('Dashboard Trends', [], 'Modules.Dashtrends.Admin');
+        $this->description = $this->trans('Adds a block with a graphical representation of the development of your store(s) based on selected key data.', [], 'Modules.Dashtrends.Admin');
+        $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
     }
 
     public function install()
     {
-        return (parent::install()
+        return parent::install()
             && $this->registerHook('dashboardZoneTwo')
             && $this->registerHook('dashboardData')
             && $this->registerHook('actionAdminControllerSetMedia')
             && $this->registerHook('actionOrderStatusPostUpdate')
-        );
+        ;
     }
 
     public function hookActionAdminControllerSetMedia()
     {
         if (get_class($this->context->controller) == 'AdminDashboardController') {
-            $this->context->controller->addJs($this->_path.'views/js/'.$this->name.'.js');
+            $this->context->controller->addJs($this->_path . 'views/js/' . $this->name . '.js');
         }
     }
 
     public function hookDashboardZoneTwo($params)
     {
-        $this->context->smarty->assign(array(
+        $this->context->smarty->assign([
             'currency' => $this->context->currency,
-            '_PS_PRICE_DISPLAY_PRECISION_' => _PS_PRICE_DISPLAY_PRECISION_
-        ));
+            '_PS_PRICE_DISPLAY_PRECISION_' => _PS_PRICE_DISPLAY_PRECISION_,
+        ]);
+
         return $this->display(__FILE__, 'dashboard_zone_two.tpl');
     }
 
     protected function getData($date_from, $date_to)
     {
         // We need the following figures to calculate our stats
-        $tmp_data = array(
-            'visits' => array(),
-            'orders' => array(),
-            'total_paid_tax_excl' => array(),
-            'total_purchases' => array(),
-            'total_expenses' => array()
-        );
+        $tmp_data = [
+            'visits' => [],
+            'orders' => [],
+            'total_paid_tax_excl' => [],
+            'total_purchases' => [],
+            'total_expenses' => [],
+        ];
 
         if (Configuration::get('PS_DASHBOARD_SIMULATION')) {
-            $from = strtotime($date_from.' 00:00:00');
-            $to = min(time(), strtotime($date_to.' 23:59:59'));
+            $from = strtotime($date_from . ' 00:00:00');
+            $to = min(time(), strtotime($date_to . ' 23:59:59'));
             for ($date = $from; $date <= $to; $date = strtotime('+1 day', $date)) {
                 $tmp_data['visits'][$date] = round(rand(2000, 20000));
                 $tmp_data['conversion_rate'][$date] = rand(80, 250) / 100;
@@ -114,17 +124,17 @@ class dashtrends extends Module
 
     protected function refineData($date_from, $date_to, $gross_data)
     {
-        $refined_data = array(
-            'sales' => array(),
-            'orders' => array(),
-            'average_cart_value' => array(),
-            'visits' => array(),
-            'conversion_rate' => array(),
-            'net_profits' => array()
-        );
+        $refined_data = [
+            'sales' => [],
+            'orders' => [],
+            'average_cart_value' => [],
+            'visits' => [],
+            'conversion_rate' => [],
+            'net_profits' => [],
+        ];
 
-        $from = strtotime($date_from.' 00:00:00');
-        $to = min(time(), strtotime($date_to.' 23:59:59'));
+        $from = strtotime($date_from . ' 00:00:00');
+        $to = min(time(), strtotime($date_to . ' 23:59:59'));
         for ($date = $from; $date <= $to; $date = strtotime('+1 day', $date)) {
             $refined_data['sales'][$date] = 0;
             if (isset($gross_data['total_paid_tax_excl'][$date])) {
@@ -150,19 +160,20 @@ class dashtrends extends Module
                 $refined_data['net_profits'][$date] -= $gross_data['total_expenses'][$date];
             }
         }
+
         return $refined_data;
     }
 
     protected function addupData($data)
     {
-        $summing = array(
+        $summing = [
             'sales' => 0,
             'orders' => 0,
             'average_cart_value' => 0,
             'visits' => 0,
             'conversion_rate' => 0,
-            'net_profits' => 0
-        );
+            'net_profits' => 0,
+        ];
 
         $summing['sales'] = array_sum($data['sales']);
         $summing['orders'] = array_sum($data['orders']);
@@ -176,32 +187,32 @@ class dashtrends extends Module
 
     protected function compareData($data1, $data2)
     {
-        return array(
-            'sales_score_trends' => array(
+        return [
+            'sales_score_trends' => [
                 'way' => ($data1['sales'] == $data2['sales'] ? 'right' : ($data1['sales'] > $data2['sales'] ? 'up' : 'down')),
-                'value' => ($data1['sales'] > $data2['sales'] ? '+' : '').($data2['sales'] ? round(100 * $data1['sales'] / $data2['sales'] - 100, 2).'%' : '&infin;')
-            ),
-            'orders_score_trends' => array(
+                'value' => ($data1['sales'] > $data2['sales'] ? '+' : '') . ($data2['sales'] ? round(100 * $data1['sales'] / $data2['sales'] - 100, 2) . '%' : '&infin;'),
+            ],
+            'orders_score_trends' => [
                 'way' => ($data1['orders'] == $data2['orders'] ? 'right' : ($data1['orders'] > $data2['orders'] ? 'up' : 'down')),
-                'value' => ($data1['orders'] > $data2['orders'] ? '+' : '').($data2['orders'] ? round(100 * $data1['orders'] / $data2['orders'] - 100, 2).'%' : '&infin;')
-            ),
-            'cart_value_score_trends' => array(
+                'value' => ($data1['orders'] > $data2['orders'] ? '+' : '') . ($data2['orders'] ? round(100 * $data1['orders'] / $data2['orders'] - 100, 2) . '%' : '&infin;'),
+            ],
+            'cart_value_score_trends' => [
                 'way' => ($data1['average_cart_value'] == $data2['average_cart_value'] ? 'right' : ($data1['average_cart_value'] > $data2['average_cart_value'] ? 'up' : 'down')),
-                'value' => ($data1['average_cart_value'] > $data2['average_cart_value'] ? '+' : '').($data2['average_cart_value'] ? round(100 * $data1['average_cart_value'] / $data2['average_cart_value'] - 100, 2).'%' : '&infin;')
-            ),
-            'visits_score_trends' => array(
+                'value' => ($data1['average_cart_value'] > $data2['average_cart_value'] ? '+' : '') . ($data2['average_cart_value'] ? round(100 * $data1['average_cart_value'] / $data2['average_cart_value'] - 100, 2) . '%' : '&infin;'),
+            ],
+            'visits_score_trends' => [
                 'way' => ($data1['visits'] == $data2['visits'] ? 'right' : ($data1['visits'] > $data2['visits'] ? 'up' : 'down')),
-                'value' => ($data1['visits'] > $data2['visits'] ? '+' : '').($data2['visits'] ? round(100 * $data1['visits'] / $data2['visits'] - 100, 2).'%' : '&infin;')
-            ),
-            'conversion_rate_score_trends' => array(
+                'value' => ($data1['visits'] > $data2['visits'] ? '+' : '') . ($data2['visits'] ? round(100 * $data1['visits'] / $data2['visits'] - 100, 2) . '%' : '&infin;'),
+            ],
+            'conversion_rate_score_trends' => [
                 'way' => ($data1['conversion_rate'] == $data2['conversion_rate'] ? 'right' : ($data1['conversion_rate'] > $data2['conversion_rate'] ? 'up' : 'down')),
-                'value' => ($data1['conversion_rate'] > $data2['conversion_rate'] ? '+' : '') . ($data2['conversion_rate'] ? sprintf($this->trans('%s points', array(), 'Modules.Dashtrends.Admin'), round(100 * ($data1['conversion_rate'] - $data2['conversion_rate']), 2)) : '&infin;')
-            ),
-            'net_profits_score_trends' => array(
+                'value' => ($data1['conversion_rate'] > $data2['conversion_rate'] ? '+' : '') . ($data2['conversion_rate'] ? sprintf($this->trans('%s points', [], 'Modules.Dashtrends.Admin'), round(100 * ($data1['conversion_rate'] - $data2['conversion_rate']), 2)) : '&infin;'),
+            ],
+            'net_profits_score_trends' => [
                 'way' => ($data1['net_profits'] == $data2['net_profits'] ? 'right' : ($data1['net_profits'] > $data2['net_profits'] ? 'up' : 'down')),
-                'value' => ($data1['net_profits'] > $data2['net_profits'] ? '+' : '').($data2['net_profits'] ? round(100 * $data1['net_profits'] / $data2['net_profits'] - 100, 2).'%' : '&infin;')
-            )
-        );
+                'value' => ($data1['net_profits'] > $data2['net_profits'] ? '+' : '') . ($data2['net_profits'] ? round(100 * $data1['net_profits'] / $data2['net_profits'] - 100, 2) . '%' : '&infin;'),
+            ],
+        ];
     }
 
     public function hookDashboardData($params)
@@ -223,37 +234,37 @@ class dashtrends extends Module
             $this->dashboard_data_compare = $this->translateCompareData($this->dashboard_data, $this->dashboard_data_compare);
         }
 
-        $sales_score = Tools::displayPrice($this->dashboard_data_sum['sales'], $this->currency).
+        $sales_score = Tools::displayPrice($this->dashboard_data_sum['sales'], $this->currency) .
                        $this->addTaxSuffix();
 
-        $cart_value_score = Tools::displayPrice($this->dashboard_data_sum['average_cart_value'], $this->currency).
+        $cart_value_score = Tools::displayPrice($this->dashboard_data_sum['average_cart_value'], $this->currency) .
                             $this->addTaxSuffix();
 
-        $net_profit_score = Tools::displayPrice($this->dashboard_data_sum['net_profits'], $this->currency).
+        $net_profit_score = Tools::displayPrice($this->dashboard_data_sum['net_profits'], $this->currency) .
                             $this->addTaxSuffix();
 
-        return array(
-            'data_value' => array(
+        return [
+            'data_value' => [
                 'sales_score' => $sales_score,
-                'orders_score' => Tools::displayNumber($this->dashboard_data_sum['orders'], $this->currency),
+                'orders_score' => Tools::displayNumber($this->dashboard_data_sum['orders']),
                 'cart_value_score' => $cart_value_score,
-                'visits_score' => Tools::displayNumber($this->dashboard_data_sum['visits'], $this->currency),
-                'conversion_rate_score' => round(100 * $this->dashboard_data_sum['conversion_rate'], 2).'%',
+                'visits_score' => Tools::displayNumber($this->dashboard_data_sum['visits']),
+                'conversion_rate_score' => round(100 * $this->dashboard_data_sum['conversion_rate'], 2) . '%',
                 'net_profits_score' => $net_profit_score,
-            ),
+            ],
             'data_trends' => $this->data_trends,
-            'data_chart' => array('dash_trends_chart1' => $this->getChartTrends()),
-        );
+            'data_chart' => ['dash_trends_chart1' => $this->getChartTrends()],
+        ];
     }
 
     protected function addTaxSuffix()
     {
-        return ' <small>'.$this->trans('Tax excl.', array(), 'Admin.Global').'</small>';
+        return ' <small>' . $this->trans('Tax excl.', [], 'Admin.Global') . '</small>';
     }
 
     protected function translateCompareData($normal, $compare)
     {
-        $translated_array = array();
+        $translated_array = [];
         foreach ($compare as $key => $date_array) {
             $normal_min = key($normal[$key]);
             end($normal[$key]); // move the internal pointer to the end of the array
@@ -267,7 +278,7 @@ class dashtrends extends Module
             reset($compare[$key]);
             $compare_size = $compare_max - $compare_min;
 
-            $translated_array[$key] = array();
+            $translated_array[$key] = [];
             foreach ($date_array as $compare_date => $value) {
                 $translation = $normal_min + ($compare_date - $compare_min) * ($normal_size / $compare_size);
                 $translated_array[$key][number_format($translation, 0, '', '')] = $value;
@@ -279,10 +290,10 @@ class dashtrends extends Module
 
     public function getChartTrends()
     {
-        $chart_data = array();
-        $chart_data_compare = array();
+        $chart_data = [];
+        $chart_data_compare = [];
         foreach (array_keys($this->dashboard_data) as $chart_key) {
-            $chart_data[$chart_key] = $chart_data_compare[$chart_key] = array();
+            $chart_data[$chart_key] = $chart_data_compare[$chart_key] = [];
 
             if (!$count = count($this->dashboard_data[$chart_key])) {
                 continue;
@@ -292,56 +303,57 @@ class dashtrends extends Module
             $calibration = array_sum($this->dashboard_data[$chart_key]) / $count;
 
             foreach ($this->dashboard_data[$chart_key] as $key => $value) {
-                $chart_data[$chart_key][] = array($key, $value);
+                $chart_data[$chart_key][] = [$key, $value];
             }
-                // min(10) is there to limit the growth to 1000%, beyond this limit it becomes unreadable
-                //$chart_data[$chart_key][] = array(1000 * $key, $calibration ? min(10, $value / $calibration) : 0);
+            // min(10) is there to limit the growth to 1000%, beyond this limit it becomes unreadable
+            //$chart_data[$chart_key][] = array(1000 * $key, $calibration ? min(10, $value / $calibration) : 0);
 
             if ($this->dashboard_data_compare) {
                 foreach ($this->dashboard_data_compare[$chart_key] as $key => $value) {
-                    $chart_data_compare[$chart_key][] = array($key, $value);
+                    $chart_data_compare[$chart_key][] = [$key, $value];
                 }
             }
-                    // min(10) is there to limit the growth to 1000%, beyond this limit it becomes unreadable
+            // min(10) is there to limit the growth to 1000%, beyond this limit it becomes unreadable
                     /*$chart_data_compare[$chart_key][] = array(
                         1000 * $key,
                         $calibration ? min(10, $value / $calibration) : 0
                     );*/
         }
 
-        $charts = array(
-            'sales' => $this->trans('Sales', array(), 'Admin.Global'),
-            'orders' => $this->trans('Orders', array(), 'Admin.Global'),
-            'average_cart_value' => $this->trans('Average Cart Value', array(), 'Modules.Dashtrends.Admin'),
-            'visits' => $this->trans('Visits', array(), 'Admin.Shopparameters.Feature'),
-            'conversion_rate' => $this->trans('Conversion Rate', array(), 'Modules.Dashtrends.Admin'),
-            'net_profits' => $this->trans('Net Profit', array(), 'Modules.Dashtrends.Admin')
-        );
+        $charts = [
+            'sales' => $this->trans('Sales', [], 'Admin.Global'),
+            'orders' => $this->trans('Orders', [], 'Admin.Global'),
+            'average_cart_value' => $this->trans('Average Cart Value', [], 'Modules.Dashtrends.Admin'),
+            'visits' => $this->trans('Visits', [], 'Admin.Shopparameters.Feature'),
+            'conversion_rate' => $this->trans('Conversion Rate', [], 'Modules.Dashtrends.Admin'),
+            'net_profits' => $this->trans('Net Profit', [], 'Modules.Dashtrends.Admin'),
+        ];
 
-        $gfx_color = array('#1777B6','#2CA121','#E61409','#FF7F00','#6B399C','#B3591F');
-        $gfx_color_compare = array('#A5CEE4','#B1E086','#FD9997','#FFC068','#CAB1D7','#D2A689');
+        $gfx_color = ['#1777B6', '#2CA121', '#E61409', '#FF7F00', '#6B399C', '#B3591F'];
+        $gfx_color_compare = ['#A5CEE4', '#B1E086', '#FD9997', '#FFC068', '#CAB1D7', '#D2A689'];
 
         $i = 0;
-        $data = array('chart_type' => 'line_chart_trends', 'date_format' => $this->context->language->date_format_lite, 'data' => array());
+        $data = ['chart_type' => 'line_chart_trends', 'date_format' => $this->context->language->date_format_lite, 'data' => []];
         foreach ($charts as $key => $title) {
-            $data['data'][] = array(
+            $data['data'][] = [
                 'id' => $key,
                 'key' => $title,
                 'color' => $gfx_color[$i],
                 'values' => $chart_data[$key],
-                'disabled' => ($key == 'sales' ? false : true)
-            );
+                'disabled' => ($key == 'sales' ? false : true),
+            ];
             if ($this->dashboard_data_compare) {
-                $data['data'][] = array(
-                    'id' => $key.'_compare',
+                $data['data'][] = [
+                    'id' => $key . '_compare',
                     'color' => $gfx_color_compare[$i],
-                    'key' => sprintf($this->trans('%s (previous period)', array(), 'Modules.Dashtrends.Admin'), $title),
+                    'key' => sprintf($this->trans('%s (previous period)', [], 'Modules.Dashtrends.Admin'), $title),
                     'values' => $chart_data_compare[$key],
-                    'disabled' => ($key == 'sales' ? false : true)
-                );
+                    'disabled' => ($key == 'sales' ? false : true),
+                ];
             }
-            $i++;
+            ++$i;
         }
+
         return $data;
     }
 

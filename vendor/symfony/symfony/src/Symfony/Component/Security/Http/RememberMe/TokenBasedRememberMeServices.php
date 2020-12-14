@@ -89,10 +89,10 @@ class TokenBasedRememberMeServices extends AbstractRememberMeServices
     /**
      * Generates the cookie value.
      *
-     * @param string $class
-     * @param string $username The username
-     * @param int    $expires  The Unix timestamp when the cookie expires
-     * @param string $password The encoded password
+     * @param string      $class
+     * @param string      $username The username
+     * @param int         $expires  The Unix timestamp when the cookie expires
+     * @param string|null $password The encoded password
      *
      * @return string
      */
@@ -109,17 +109,17 @@ class TokenBasedRememberMeServices extends AbstractRememberMeServices
     }
 
     /**
-     * Generates a hash for the cookie to ensure it is not being tempered with.
+     * Generates a hash for the cookie to ensure it is not being tampered with.
      *
-     * @param string $class
-     * @param string $username The username
-     * @param int    $expires  The Unix timestamp when the cookie expires
-     * @param string $password The encoded password
+     * @param string      $class
+     * @param string      $username The username
+     * @param int         $expires  The Unix timestamp when the cookie expires
+     * @param string|null $password The encoded password
      *
      * @return string
      */
     protected function generateCookieHash($class, $username, $expires, $password)
     {
-        return hash_hmac('sha256', $class.$username.$expires.$password, $this->getSecret());
+        return hash_hmac('sha256', $class.self::COOKIE_DELIMITER.$username.self::COOKIE_DELIMITER.$expires.self::COOKIE_DELIMITER.$password, $this->getSecret());
     }
 }

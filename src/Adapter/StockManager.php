@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,21 +17,20 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Adapter;
 
-use PrestaShopBundle\Service\DataProvider\StockInterface;
-use PrestaShop\PrestaShop\Adapter\Shop\Context as ShopAdapter;
-use PrestaShop\PrestaShop\Adapter\Configuration as ConfigurationAdapter;
-use StockAvailable;
 use Db;
+use PrestaShop\PrestaShop\Adapter\Configuration as ConfigurationAdapter;
+use PrestaShop\PrestaShop\Adapter\Shop\Context as ShopAdapter;
+use PrestaShopBundle\Service\DataProvider\StockInterface;
+use StockAvailable;
 
 /**
  * Data provider for new Architecture, about Product stocks.
@@ -113,6 +113,10 @@ class StockManager implements StockInterface
             $updatePhysicalQuantityQuery .= ' AND sa.id_product = ' . (int) $idProduct;
         }
 
+        if ($idOrder) {
+            $updatePhysicalQuantityQuery .= ' AND sa.id_product IN (SELECT product_id FROM {table_prefix}order_detail WHERE id_order = ' . (int) $idOrder . ')';
+        }
+
         $updatePhysicalQuantityQuery = str_replace('{table_prefix}', _DB_PREFIX_, $updatePhysicalQuantityQuery);
 
         return Db::getInstance()->execute($updatePhysicalQuantityQuery);
@@ -149,12 +153,12 @@ class StockManager implements StockInterface
             WHERE sa.id_shop = :shop_id
         ';
 
-        $strParams = array(
+        $strParams = [
             '{table_prefix}' => _DB_PREFIX_,
             ':shop_id' => (int) $shopId,
             ':error_state' => (int) $errorState,
             ':cancellation_state' => (int) $cancellationState,
-        );
+        ];
 
         if ($idProduct) {
             $updateReservedQuantityQuery .= ' AND sa.id_product = :product_id';
@@ -180,7 +184,7 @@ class StockManager implements StockInterface
      */
     public function newStockAvailable($stockAvailableId = null)
     {
-        if (is_integer($stockAvailableId)) {
+        if (is_int($stockAvailableId)) {
             return new StockAvailable($stockAvailableId);
         }
 

@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,12 +17,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 class Datas
@@ -87,13 +87,13 @@ class Datas
             'name' => 'db_clear',
             'default' => '1',
             'validate' => 'isInt',
-            'help' => 'Drop existing tables'
+            'help' => 'Drop existing tables',
         ),
         'database_create' => array(
             'name' => 'db_create',
             'default' => '0',
             'validate' => 'isInt',
-            'help' => 'Create the database if not exist'
+            'help' => 'Create the database if not exist',
         ),
         'database_prefix' => array(
             'name' => 'prefix',
@@ -120,7 +120,7 @@ class Datas
             'name' => 'country',
             'validate' => 'isLanguageIsoCode',
             'default' => 'fr',
-            ),
+        ),
         'admin_firstname' => array(
             'name' => 'firstname',
             'validate' => 'isName',
@@ -139,26 +139,26 @@ class Datas
         'admin_email' => array(
             'name' => 'email',
             'validate' => 'isEmail',
-            'default' => 'pub@prestashop.com'
+            'default' => 'pub@prestashop.com',
         ),
         'show_license' => array(
             'name' => 'license',
             'default' => 0,
-            'help' => 'show PrestaShop license'
-        ),
-        'newsletter' => array(
-            'name' => 'newsletter',
-            'default' => 1,
-            'help' => 'get news from PrestaShop',
+            'help' => 'show PrestaShop license',
         ),
         'theme' => array(
             'name' => 'theme',
-            'default' => ''
+            'default' => '',
         ),
         'enable_ssl' => array(
             'name' => 'ssl',
             'default' => 0,
-            'help' => 'enable SSL for PrestaShop'
+            'help' => 'enable SSL for PrestaShop',
+        ),
+        'rewrite_engine' => array(
+            'name' => 'rewrite',
+            'default' => 1,
+            'help' => 'enable rewrite engine for PrestaShop',
         ),
     );
 
@@ -180,15 +180,16 @@ class Datas
 
     public static function getInstance()
     {
-        if (Datas::$instance === null) {
-            Datas::$instance = new Datas();
+        if (static::$instance === null) {
+            static::$instance = new static();
         }
-        return Datas::$instance;
+
+        return static::$instance;
     }
 
     public static function getArgs()
     {
-        return Datas::$available_args;
+        return static::$available_args;
     }
 
     public function getAndCheckArgs($argv)
@@ -213,7 +214,7 @@ class Datas
         }
 
         $errors = array();
-        foreach (Datas::getArgs() as $key => $row) {
+        foreach (static::getArgs() as $key => $row) {
             if (isset($row['name'])) {
                 $name = $row['name'];
             } else {
@@ -225,7 +226,7 @@ class Datas
                 } else {
                     $this->$key = $row['default'];
                 }
-            } elseif (isset($row['validate']) && !call_user_func(array('Validate', $row['validate']), $args_ok[$name])) {
+            } elseif (isset($row['validate']) && class_exists('Validate') && !call_user_func(array('Validate', $row['validate']), $args_ok[$name])) {
                 $errors[] = 'Field '.$key.' is not valid';
             } else {
                 $this->$key = $args_ok[$name];

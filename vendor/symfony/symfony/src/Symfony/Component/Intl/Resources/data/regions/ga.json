@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.44.91",
+    "Version": "36",
     "Names": {
         "AC": "Oileán na Deascabhála",
         "AD": "Andóra",
@@ -146,7 +146,7 @@
         "MF": "Saint-Martin",
         "MG": "Madagascar",
         "MH": "Oileáin Marshall",
-        "MK": "an Mhacadóin",
+        "MK": "an Mhacadóin Thuaidh",
         "ML": "Mailí",
         "MM": "Maenmar (Burma)",
         "MN": "an Mhongóil",
@@ -215,7 +215,7 @@
         "SV": "an tSalvadóir",
         "SX": "Sint Maarten",
         "SY": "an tSiria",
-        "SZ": "an tSuasalainn",
+        "SZ": "eSuaitíní",
         "TA": "Tristan da Cunha",
         "TC": "Oileáin na dTurcach agus Caicos",
         "TD": "Sead",
@@ -248,6 +248,8 @@
         "VU": "Vanuatú",
         "WF": "Vailís agus Futúna",
         "WS": "Samó",
+        "XA": "Bréagdhiaicriticí",
+        "XB": "Bréag-Bidi",
         "XK": "an Chosaiv",
         "YE": "Éimin",
         "YT": "Mayotte",

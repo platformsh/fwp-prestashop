@@ -212,6 +212,8 @@ class FrameworkExtension extends Extension
                     'phpstorm' => 'phpstorm://open?file=%%f&line=%%l',
                 ];
                 $ide = $config['ide'];
+                // mark any env vars found in the ide setting as used
+                $container->resolveEnvPlaceholders($ide);
 
                 $container->setParameter('templating.helper.code.file_link_format', str_replace('%', '%%', ini_get('xdebug.file_link_format') ?: get_cfg_var('xdebug.file_link_format')) ?: (isset($links[$ide]) ? $links[$ide] : $ide));
             }
@@ -231,6 +233,10 @@ class FrameworkExtension extends Extension
         }
 
         if ($this->isConfigEnabled($container, $config['session'])) {
+            if (!\extension_loaded('session')) {
+                throw new LogicException('Session support cannot be enabled as the session extension is not installed. See https://php.net/session.installation for instructions.');
+            }
+
             $this->sessionConfigEnabled = true;
             $this->registerSessionConfiguration($config['session'], $container, $loader);
         }
@@ -602,7 +608,7 @@ class FrameworkExtension extends Extension
         $registryDefinition = $container->getDefinition('workflow.registry');
 
         foreach ($config['workflows'] as $name => $workflow) {
-            if (!array_key_exists('type', $workflow)) {
+            if (!\array_key_exists('type', $workflow)) {
                 $workflow['type'] = 'workflow';
                 @trigger_error(sprintf('The "type" option of the "framework.workflows.%s" configuration entry must be defined since Symfony 3.3. The default value will be "state_machine" in Symfony 4.0.', $name), E_USER_DEPRECATED);
             }
@@ -1037,8 +1043,6 @@ class FrameworkExtension extends Extension
         $container->getDefinition('assets.url_package')->setPrivate(true);
         $container->getDefinition('assets.static_version_strategy')->setPrivate(true);
 
-        $defaultVersion = null;
-
         if ($config['version_strategy']) {
             $defaultVersion = new Reference($config['version_strategy']);
         } else {
@@ -1052,7 +1056,7 @@ class FrameworkExtension extends Extension
         foreach ($config['packages'] as $name => $package) {
             if (null !== $package['version_strategy']) {
                 $version = new Reference($package['version_strategy']);
-            } elseif (!array_key_exists('version', $package) && null === $package['json_manifest_path']) {
+            } elseif (!\array_key_exists('version', $package) && null === $package['json_manifest_path']) {
                 // if neither version nor json_manifest_path are specified, use the default
                 $version = $defaultVersion;
             } else {
@@ -1273,7 +1277,7 @@ class FrameworkExtension extends Extension
         $definition = $container->findDefinition('validator.email');
         $definition->replaceArgument(0, $config['strict_email']);
 
-        if (array_key_exists('enable_annotations', $config) && $config['enable_annotations']) {
+        if (\array_key_exists('enable_annotations', $config) && $config['enable_annotations']) {
             if (!$this->annotationsConfigEnabled) {
                 throw new \LogicException('"enable_annotations" on the validator cannot be set as Annotations support is disabled.');
             }
@@ -1281,7 +1285,7 @@ class FrameworkExtension extends Extension
             $validatorBuilder->addMethodCall('enableAnnotationMapping', [new Reference('annotation_reader')]);
         }
 
-        if (array_key_exists('static_method', $config) && $config['static_method']) {
+        if (\array_key_exists('static_method', $config) && $config['static_method']) {
             foreach ($config['static_method'] as $methodName) {
                 $validatorBuilder->addMethodCall('addMethodMapping', [$methodName]);
             }
@@ -1704,7 +1708,7 @@ class FrameworkExtension extends Extension
 
             if (!$container->getParameter('kernel.debug')) {
                 $propertyAccessDefinition->setFactory([PropertyAccessor::class, 'createCache']);
-                $propertyAccessDefinition->setArguments([null, null, $version, new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)]);
+                $propertyAccessDefinition->setArguments([null, 0, $version, new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)]);
                 $propertyAccessDefinition->addTag('cache.pool', ['clearer' => 'cache.system_clearer']);
                 $propertyAccessDefinition->addTag('monolog.logger', ['channel' => 'cache']);
             } else {
@@ -1737,9 +1741,7 @@ class FrameworkExtension extends Extension
     }
 
     /**
-     * Returns the base path for the XSD files.
-     *
-     * @return string The XSD base path
+     * {@inheritdoc}
      */
     public function getXsdValidationBasePath()
     {

@@ -12,6 +12,7 @@
 namespace Symfony\Bridge\Twig\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -100,6 +101,7 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
+        $decorated = $io->isDecorated();
 
         // BC to be removed in 4.0
         if (__CLASS__ !== \get_class($this)) {
@@ -114,29 +116,35 @@ EOF
             throw new \RuntimeException('The Twig environment needs to be set.');
         }
 
+        $filter = $input->getArgument('filter');
         $types = ['functions', 'filters', 'tests', 'globals'];
 
         if ('json' === $input->getOption('format')) {
             $data = [];
             foreach ($types as $type) {
                 foreach ($this->twig->{'get'.ucfirst($type)}() as $name => $entity) {
-                    $data[$type][$name] = $this->getMetadata($type, $entity);
+                    if (!$filter || false !== strpos($name, $filter)) {
+                        $data[$type][$name] = $this->getMetadata($type, $entity);
+                    }
                 }
             }
-            $data['tests'] = array_keys($data['tests']);
+
+            if (isset($data['tests'])) {
+                $data['tests'] = array_keys($data['tests']);
+            }
+
             $data['loader_paths'] = $this->getLoaderPaths();
-            $io->writeln(json_encode($data));
+            $data = json_encode($data, JSON_PRETTY_PRINT);
+            $io->writeln($decorated ? OutputFormatter::escape($data) : $data);
 
             return 0;
         }
-
-        $filter = $input->getArgument('filter');
 
         foreach ($types as $index => $type) {
             $items = [];
             foreach ($this->twig->{'get'.ucfirst($type)}() as $name => $entity) {
                 if (!$filter || false !== strpos($name, $filter)) {
-                    $items[$name] = $name.$this->getPrettyMetadata($type, $entity);
+                    $items[$name] = $name.$this->getPrettyMetadata($type, $entity, $decorated);
                 }
             }
 
@@ -212,16 +220,16 @@ EOF
             return $entity;
         }
         if ('tests' === $type) {
-            return;
+            return null;
         }
         if ('functions' === $type || 'filters' === $type) {
             $cb = $entity->getCallable();
             if (null === $cb) {
-                return;
+                return null;
             }
             if (\is_array($cb)) {
                 if (!method_exists($cb[0], $cb[1])) {
-                    return;
+                    return null;
                 }
                 $refl = new \ReflectionMethod($cb[0], $cb[1]);
             } elseif (\is_object($cb) && method_exists($cb, '__invoke')) {
@@ -260,9 +268,11 @@ EOF
 
             return $args;
         }
+
+        return null;
     }
 
-    private function getPrettyMetadata($type, $entity)
+    private function getPrettyMetadata($type, $entity, $decorated)
     {
         if ('tests' === $type) {
             return '';
@@ -274,7 +284,7 @@ EOF
                 return '(unknown?)';
             }
         } catch (\UnexpectedValueException $e) {
-            return ' <error>'.$e->getMessage().'</error>';
+            return sprintf(' <error>%s</error>', $decorated ? OutputFormatter::escape($e->getMessage()) : $e->getMessage());
         }
 
         if ('globals' === $type) {
@@ -282,7 +292,9 @@ EOF
                 return ' = object('.\get_class($meta).')';
             }
 
-            return ' = '.substr(@json_encode($meta), 0, 50);
+            $description = substr(@json_encode($meta), 0, 50);
+
+            return sprintf(' = %s', $decorated ? OutputFormatter::escape($description) : $description);
         }
 
         if ('functions' === $type) {
@@ -292,5 +304,7 @@ EOF
         if ('filters' === $type) {
             return $meta ? '('.implode(', ', $meta).')' : '';
         }
+
+        return null;
     }
 }

@@ -127,8 +127,6 @@ abstract class Descriptor implements DescriptorInterface
      * * name: name of described service
      *
      * @param Definition|Alias|object $service
-     * @param array                   $options
-     * @param ContainerBuilder|null   $builder
      */
     abstract protected function describeContainerService($service, array $options = [], ContainerBuilder $builder = null);
 
@@ -166,8 +164,7 @@ abstract class Descriptor implements DescriptorInterface
     /**
      * Describes a callable.
      *
-     * @param callable $callable
-     * @param array    $options
+     * @param mixed $callable
      */
     abstract protected function describeCallable($callable, array $options = []);
 
@@ -214,8 +211,7 @@ abstract class Descriptor implements DescriptorInterface
     }
 
     /**
-     * @param ContainerBuilder $builder
-     * @param string           $serviceId
+     * @param string $serviceId
      *
      * @return mixed
      */
@@ -225,7 +221,7 @@ abstract class Descriptor implements DescriptorInterface
             return $builder->getDefinition($serviceId);
         }
 
-        // Some service IDs don't have a Definition, they're simply an Alias
+        // Some service IDs don't have a Definition, they're aliases
         if ($builder->hasAlias($serviceId)) {
             return $builder->getAlias($serviceId);
         }
@@ -235,8 +231,7 @@ abstract class Descriptor implements DescriptorInterface
     }
 
     /**
-     * @param ContainerBuilder $builder
-     * @param bool             $showPrivate
+     * @param bool $showPrivate
      *
      * @return array
      */

@@ -13,7 +13,6 @@ namespace Symfony\Component\Intl\Tests\Data\Provider;
 
 use Symfony\Component\Intl\Data\Provider\CurrencyDataProvider;
 use Symfony\Component\Intl\Intl;
-use Symfony\Component\Intl\Locale;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -523,8 +522,8 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
         'WST' => 882,
         'YER' => 886,
         'YUN' => 890,
+        'YUD' => 890,
         'YUM' => 891,
-        'YUD' => 891,
         'CSD' => 891,
         'ZMK' => 894,
         'TWD' => 901,
@@ -590,6 +589,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
      * @var CurrencyDataProvider
      */
     protected $dataProvider;
+    private $defaultLocale;
 
     protected function setUp()
     {
@@ -599,6 +599,15 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
             $this->getDataDirectory().'/'.Intl::CURRENCY_DIR,
             $this->createEntryReader()
         );
+
+        $this->defaultLocale = \Locale::getDefault();
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        \Locale::setDefault($this->defaultLocale);
     }
 
     abstract protected function getDataDirectory();
@@ -631,7 +640,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 
     public function testGetNamesDefaultLocale()
     {
-        Locale::setDefault('de_AT');
+        \Locale::setDefault('de_AT');
 
         $this->assertSame(
             $this->dataProvider->getNames('de_AT'),
@@ -670,7 +679,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 
     public function testGetNameDefaultLocale()
     {
-        Locale::setDefault('de_AT');
+        \Locale::setDefault('de_AT');
 
         $expected = $this->dataProvider->getNames('de_AT');
         $actual = [];
@@ -707,7 +716,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
      */
     public function testGetFractionDigits($currency)
     {
-        $this->assertInternalType('numeric', $this->dataProvider->getFractionDigits($currency));
+        $this->assertIsNumeric($this->dataProvider->getFractionDigits($currency));
     }
 
     /**
@@ -715,7 +724,7 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
      */
     public function testGetRoundingIncrement($currency)
     {
-        $this->assertInternalType('numeric', $this->dataProvider->getRoundingIncrement($currency));
+        $this->assertIsNumeric($this->dataProvider->getRoundingIncrement($currency));
     }
 
     public function provideCurrenciesWithNumericEquivalent()
@@ -744,10 +753,10 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 
     /**
      * @dataProvider provideCurrenciesWithoutNumericEquivalent
-     * @expectedException \Symfony\Component\Intl\Exception\MissingResourceException
      */
     public function testGetNumericCodeFailsIfNoNumericEquivalent($currency)
     {
+        $this->expectException('Symfony\Component\Intl\Exception\MissingResourceException');
         $this->dataProvider->getNumericCode($currency);
     }
 
@@ -789,10 +798,10 @@ abstract class AbstractCurrencyDataProviderTest extends AbstractDataProviderTest
 
     /**
      * @dataProvider provideInvalidNumericCodes
-     * @expectedException \Symfony\Component\Intl\Exception\MissingResourceException
      */
     public function testForNumericCodeFailsIfInvalidNumericCode($currency)
     {
+        $this->expectException('Symfony\Component\Intl\Exception\MissingResourceException');
         $this->dataProvider->forNumericCode($currency);
     }
 

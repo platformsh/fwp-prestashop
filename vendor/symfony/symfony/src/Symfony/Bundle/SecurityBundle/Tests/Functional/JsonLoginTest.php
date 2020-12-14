@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class JsonLoginTest extends WebTestCase
+class JsonLoginTest extends AbstractWebTestCase
 {
     public function testDefaultJsonLoginSuccess()
     {
@@ -70,6 +70,6 @@ class JsonLoginTest extends WebTestCase
 
         $this->assertSame(400, $response->getStatusCode());
         $this->assertSame('application/json', $response->headers->get('Content-Type'));
-        $this->assertArraySubset(['error' => ['code' => 400, 'message' => 'Bad Request']], json_decode($response->getContent(), true));
+        $this->assertSame(['error' => ['code' => 400, 'message' => 'Bad Request']], json_decode($response->getContent(), true));
     }
 }

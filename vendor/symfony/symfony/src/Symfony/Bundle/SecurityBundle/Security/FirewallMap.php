@@ -107,13 +107,11 @@ class _FirewallMap
 {
     private $container;
     private $map;
-    private $contexts;
 
     public function __construct(ContainerInterface $container, $map)
     {
         $this->container = $container;
         $this->map = $map;
-        $this->contexts = new \SplObjectStorage();
     }
 
     public function getListeners(Request $request)
@@ -135,14 +133,14 @@ class _FirewallMap
         $context = $this->getFirewallContext($request);
 
         if (null === $context) {
-            return;
+            return null;
         }
 
         return $context->getConfig();
     }
 
     /**
-     * @return FirewallContext
+     * @return FirewallContext|null
      */
     private function getFirewallContext(Request $request)
     {
@@ -164,5 +162,7 @@ class _FirewallMap
                 return $this->container->get($contextId);
             }
         }
+
+        return null;
     }
 }

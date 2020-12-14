@@ -82,7 +82,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
         try {
             $reflectionClass = new \ReflectionClass($class);
         } catch (\ReflectionException $e) {
-            return;
+            return null;
         }
 
         $reflectionProperties = $reflectionClass->getProperties();
@@ -103,8 +103,8 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
             if (!$propertyName || isset($properties[$propertyName])) {
                 continue;
             }
-            if (!$reflectionClass->hasProperty($propertyName) && !preg_match('/^[A-Z]{2,}/', $propertyName)) {
-                $propertyName = lcfirst($propertyName);
+            if ($reflectionClass->hasProperty($lowerCasedPropertyName = lcfirst($propertyName)) || (!$reflectionClass->hasProperty($propertyName) && !preg_match('/^[A-Z]{2,}/', $propertyName))) {
+                $propertyName = $lowerCasedPropertyName;
             }
             $properties[$propertyName] = $propertyName;
         }
@@ -124,6 +124,8 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
         if ($fromAccessor = $this->extractFromAccessor($class, $property)) {
             return $fromAccessor;
         }
+
+        return null;
     }
 
     /**
@@ -166,7 +168,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
     {
         list($reflectionMethod, $prefix) = $this->getMutatorMethod($class, $property);
         if (null === $reflectionMethod) {
-            return;
+            return null;
         }
 
         $reflectionParameters = $reflectionMethod->getParameters();
@@ -174,13 +176,13 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
 
         if ($this->supportsParameterType) {
             if (!$reflectionType = $reflectionParameter->getType()) {
-                return;
+                return null;
             }
             $type = $this->extractFromReflectionType($reflectionType, $reflectionMethod);
 
             // HHVM reports variadics with "array" but not builtin type hints
             if (!$reflectionType->isBuiltin() && Type::BUILTIN_TYPE_ARRAY === $type->getBuiltinType()) {
-                return;
+                return null;
             }
         } elseif (preg_match('/^(?:[^ ]++ ){4}([a-zA-Z_\x7F-\xFF][^ ]++)/', $reflectionParameter, $info)) {
             if (Type::BUILTIN_TYPE_ARRAY === $info[1]) {
@@ -191,7 +193,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
                 $type = new Type(Type::BUILTIN_TYPE_OBJECT, $reflectionParameter->allowsNull(), $this->resolveTypeName($info[1], $reflectionMethod));
             }
         } else {
-            return;
+            return null;
         }
 
         if (\in_array($prefix, $this->arrayMutatorPrefixes)) {
@@ -213,16 +215,14 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
     {
         list($reflectionMethod, $prefix) = $this->getAccessorMethod($class, $property);
         if (null === $reflectionMethod) {
-            return;
+            return null;
         }
 
         if ($this->supportsParameterType && $reflectionType = $reflectionMethod->getReturnType()) {
             return [$this->extractFromReflectionType($reflectionType, $reflectionMethod)];
         }
 
-        if (\in_array($prefix, ['is', 'can'])) {
-            return [new Type(Type::BUILTIN_TYPE_BOOL)];
-        }
+        return \in_array($prefix, ['is', 'can']) ? [new Type(Type::BUILTIN_TYPE_BOOL)] : null;
     }
 
     /**
@@ -310,6 +310,8 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
                 // Return null if the property doesn't exist
             }
         }
+
+        return null;
     }
 
     /**
@@ -321,7 +323,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
      * @param string $class
      * @param string $property
      *
-     * @return array
+     * @return array|null
      */
     private function getMutatorMethod($class, $property)
     {
@@ -350,6 +352,8 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
                 }
             }
         }
+
+        return null;
     }
 
     /**
@@ -358,7 +362,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
      * @param string                $methodName
      * @param \ReflectionProperty[] $reflectionProperties
      *
-     * @return string
+     * @return string|null
      */
     private function getPropertyName($methodName, array $reflectionProperties)
     {
@@ -379,5 +383,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
 
             return $matches[2];
         }
+
+        return null;
     }
 }

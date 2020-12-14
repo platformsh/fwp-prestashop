@@ -13,9 +13,12 @@ namespace Symfony\Component\Form\Tests\Extension\Core\DataTransformer;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToRfc3339Transformer;
+use Symfony\Component\Form\Tests\Extension\Core\DataTransformer\Traits\DateTimeEqualsTrait;
 
 class DateTimeToRfc3339TransformerTest extends TestCase
 {
+    use DateTimeEqualsTrait;
+
     protected $dateTime;
     protected $dateTimeWithoutSeconds;
 
@@ -31,16 +34,6 @@ class DateTimeToRfc3339TransformerTest extends TestCase
     {
         $this->dateTime = null;
         $this->dateTimeWithoutSeconds = null;
-    }
-
-    public static function assertEquals($expected, $actual, $message = '', $delta = 0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)
-    {
-        if ($expected instanceof \DateTime && $actual instanceof \DateTime) {
-            $expected = $expected->format('c');
-            $actual = $actual->format('c');
-        }
-
-        parent::assertEquals($expected, $actual, $message, $delta, $maxDepth, $canonicalize, $ignoreCase);
     }
 
     public function allProvider()
@@ -91,11 +84,9 @@ class DateTimeToRfc3339TransformerTest extends TestCase
         $this->assertSame($to, $transformer->transform(null !== $from ? new \DateTimeImmutable($from) : null));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testTransformRequiresValidDateTime()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $transformer = new DateTimeToRfc3339Transformer();
         $transformer->transform('2010-01-01');
     }
@@ -108,26 +99,22 @@ class DateTimeToRfc3339TransformerTest extends TestCase
         $transformer = new DateTimeToRfc3339Transformer($toTz, $fromTz);
 
         if (null !== $to) {
-            $this->assertEquals(new \DateTime($to), $transformer->reverseTransform($from));
+            $this->assertDateTimeEquals(new \DateTime($to), $transformer->reverseTransform($from));
         } else {
             $this->assertNull($transformer->reverseTransform($from));
         }
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testReverseTransformRequiresString()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $transformer = new DateTimeToRfc3339Transformer();
         $transformer->reverseTransform(12345);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
-     */
     public function testReverseTransformWithNonExistingDate()
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $transformer = new DateTimeToRfc3339Transformer('UTC', 'UTC');
 
         $transformer->reverseTransform('2010-04-31T04:05Z');
@@ -135,10 +122,10 @@ class DateTimeToRfc3339TransformerTest extends TestCase
 
     /**
      * @dataProvider invalidDateStringProvider
-     * @expectedException \Symfony\Component\Form\Exception\TransformationFailedException
      */
     public function testReverseTransformExpectsValidDateString($date)
     {
+        $this->expectException('Symfony\Component\Form\Exception\TransformationFailedException');
         $transformer = new DateTimeToRfc3339Transformer('UTC', 'UTC');
 
         $transformer->reverseTransform($date);

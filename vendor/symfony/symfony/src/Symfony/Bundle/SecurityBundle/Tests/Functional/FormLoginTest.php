@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\SecurityBundle\Tests\Functional;
 
-class FormLoginTest extends WebTestCase
+class FormLoginTest extends AbstractWebTestCase
 {
     /**
      * @dataProvider getConfigs
@@ -28,8 +28,8 @@ class FormLoginTest extends WebTestCase
         $this->assertRedirect($client->getResponse(), '/profile');
 
         $text = $client->followRedirect()->text();
-        $this->assertContains('Hello johannes!', $text);
-        $this->assertContains('You\'re browsing to path "/profile".', $text);
+        $this->assertStringContainsString('Hello johannes!', $text);
+        $this->assertStringContainsString('You\'re browsing to path "/profile".', $text);
     }
 
     /**
@@ -49,8 +49,8 @@ class FormLoginTest extends WebTestCase
         $crawler = $client->followRedirect();
         $text = $crawler->text();
 
-        $this->assertContains('Hello johannes!', $text);
-        $this->assertContains('You\'re browsing to path "/profile".', $text);
+        $this->assertStringContainsString('Hello johannes!', $text);
+        $this->assertStringContainsString('You\'re browsing to path "/profile".', $text);
 
         $logoutLinks = $crawler->selectLink('Log out')->links();
         $this->assertCount(6, $logoutLinks);
@@ -81,8 +81,8 @@ class FormLoginTest extends WebTestCase
         $this->assertRedirect($client->getResponse(), '/foo');
 
         $text = $client->followRedirect()->text();
-        $this->assertContains('Hello johannes!', $text);
-        $this->assertContains('You\'re browsing to path "/foo".', $text);
+        $this->assertStringContainsString('Hello johannes!', $text);
+        $this->assertStringContainsString('You\'re browsing to path "/foo".', $text);
     }
 
     /**
@@ -102,8 +102,8 @@ class FormLoginTest extends WebTestCase
         $this->assertRedirect($client->getResponse(), '/protected_resource');
 
         $text = $client->followRedirect()->text();
-        $this->assertContains('Hello johannes!', $text);
-        $this->assertContains('You\'re browsing to path "/protected_resource".', $text);
+        $this->assertStringContainsString('Hello johannes!', $text);
+        $this->assertStringContainsString('You\'re browsing to path "/protected_resource".', $text);
     }
 
     public function getConfigs()

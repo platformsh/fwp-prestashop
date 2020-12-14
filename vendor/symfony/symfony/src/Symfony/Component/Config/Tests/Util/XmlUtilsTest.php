@@ -24,31 +24,31 @@ class XmlUtilsTest extends TestCase
             XmlUtils::loadFile($fixtures.'invalid.xml');
             $this->fail();
         } catch (\InvalidArgumentException $e) {
-            $this->assertContains('ERROR 77', $e->getMessage());
+            $this->assertStringContainsString('ERROR 77', $e->getMessage());
         }
 
         try {
             XmlUtils::loadFile($fixtures.'document_type.xml');
             $this->fail();
         } catch (\InvalidArgumentException $e) {
-            $this->assertContains('Document types are not allowed', $e->getMessage());
+            $this->assertStringContainsString('Document types are not allowed', $e->getMessage());
         }
 
         try {
             XmlUtils::loadFile($fixtures.'invalid_schema.xml', $fixtures.'schema.xsd');
             $this->fail();
         } catch (\InvalidArgumentException $e) {
-            $this->assertContains('ERROR 1845', $e->getMessage());
+            $this->assertStringContainsString('ERROR 1845', $e->getMessage());
         }
 
         try {
             XmlUtils::loadFile($fixtures.'invalid_schema.xml', 'invalid_callback_or_file');
             $this->fail();
         } catch (\InvalidArgumentException $e) {
-            $this->assertContains('XSD file or callable', $e->getMessage());
+            $this->assertStringContainsString('XSD file or callable', $e->getMessage());
         }
 
-        $mock = $this->getMockBuilder(__NAMESPACE__.'\Validator')->getMock();
+        $mock = $this->getMockBuilder(Validator::class)->getMock();
         $mock->expects($this->exactly(2))->method('validate')->will($this->onConsecutiveCalls(false, true));
 
         try {
@@ -62,15 +62,13 @@ class XmlUtilsTest extends TestCase
         $this->assertSame([], libxml_get_errors());
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Util\Exception\InvalidXmlException
-     * @expectedExceptionMessage The XML is not valid
-     */
     public function testParseWithInvalidValidatorCallable()
     {
+        $this->expectException('Symfony\Component\Config\Util\Exception\InvalidXmlException');
+        $this->expectExceptionMessage('The XML is not valid');
         $fixtures = __DIR__.'/../Fixtures/Util/';
 
-        $mock = $this->getMockBuilder(__NAMESPACE__.'\Validator')->getMock();
+        $mock = $this->getMockBuilder(Validator::class)->getMock();
         $mock->expects($this->once())->method('validate')->willReturn(false);
 
         XmlUtils::parse(file_get_contents($fixtures.'valid.xml'), [$mock, 'validate']);
@@ -166,12 +164,8 @@ class XmlUtilsTest extends TestCase
     {
         $file = __DIR__.'/../Fixtures/foo.xml';
 
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('InvalidArgumentException');
-            $this->expectExceptionMessage(sprintf('File %s does not contain valid XML, it is empty.', $file));
-        } else {
-            $this->setExpectedException('InvalidArgumentException', sprintf('File %s does not contain valid XML, it is empty.', $file));
-        }
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage(sprintf('File %s does not contain valid XML, it is empty.', $file));
 
         XmlUtils::loadFile($file);
     }

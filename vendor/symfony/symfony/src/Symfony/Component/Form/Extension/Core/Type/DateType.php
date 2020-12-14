@@ -107,13 +107,13 @@ class DateType extends AbstractType
                 \Locale::getDefault(),
                 $dateFormat,
                 $timeFormat,
-                // see https://bugs.php.net/bug.php?id=66323
+                // see https://bugs.php.net/66323
                 class_exists('IntlTimeZone', false) ? \IntlTimeZone::createDefault() : null,
                 $calendar,
                 $pattern
             );
 
-            // new \IntlDateFormatter may return null instead of false in case of failure, see https://bugs.php.net/bug.php?id=66323
+            // new \IntlDateFormatter may return null instead of false in case of failure, see https://bugs.php.net/66323
             if (!$formatter) {
                 throw new InvalidOptionsException(intl_get_error_message(), intl_get_error_code());
             }
@@ -256,7 +256,7 @@ class DateType extends AbstractType
         };
 
         $resolver->setDefaults([
-            'years' => range(date('Y') - 5, date('Y') + 5),
+            'years' => range((int) date('Y') - 5, (int) date('Y') + 5),
             'months' => range(1, 12),
             'days' => range(1, 31),
             'widget' => 'choice',

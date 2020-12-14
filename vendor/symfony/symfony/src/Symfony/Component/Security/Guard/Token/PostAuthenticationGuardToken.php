@@ -47,7 +47,7 @@ class PostAuthenticationGuardToken extends AbstractToken implements GuardTokenIn
 
         // this token is meant to be used after authentication success, so it is always authenticated
         // you could set it as non authenticated later if you need to
-        parent::setAuthenticated(true);
+        $this->setAuthenticated(true);
     }
 
     /**
@@ -78,7 +78,7 @@ class PostAuthenticationGuardToken extends AbstractToken implements GuardTokenIn
     {
         $serialized = [$this->providerKey, parent::serialize(true)];
 
-        return $this->doSerialize($serialized, \func_num_args() ? \func_get_arg(0) : null);
+        return $this->doSerialize($serialized, \func_num_args() ? func_get_arg(0) : null);
     }
 
     /**

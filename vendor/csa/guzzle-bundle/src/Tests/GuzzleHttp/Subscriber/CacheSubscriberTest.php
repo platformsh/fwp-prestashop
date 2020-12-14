@@ -4,6 +4,7 @@
  * This file is part of the CsaGuzzleBundle package
  *
  * (c) Charles Sarrazin <charles@sarraz.in>
+ * (c) PrestaShop and Contributors
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code
@@ -16,7 +17,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Subscriber\Mock;
 
-class CacheSubscriberTest extends \PHPUnit_Framework_TestCase
+class CacheSubscriberTest extends \PHPUnit\Framework\TestCase
 {
     public function testFetch()
     {
@@ -24,7 +25,7 @@ class CacheSubscriberTest extends \PHPUnit_Framework_TestCase
         $mocks = array_fill(0, 2, $response);
 
         $mockSubscriber = new Mock($mocks);
-        $adapter = $this->getMock('Csa\Bundle\GuzzleBundle\GuzzleHttp\Cache\StorageAdapterInterface');
+        $adapter = $this->createMock('Csa\Bundle\GuzzleBundle\GuzzleHttp\Cache\StorageAdapterInterface');
         $adapter
             ->expects($this->at(0))
             ->method('fetch')

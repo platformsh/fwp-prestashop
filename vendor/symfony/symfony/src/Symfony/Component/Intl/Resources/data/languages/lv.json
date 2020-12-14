@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.44.91",
+    "Version": "36",
     "Names": {
         "aa": "afāru",
         "ab": "abhāzu",
@@ -71,6 +71,7 @@
         "car": "karību",
         "cay": "kajuga",
         "cch": "atsamu",
+        "ccp": "čakmu",
         "ce": "čečenu",
         "ceb": "sebuāņu",
         "cgg": "kiga",
@@ -292,7 +293,7 @@
         "mg": "malagasu",
         "mga": "vidusīru",
         "mgh": "makua",
-        "mgo": "mgo",
+        "mgo": "metu",
         "mh": "māršaliešu",
         "mi": "maoru",
         "mic": "mikmaku",

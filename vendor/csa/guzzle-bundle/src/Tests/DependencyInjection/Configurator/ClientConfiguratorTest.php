@@ -4,6 +4,7 @@
  * This file is part of the CsaGuzzleBundle package
  *
  * (c) Charles Sarrazin <charles@sarraz.in>
+ * (c) PrestaShop and Contributors
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code
@@ -14,7 +15,7 @@ namespace Csa\Bundle\GuzzleBundle\Tests\DependencyInjection\Configurator;
 use Csa\Bundle\GuzzleBundle\DependencyInjection\Configurator\ClientConfigurator;
 use GuzzleHttp\ClientInterface;
 
-class ClientConfiguratorTest extends \PHPUnit_Framework_TestCase
+class ClientConfiguratorTest extends \PHPUnit\Framework\TestCase
 {
     public function testSubscribersAttachedToEmitter()
     {
@@ -49,16 +50,16 @@ class ClientConfiguratorTest extends \PHPUnit_Framework_TestCase
 
     private function getMockClient()
     {
-        return $this->getMock('GuzzleHttp\ClientInterface');
+        return $this->createMock('GuzzleHttp\ClientInterface');
     }
 
     private function getMockEmitter()
     {
-        return $this->getMock('GuzzleHttp\Event\EmitterInterface');
+        return $this->createMock('GuzzleHttp\Event\EmitterInterface');
     }
 
     private function getMockSubscriber()
     {
-        return $this->getMock('GuzzleHttp\Event\SubscriberInterface');
+        return $this->createMock('GuzzleHttp\Event\SubscriberInterface');
     }
 }

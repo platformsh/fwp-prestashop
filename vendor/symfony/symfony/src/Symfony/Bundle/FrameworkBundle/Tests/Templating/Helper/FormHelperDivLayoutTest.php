@@ -27,6 +27,8 @@ class FormHelperDivLayoutTest extends AbstractDivLayoutTest
      */
     protected $engine;
 
+    protected static $supportedFeatureSetVersion = 304;
+
     protected function getExtensions()
     {
         // should be moved to the Form component once absolute file paths are supported
@@ -50,11 +52,12 @@ class FormHelperDivLayoutTest extends AbstractDivLayoutTest
         ]);
     }
 
-    protected function tearDown()
+    /**
+     * @after
+     */
+    public function doTearDown()
     {
         $this->engine = null;
-
-        parent::tearDown();
     }
 
     public function testStartTagHasNoActionAttributeWhenActionIsEmpty()

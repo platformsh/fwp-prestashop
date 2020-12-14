@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,18 +17,19 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Core\Grid\Query;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use PrestaShop\PrestaShop\Core\Grid\Query\Filter\DoctrineFilterApplicatorInterface;
+use PrestaShop\PrestaShop\Core\Grid\Query\Filter\SqlFilters;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 
 /**
@@ -41,19 +43,36 @@ final class WebserviceKeyQueryBuilder extends AbstractDoctrineQueryBuilder
     private $searchCriteriaApplicator;
 
     /**
+     * @var array
+     */
+    private $contextShopIds;
+
+    /**
+     * @var DoctrineFilterApplicatorInterface
+     */
+    private $doctrineFilterApplicator;
+
+    /**
      * WebserviceKeyQueryBuilder constructor.
      *
      * @param Connection $connection
      * @param $dbPrefix
      * @param DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator
+     * @param array $contextShopIds
+     * @param DoctrineFilterApplicatorInterface $doctrineFilterApplicator
      */
     public function __construct(
         Connection $connection,
         $dbPrefix,
-        DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator
+        DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator,
+        array $contextShopIds,
+        DoctrineFilterApplicatorInterface $doctrineFilterApplicator
     ) {
         parent::__construct($connection, $dbPrefix);
         $this->searchCriteriaApplicator = $searchCriteriaApplicator;
+        $this->contextShopIds = $contextShopIds;
+        $this->connection = $connection;
+        $this->doctrineFilterApplicator = $doctrineFilterApplicator;
     }
 
     /**
@@ -67,7 +86,7 @@ final class WebserviceKeyQueryBuilder extends AbstractDoctrineQueryBuilder
                 $this->getModifiedOrderBy($searchCriteria->getOrderBy()),
                 $searchCriteria->getOrderWay()
             )
-        ;
+            ->groupBy('wa.`id_webservice_account`');
 
         $this->searchCriteriaApplicator->applyPagination($searchCriteria, $qb);
 
@@ -79,8 +98,8 @@ final class WebserviceKeyQueryBuilder extends AbstractDoctrineQueryBuilder
      */
     public function getCountQueryBuilder(SearchCriteriaInterface $searchCriteria)
     {
-        $qb = $this->getQueryBuilder($searchCriteria->getFilters());
-        $qb->select('COUNT(wa.`id_webservice_account`)');
+        $qb = $this->getQueryBuilder($searchCriteria->getFilters())
+            ->select('COUNT(DISTINCT wa.`id_webservice_account`)');
 
         return $qb;
     }
@@ -96,18 +115,24 @@ final class WebserviceKeyQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $qb = $this->connection
             ->createQueryBuilder()
-            ->from($this->dbPrefix . 'webservice_account', 'wa');
+            ->from($this->dbPrefix . 'webservice_account', 'wa')
+            ->innerJoin(
+                'wa',
+                $this->dbPrefix . 'webservice_account_shop',
+                'was',
+                'was.`id_webservice_account` = wa.`id_webservice_account`'
+            )
+            ->andWhere('was.`id_shop` IN (:shops)')
+            ->setParameter('shops', $this->contextShopIds, Connection::PARAM_INT_ARRAY)
+        ;
 
-        foreach ($filters as $filterName => $value) {
-            if ('active' === $filterName && is_numeric($value)) {
-                $qb->andWhere('wa.`active`=' . (int) $value);
+        $sqlFilters = (new SqlFilters())
+            ->addFilter('key', 'wa.key', SqlFilters::WHERE_LIKE)
+            ->addFilter('active', 'wa.active', SqlFilters::WHERE_STRICT)
+            ->addFilter('description', 'wa.description', SqlFilters::WHERE_LIKE)
+        ;
 
-                continue;
-            }
-
-            $qb->andWhere('wa.`' . $filterName . '` LIKE :' . $filterName);
-            $qb->setParameter($filterName, '%' . $value . '%');
-        }
+        $this->doctrineFilterApplicator->apply($qb, $sqlFilters, $filters);
 
         return $qb;
     }
@@ -121,6 +146,6 @@ final class WebserviceKeyQueryBuilder extends AbstractDoctrineQueryBuilder
      */
     private function getModifiedOrderBy($orderBy)
     {
-        return $orderBy === 'key' ? 'wa.`key`' : $orderBy;
+        return 'wa.`' . $orderBy . '`';
     }
 }

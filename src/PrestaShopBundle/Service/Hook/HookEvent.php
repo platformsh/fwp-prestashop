@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,19 +17,18 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShopBundle\Service\Hook;
 
 use AppKernel;
-use Symfony\Component\EventDispatcher\Event;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * HookEvent is used in HookDispatcher.
@@ -37,7 +37,7 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
  */
 class HookEvent extends Event
 {
-    private $hookParameters = array();
+    private $hookParameters = [];
 
     /**
      * Sets the Hook parameters.
@@ -64,10 +64,10 @@ class HookEvent extends Event
      */
     public function getHookParameters()
     {
-        $globalParameters = array('_ps_version' => AppKernel::VERSION);
+        $globalParameters = ['_ps_version' => AppKernel::VERSION];
 
         $sfContainer = SymfonyContainer::getInstance();
-        if (!is_null($sfContainer) && !is_null($sfContainer->get('request_stack')->getCurrentRequest())) {
+        if (null !== $sfContainer && null !== $sfContainer->get('request_stack')->getCurrentRequest()) {
             $request = $sfContainer->get('request_stack')->getCurrentRequest();
             $globalParameters['request'] = $request;
             $globalParameters['route'] = $request->get('_route');

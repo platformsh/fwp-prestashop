@@ -65,6 +65,7 @@ class XliffFileDumper extends BaseXliffFileDumper
             throw new \InvalidArgumentException('The file dumper needs a path option.');
         }
 
+        $fs = new Filesystem();
         // save a file for each domain
         foreach ($messages->getDomains() as $domain) {
             $domainPath = DomainHelper::getExportPath($domain);
@@ -74,7 +75,6 @@ class XliffFileDumper extends BaseXliffFileDumper
                 throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
             }
 
-            $fs = new Filesystem();
             $fs->dumpFile($fullpath, $this->formatCatalogue($messages, $domain, $options));
         }
     }
@@ -94,12 +94,25 @@ class XliffFileDumper extends BaseXliffFileDumper
         $xliffBuilder->setVersion('1.2');
 
         foreach ($messages->all($domain) as $source => $target) {
-          if (!empty($source)) {
-            $metadata = $messages->getMetadata($source, $domain);
-            $metadata['file'] = Configuration::getRelativePath($metadata['file'], (!empty($options['root_dir']) ? $options['root_dir'] : false) );
-            $xliffBuilder->addFile($metadata['file'], $defaultLocale, $messages->getLocale());
-            $xliffBuilder->addTransUnit($metadata['file'], $source, $target, $this->getNote($metadata));
-          }
+            if (!empty($source)) {
+                $metadata = $messages->getMetadata($source, $domain);
+
+                /**
+                 * Handle original file information from xliff file.
+                 * This is needed if at least part of the catalogue was read from xliff files
+                 */
+                if (is_array($metadata['file']) && !empty($metadata['file']['original'])) {
+                    $metadata['file'] = $metadata['file']['original'];
+                }
+
+                $metadata['file'] = Configuration::getRelativePath(
+                    $metadata['file'],
+                    !empty($options['root_dir']) ? realpath($options['root_dir']) : false
+                );
+
+                $xliffBuilder->addFile($metadata['file'], $defaultLocale, $messages->getLocale());
+                $xliffBuilder->addTransUnit($metadata['file'], $source, $target, $this->getNote($metadata));
+            }
         }
 
         return html_entity_decode($xliffBuilder->build()->saveXML());
@@ -112,21 +125,24 @@ class XliffFileDumper extends BaseXliffFileDumper
      */
     private function getNote($transMetadata)
     {
-        $context = 'Context:';
+        $notes = [];
 
         if (!empty($transMetadata['file'])) {
-            $context .= PHP_EOL.'File: '.$transMetadata['file'];
-
             if (isset($transMetadata['line'])) {
-                $context .= ':'.$transMetadata['line'];
+                $notes['line'] = 'Line: '.$transMetadata['line'];
             }
 
             if (isset($transMetadata['comment'])) {
-                $context .= PHP_EOL.' Comment: '.$transMetadata['comment'];
+                $notes['comment'] = 'Comment: '.$transMetadata['comment'];
             }
         }
 
-        return $context;
+        if (empty($notes) && isset($transMetadata['notes'][0]['content'])) {
+            // use notes loaded from xliff file
+            return $transMetadata['notes'][0]['content'];
+        }
+
+        return implode(PHP_EOL, $notes);
     }
 
     /**

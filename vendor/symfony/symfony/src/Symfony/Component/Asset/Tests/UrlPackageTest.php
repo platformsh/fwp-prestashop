@@ -88,26 +88,22 @@ class UrlPackageTest extends TestCase
         $this->assertEquals('https://cdn.com/bar/main.css', $package->getUrl('main.css'));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Asset\Exception\LogicException
-     */
     public function testNoBaseUrls()
     {
+        $this->expectException('Symfony\Component\Asset\Exception\LogicException');
         new UrlPackage([], new EmptyVersionStrategy());
     }
 
-    /**
-     * @expectedException \Symfony\Component\Asset\Exception\InvalidArgumentException
-     */
     public function testWrongBaseUrl()
     {
+        $this->expectException('Symfony\Component\Asset\Exception\InvalidArgumentException');
         new UrlPackage(['not-a-url'], new EmptyVersionStrategy());
     }
 
     private function getContext($secure)
     {
         $context = $this->getMockBuilder('Symfony\Component\Asset\Context\ContextInterface')->getMock();
-        $context->expects($this->any())->method('isSecure')->will($this->returnValue($secure));
+        $context->expects($this->any())->method('isSecure')->willReturn($secure);
 
         return $context;
     }

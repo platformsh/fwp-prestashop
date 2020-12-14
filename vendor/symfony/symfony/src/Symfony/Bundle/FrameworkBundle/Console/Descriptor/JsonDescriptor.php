@@ -142,7 +142,9 @@ class JsonDescriptor extends Descriptor
     protected function describeContainerAlias(Alias $alias, array $options = [], ContainerBuilder $builder = null)
     {
         if (!$builder) {
-            return $this->writeData($this->getContainerAliasData($alias), $options);
+            $this->writeData($this->getContainerAliasData($alias), $options);
+
+            return;
         }
 
         $this->writeData(
@@ -156,7 +158,7 @@ class JsonDescriptor extends Descriptor
      */
     protected function describeEventDispatcherListeners(EventDispatcherInterface $eventDispatcher, array $options = [])
     {
-        $this->writeData($this->getEventDispatcherListenersData($eventDispatcher, array_key_exists('event', $options) ? $options['event'] : null), $options);
+        $this->writeData($this->getEventDispatcherListenersData($eventDispatcher, \array_key_exists('event', $options) ? $options['event'] : null), $options);
     }
 
     /**
@@ -164,7 +166,7 @@ class JsonDescriptor extends Descriptor
      */
     protected function describeCallable($callable, array $options = [])
     {
-        $this->writeData($this->getCallableData($callable, $options), $options);
+        $this->writeData($this->getCallableData($callable), $options);
     }
 
     /**
@@ -179,12 +181,11 @@ class JsonDescriptor extends Descriptor
 
     /**
      * Writes data as json.
-     *
-     * @return array|string
      */
     private function writeData(array $data, array $options)
     {
         $flags = isset($options['json_encoding']) ? $options['json_encoding'] : 0;
+
         $this->write(json_encode($data, $flags | JSON_PRETTY_PRINT)."\n");
     }
 
@@ -208,8 +209,7 @@ class JsonDescriptor extends Descriptor
     }
 
     /**
-     * @param Definition $definition
-     * @param bool       $omitTags
+     * @param bool $omitTags
      *
      * @return array
      */
@@ -286,8 +286,7 @@ class JsonDescriptor extends Descriptor
     }
 
     /**
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param string|null              $event
+     * @param string|null $event
      *
      * @return array
      */
@@ -319,11 +318,10 @@ class JsonDescriptor extends Descriptor
 
     /**
      * @param callable $callable
-     * @param array    $options
      *
      * @return array
      */
-    private function getCallableData($callable, array $options = [])
+    private function getCallableData($callable)
     {
         $data = [];
 

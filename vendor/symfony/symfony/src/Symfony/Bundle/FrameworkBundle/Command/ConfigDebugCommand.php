@@ -104,7 +104,7 @@ EOF
         } catch (LogicException $e) {
             $errorIo->error($e->getMessage());
 
-            return;
+            return 1;
         }
 
         $io->title(sprintf('Current configuration for "%s.%s"', $extensionAlias, $path));
@@ -139,7 +139,7 @@ EOF
         $steps = explode('.', $path);
 
         foreach ($steps as $step) {
-            if (!array_key_exists($step, $config)) {
+            if (!\array_key_exists($step, $config)) {
                 throw new LogicException(sprintf('Unable to find configuration for "%s.%s"', $alias, $path));
             }
 

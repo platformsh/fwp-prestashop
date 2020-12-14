@@ -36,18 +36,18 @@ class ExpressionLanguageTest extends TestCase
         $cacheItemMock
             ->expects($this->exactly(2))
             ->method('get')
-            ->will($this->returnCallback(function () use (&$savedParsedExpression) {
+            ->willReturnCallback(function () use (&$savedParsedExpression) {
                 return $savedParsedExpression;
-            }))
+            })
         ;
 
         $cacheItemMock
             ->expects($this->exactly(1))
             ->method('set')
             ->with($this->isInstanceOf(ParsedExpression::class))
-            ->will($this->returnCallback(function ($parsedExpression) use (&$savedParsedExpression) {
+            ->willReturnCallback(function ($parsedExpression) use (&$savedParsedExpression) {
                 $savedParsedExpression = $parsedExpression;
-            }))
+            })
         ;
 
         $cacheMock
@@ -70,7 +70,6 @@ class ExpressionLanguageTest extends TestCase
     {
         $cacheMock = $this->getMockBuilder('Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface')->getMock();
 
-        $cacheItemMock = $this->getMockBuilder('Psr\Cache\CacheItemInterface')->getMock();
         $savedParsedExpression = null;
         $expressionLanguage = new ExpressionLanguage($cacheMock);
 
@@ -85,23 +84,21 @@ class ExpressionLanguageTest extends TestCase
             ->expects($this->exactly(1))
             ->method('save')
             ->with('1%20%2B%201%2F%2F', $this->isInstanceOf(ParsedExpression::class))
-            ->will($this->returnCallback(function ($key, $expression) use (&$savedParsedExpression) {
+            ->willReturnCallback(function ($key, $expression) use (&$savedParsedExpression) {
                 $savedParsedExpression = $expression;
-            }))
+            })
         ;
 
         $parsedExpression = $expressionLanguage->parse('1 + 1', []);
         $this->assertSame($savedParsedExpression, $parsedExpression);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Cache argument has to implement Psr\Cache\CacheItemPoolInterface.
-     */
     public function testWrongCacheImplementation()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Cache argument has to implement Psr\Cache\CacheItemPoolInterface.');
         $cacheMock = $this->getMockBuilder('Psr\Cache\CacheItemSpoolInterface')->getMock();
-        $expressionLanguage = new ExpressionLanguage($cacheMock);
+        new ExpressionLanguage($cacheMock);
     }
 
     public function testConstantFunction()
@@ -146,12 +143,10 @@ class ExpressionLanguageTest extends TestCase
         $this->assertSame($expected, $result);
     }
 
-    /**
-     * @expectedException \Symfony\Component\ExpressionLanguage\SyntaxError
-     * @expectedExceptionMessage Unexpected end of expression around position 6 for expression `node.`.
-     */
     public function testParseThrowsInsteadOfNotice()
     {
+        $this->expectException('Symfony\Component\ExpressionLanguage\SyntaxError');
+        $this->expectExceptionMessage('Unexpected end of expression around position 6 for expression `node.`.');
         $expressionLanguage = new ExpressionLanguage();
         $expressionLanguage->parse('node.', ['node']);
     }
@@ -201,7 +196,7 @@ class ExpressionLanguageTest extends TestCase
         $cacheMock = $this->getMockBuilder('Psr\Cache\CacheItemPoolInterface')->getMock();
         $cacheItemMock = $this->getMockBuilder('Psr\Cache\CacheItemInterface')->getMock();
         $expressionLanguage = new ExpressionLanguage($cacheMock);
-        $savedParsedExpressions = [];
+        $savedParsedExpression = null;
 
         $cacheMock
             ->expects($this->exactly(2))
@@ -213,18 +208,18 @@ class ExpressionLanguageTest extends TestCase
         $cacheItemMock
             ->expects($this->exactly(2))
             ->method('get')
-            ->will($this->returnCallback(function () use (&$savedParsedExpression) {
+            ->willReturnCallback(function () use (&$savedParsedExpression) {
                 return $savedParsedExpression;
-            }))
+            })
         ;
 
         $cacheItemMock
             ->expects($this->exactly(1))
             ->method('set')
             ->with($this->isInstanceOf(ParsedExpression::class))
-            ->will($this->returnCallback(function ($parsedExpression) use (&$savedParsedExpression) {
+            ->willReturnCallback(function ($parsedExpression) use (&$savedParsedExpression) {
                 $savedParsedExpression = $parsedExpression;
-            }))
+            })
         ;
 
         $cacheMock
@@ -240,10 +235,10 @@ class ExpressionLanguageTest extends TestCase
 
     /**
      * @dataProvider getRegisterCallbacks
-     * @expectedException \LogicException
      */
     public function testRegisterAfterParse($registerCallback)
     {
+        $this->expectException('LogicException');
         $el = new ExpressionLanguage();
         $el->parse('1 + 1', []);
         $registerCallback($el);
@@ -251,31 +246,29 @@ class ExpressionLanguageTest extends TestCase
 
     /**
      * @dataProvider getRegisterCallbacks
-     * @expectedException \LogicException
      */
     public function testRegisterAfterEval($registerCallback)
     {
+        $this->expectException('LogicException');
         $el = new ExpressionLanguage();
         $el->evaluate('1 + 1');
         $registerCallback($el);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessageRegExp  /Unable to call method "\w+" of object "\w+"./
-     */
     public function testCallBadCallable()
     {
+        $this->expectException('RuntimeException');
+        $this->expectExceptionMessageRegExp('/Unable to call method "\w+" of object "\w+"./');
         $el = new ExpressionLanguage();
         $el->evaluate('foo.myfunction()', ['foo' => new \stdClass()]);
     }
 
     /**
      * @dataProvider getRegisterCallbacks
-     * @expectedException \LogicException
      */
     public function testRegisterAfterCompile($registerCallback)
     {
+        $this->expectException('LogicException');
         $el = new ExpressionLanguage();
         $el->compile('1 + 1');
         $registerCallback($el);

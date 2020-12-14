@@ -289,7 +289,7 @@ class Parser
                     $allowOverwrite = true;
                     if (isset($values['value'][0]) && '*' === $values['value'][0]) {
                         $refName = substr(rtrim($values['value']), 1);
-                        if (!array_key_exists($refName, $this->refs)) {
+                        if (!\array_key_exists($refName, $this->refs)) {
                             if (false !== $pos = array_search($refName, $this->refsBeingParsed, true)) {
                                 throw new ParseException(sprintf('Circular reference [%s, %s] detected for reference "%s".', implode(', ', \array_slice($this->refsBeingParsed, $pos)), $refName, $refName), $this->currentLineNb + 1, $this->currentLine, $this->filename);
                             }
@@ -436,6 +436,9 @@ class Parser
                     $value = '';
 
                     foreach ($this->lines as $line) {
+                        if ('' !== ltrim($line) && '#' === ltrim($line)[0]) {
+                            continue;
+                        }
                         // If the indentation is not consistent at offset 0, it is to be considered as a ParseError
                         if (0 === $this->offset && !$deprecatedUsage && isset($line[0]) && ' ' === $line[0]) {
                             throw new ParseException('Unable to parse.', $this->getRealCurrentLineNb() + 1, $this->currentLine, $this->filename);
@@ -561,7 +564,7 @@ class Parser
         $oldLineIndentation = $this->getCurrentLineIndentation();
 
         if (!$this->moveToNextLine()) {
-            return;
+            return '';
         }
 
         if (null === $indentation) {
@@ -604,7 +607,7 @@ class Parser
         } else {
             $this->moveToPreviousLine();
 
-            return;
+            return '';
         }
 
         if ($inSequence && $oldLineIndentation === $newIndent && isset($data[0][0]) && '-' === $data[0][0]) {
@@ -612,7 +615,7 @@ class Parser
             // and therefore no nested list or mapping
             $this->moveToPreviousLine();
 
-            return;
+            return '';
         }
 
         $isItUnindentedCollection = $this->isStringUnIndentedCollectionItem();
@@ -698,7 +701,7 @@ class Parser
                 $value = substr($value, 1);
             }
 
-            if (!array_key_exists($value, $this->refs)) {
+            if (!\array_key_exists($value, $this->refs)) {
                 if (false !== $pos = array_search($value, $this->refsBeingParsed, true)) {
                     throw new ParseException(sprintf('Circular reference [%s, %s] detected for reference "%s".', implode(', ', \array_slice($this->refsBeingParsed, $pos)), $value, $value), $this->currentLineNb + 1, $this->currentLine, $this->filename);
                 }
@@ -712,7 +715,7 @@ class Parser
         if (self::preg_match('/^(?:'.self::TAG_PATTERN.' +)?'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $value, $matches)) {
             $modifiers = isset($matches['modifiers']) ? $matches['modifiers'] : '';
 
-            $data = $this->parseBlockScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), (int) abs($modifiers));
+            $data = $this->parseBlockScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), (int) abs((int) $modifiers));
 
             if ('' !== $matches['tag']) {
                 if ('!!binary' === $matches['tag']) {
@@ -1099,14 +1102,17 @@ class Parser
         return $value;
     }
 
+    /**
+     * @return string|null
+     */
     private function getLineTag($value, $flags, $nextLineCheck = true)
     {
         if ('' === $value || '!' !== $value[0] || 1 !== self::preg_match('/^'.self::TAG_PATTERN.' *( +#.*)?$/', $value, $matches)) {
-            return;
+            return null;
         }
 
         if ($nextLineCheck && !$this->isNextLineIndented()) {
-            return;
+            return null;
         }
 
         $tag = substr($matches['tag'], 1);
