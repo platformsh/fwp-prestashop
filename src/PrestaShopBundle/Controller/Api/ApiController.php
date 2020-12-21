@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,12 +17,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShopBundle\Controller\Api;
@@ -66,7 +66,7 @@ abstract class ApiController
     {
         $this->logger->info($exception->getMessage());
 
-        return new JsonResponse(array('error' => $exception->getMessage()), $exception->getStatusCode());
+        return new JsonResponse(['error' => $exception->getMessage()], $exception->getStatusCode());
     }
 
     /**
@@ -113,12 +113,12 @@ abstract class ApiController
     protected function addAdditionalInfo(
         Request $request,
         QueryParamsCollection $queryParams = null,
-        $headers = array()
+        $headers = []
     ) {
         $router = $this->container->get('router');
 
-        $queryParamsArray = array();
-        if (!is_null($queryParams)) {
+        $queryParamsArray = [];
+        if (null !== $queryParams) {
             $queryParamsArray = $queryParams->getQueryParams();
         }
 
@@ -129,13 +129,13 @@ abstract class ApiController
         );
         unset($allParamsWithoutPagination['page_index'], $allParamsWithoutPagination['page_size']);
 
-        $info = array(
+        $info = [
             'current_url' => $router->generate($request->attributes->get('_route'), $allParams),
             'current_url_without_pagination' => $router->generate(
                 $request->attributes->get('_route'),
                 $allParamsWithoutPagination
             ),
-        );
+        ];
 
         if (array_key_exists('page_index', $allParams) && $allParams['page_index'] > 1) {
             $previousParams = $allParams;
@@ -159,7 +159,7 @@ abstract class ApiController
             $info['total_page'] = $headers['Total-Pages'];
         }
 
-        if (!is_null($queryParams)) {
+        if (null !== $queryParams) {
             $info['page_index'] = $queryParamsArray['page_index'];
             $info['page_size'] = $queryParamsArray['page_size'];
         }
@@ -181,13 +181,29 @@ abstract class ApiController
         Request $request,
         QueryParamsCollection $queryParams = null,
         $status = 200,
-        $headers = array()
+        $headers = []
     ) {
-        $response = array(
+        $response = [
             'info' => $this->addAdditionalInfo($request, $queryParams, $headers),
             'data' => $data,
-        );
+        ];
 
         return new JsonResponse($response, $status, $headers);
+    }
+
+    /**
+     * Checks if access is granted.
+     *
+     * @param string $controller name of the controller
+     * @param array $accessLevel
+     *
+     * @return bool
+     */
+    protected function isGranted(array $accessLevel, $controller)
+    {
+        return $this->container->get('security.authorization_checker')->isGranted(
+            $accessLevel,
+            $controller . '_'
+        );
     }
 }

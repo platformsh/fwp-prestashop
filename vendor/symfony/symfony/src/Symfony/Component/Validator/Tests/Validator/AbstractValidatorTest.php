@@ -499,11 +499,9 @@ abstract class AbstractValidatorTest extends TestCase
         $this->assertCount(0, $violations);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\NoSuchMetadataException
-     */
     public function testFailOnScalarReferences()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\NoSuchMetadataException');
         $entity = new Entity();
         $entity->reference = 'string';
 
@@ -587,6 +585,30 @@ abstract class AbstractValidatorTest extends TestCase
         $this->assertSame($entity->reference[2]['key'], $violations[0]->getInvalidValue());
         $this->assertNull($violations[0]->getPlural());
         $this->assertNull($violations[0]->getCode());
+    }
+
+    public function testOnlyCascadedArraysAreTraversed()
+    {
+        $entity = new Entity();
+        $entity->reference = ['key' => new Reference()];
+
+        $callback = function ($value, ExecutionContextInterface $context) {
+            $context->addViolation('Message %param%', ['%param%' => 'value']);
+        };
+
+        $this->metadata->addPropertyConstraint('reference', new Callback([
+            'callback' => function () {},
+            'groups' => 'Group',
+        ]));
+        $this->referenceMetadata->addConstraint(new Callback([
+            'callback' => $callback,
+            'groups' => 'Group',
+        ]));
+
+        $violations = $this->validate($entity, null, 'Group');
+
+        /* @var ConstraintViolationInterface[] $violations */
+        $this->assertCount(0, $violations);
     }
 
     public function testArrayTraversalCannotBeDisabled()
@@ -714,11 +736,9 @@ abstract class AbstractValidatorTest extends TestCase
         $this->assertCount(0, $violations);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\NoSuchMetadataException
-     */
     public function testMetadataMustExistIfTraversalIsDisabled()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\NoSuchMetadataException');
         $entity = new Entity();
         $entity->reference = new \ArrayIterator();
 

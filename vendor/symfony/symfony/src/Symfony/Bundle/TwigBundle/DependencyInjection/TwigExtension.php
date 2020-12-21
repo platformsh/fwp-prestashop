@@ -150,18 +150,20 @@ class TwigExtension extends Extension
             }
         }
 
-        unset(
-            $config['form'],
-            $config['globals'],
-            $config['extensions']
-        );
-
         if (isset($config['autoescape_service']) && isset($config['autoescape_service_method'])) {
             $config['autoescape'] = [new Reference($config['autoescape_service']), $config['autoescape_service_method']];
         }
-        unset($config['autoescape_service'], $config['autoescape_service_method']);
 
-        $container->getDefinition('twig')->replaceArgument(1, $config);
+        $container->getDefinition('twig')->replaceArgument(1, array_intersect_key($config, [
+            'debug' => true,
+            'charset' => true,
+            'base_template_class' => true,
+            'strict_variables' => true,
+            'autoescape' => true,
+            'cache' => true,
+            'auto_reload' => true,
+            'optimizations' => true,
+        ]));
 
         $container->registerForAutoconfiguration(\Twig_ExtensionInterface::class)->addTag('twig.extension');
         $container->registerForAutoconfiguration(\Twig_LoaderInterface::class)->addTag('twig.loader');
@@ -193,7 +195,7 @@ class TwigExtension extends Extension
         $bundleHierarchy = [];
 
         foreach ($container->getParameter('kernel.bundles_metadata') as $name => $bundle) {
-            if (!array_key_exists($name, $bundleHierarchy)) {
+            if (!\array_key_exists($name, $bundleHierarchy)) {
                 $bundleHierarchy[$name] = [
                     'paths' => [],
                     'parents' => [],
@@ -222,7 +224,7 @@ class TwigExtension extends Extension
 
             $bundleHierarchy[$name]['parents'][] = $bundle['parent'];
 
-            if (!array_key_exists($bundle['parent'], $bundleHierarchy)) {
+            if (!\array_key_exists($bundle['parent'], $bundleHierarchy)) {
                 $bundleHierarchy[$bundle['parent']] = [
                     'paths' => [],
                     'parents' => [],
@@ -255,9 +257,7 @@ class TwigExtension extends Extension
     }
 
     /**
-     * Returns the base path for the XSD files.
-     *
-     * @return string The XSD base path
+     * {@inheritdoc}
      */
     public function getXsdValidationBasePath()
     {

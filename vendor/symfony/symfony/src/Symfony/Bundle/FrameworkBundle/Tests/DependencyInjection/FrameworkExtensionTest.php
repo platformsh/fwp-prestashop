@@ -19,7 +19,6 @@ use Symfony\Bundle\FullStack;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ApcuAdapter;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\ChainAdapter;
 use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
@@ -86,7 +85,9 @@ abstract class FrameworkExtensionTest extends TestCase
         $container = $this->createContainerFromFile('property_accessor');
 
         if (!method_exists(PropertyAccessor::class, 'createCache')) {
-            return $this->assertFalse($container->hasDefinition('cache.property_access'));
+            $this->assertFalse($container->hasDefinition('cache.property_access'));
+
+            return;
         }
 
         $cache = $container->getDefinition('cache.property_access');
@@ -99,7 +100,9 @@ abstract class FrameworkExtensionTest extends TestCase
         $container = $this->createContainerFromFile('property_accessor', ['kernel.debug' => true]);
 
         if (!method_exists(PropertyAccessor::class, 'createCache')) {
-            return $this->assertFalse($container->hasDefinition('cache.property_access'));
+            $this->assertFalse($container->hasDefinition('cache.property_access'));
+
+            return;
         }
 
         $cache = $container->getDefinition('cache.property_access');
@@ -107,12 +110,10 @@ abstract class FrameworkExtensionTest extends TestCase
         $this->assertSame(ArrayAdapter::class, $cache->getClass(), 'ArrayAdapter should be used in debug mode');
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage CSRF protection needs sessions to be enabled.
-     */
     public function testCsrfProtectionNeedsSessionToBeEnabled()
     {
+        $this->expectException('LogicException');
+        $this->expectExceptionMessage('CSRF protection needs sessions to be enabled.');
         $this->createContainerFromFile('csrf_needs_session');
     }
 
@@ -250,42 +251,34 @@ abstract class FrameworkExtensionTest extends TestCase
      */
     public function testDeprecatedWorkflowMissingType()
     {
-        $container = $this->createContainerFromFile('workflows_without_type');
+        $this->createContainerFromFile('workflows_without_type');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage "type" and "service" cannot be used together.
-     */
     public function testWorkflowCannotHaveBothTypeAndService()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('"type" and "service" cannot be used together.');
         $this->createContainerFromFile('workflow_with_type_and_service');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage "supports" and "support_strategy" cannot be used together.
-     */
     public function testWorkflowCannotHaveBothSupportsAndSupportStrategy()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('"supports" and "support_strategy" cannot be used together.');
         $this->createContainerFromFile('workflow_with_support_and_support_strategy');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage "supports" or "support_strategy" should be configured.
-     */
     public function testWorkflowShouldHaveOneOfSupportsAndSupportStrategy()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('"supports" or "support_strategy" should be configured.');
         $this->createContainerFromFile('workflow_without_support_and_support_strategy');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage "arguments" and "service" cannot be used together.
-     */
     public function testWorkflowCannotHaveBothArgumentsAndService()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('"arguments" and "service" cannot be used together.');
         $this->createContainerFromFile('workflow_with_arguments_and_service');
     }
 
@@ -431,11 +424,9 @@ abstract class FrameworkExtensionTest extends TestCase
         $this->assertEquals('xml', $arguments[2]['resource_type'], '->registerRouterConfiguration() sets routing resource type');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testRouterRequiresResourceOption()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
         $container = $this->createContainer();
         $loader = new FrameworkExtension();
         $loader->load([['router' => true]], $container);
@@ -638,11 +629,9 @@ abstract class FrameworkExtensionTest extends TestCase
         $this->assertFalse($container->has('templating.helper.translator'));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testTemplatingRequiresAtLeastOneEngine()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
         $container = $this->createContainer();
         $loader = new FrameworkExtension();
         $loader->load([['templating' => null]], $container);
@@ -667,7 +656,7 @@ abstract class FrameworkExtensionTest extends TestCase
         $this->assertSame('setConstraintValidatorFactory', $calls[0][0]);
         $this->assertEquals([new Reference('validator.validator_factory')], $calls[0][1]);
         $this->assertSame('setTranslator', $calls[1][0]);
-        $this->assertEquals([new Reference('translator')], $calls[1][1]);
+        $this->assertEquals([new Reference('translator', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)], $calls[1][1]);
         $this->assertSame('setTranslationDomain', $calls[2][0]);
         $this->assertSame(['%validator.translation_domain%'], $calls[2][1]);
         $this->assertSame('addXmlMappings', $calls[3][0]);
@@ -833,9 +822,9 @@ abstract class FrameworkExtensionTest extends TestCase
 
         $this->assertSame('addYamlMappings', $calls[4][0]);
         $this->assertCount(3, $calls[4][1][0]);
-        $this->assertContains('foo.yml', $calls[4][1][0][0]);
-        $this->assertContains('validation.yml', $calls[4][1][0][1]);
-        $this->assertContains('validation.yaml', $calls[4][1][0][2]);
+        $this->assertStringContainsString('foo.yml', $calls[4][1][0][0]);
+        $this->assertStringContainsString('validation.yml', $calls[4][1][0][1]);
+        $this->assertStringContainsString('validation.yaml', $calls[4][1][0][2]);
     }
 
     public function testFormsCanBeEnabledWithoutCsrfProtection()
@@ -1163,6 +1152,7 @@ abstract class FrameworkExtensionTest extends TestCase
         if ($resetCompilerPasses) {
             $container->getCompilerPassConfig()->setOptimizationPasses([]);
             $container->getCompilerPassConfig()->setRemovingPasses([]);
+            $container->getCompilerPassConfig()->setAfterRemovingPasses([]);
         }
         $container->getCompilerPassConfig()->setBeforeRemovingPasses([new AddConstraintValidatorsPass(), new TranslatorPass('translator.default', 'translation.reader')]);
         $container->getCompilerPassConfig()->setAfterRemovingPasses([new AddAnnotationsCachedReaderPass()]);
@@ -1184,6 +1174,7 @@ abstract class FrameworkExtensionTest extends TestCase
 
         $container->getCompilerPassConfig()->setOptimizationPasses([]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);
+        $container->getCompilerPassConfig()->setAfterRemovingPasses([]);
         $container->compile();
 
         return $container;
@@ -1244,10 +1235,6 @@ abstract class FrameworkExtensionTest extends TestCase
                 $this->assertSame(DoctrineAdapter::class, $parentDefinition->getClass());
                 break;
             case 'cache.app':
-                if (ChainAdapter::class === $parentDefinition->getClass()) {
-                    break;
-                }
-                // no break
             case 'cache.adapter.filesystem':
                 $this->assertSame(FilesystemAdapter::class, $parentDefinition->getClass());
                 break;

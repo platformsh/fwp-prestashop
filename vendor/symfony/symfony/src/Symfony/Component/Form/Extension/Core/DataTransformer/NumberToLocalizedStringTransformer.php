@@ -78,6 +78,11 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
 
     private $scale;
 
+    /**
+     * @param int|null  $scale
+     * @param bool|null $grouping
+     * @param int|null  $roundingMode
+     */
     public function __construct($scale = null, $grouping = false, $roundingMode = self::ROUND_HALF_UP)
     {
         if (null === $grouping) {
@@ -143,7 +148,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
         }
 
         if ('' === $value) {
-            return;
+            return null;
         }
 
         if (\in_array($value, ['NaN', 'NAN', 'nan'], true)) {
@@ -181,9 +186,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
             throw new TransformationFailedException('I don\'t have a clear idea what infinity looks like');
         }
 
-        if (\is_int($result) && $result === (int) $float = (float) $result) {
-            $result = $float;
-        }
+        $result = $this->castParsedValue($result);
 
         if (false !== $encoding = mb_detect_encoding($value, null, true)) {
             $length = mb_strlen($value, $encoding);
@@ -226,6 +229,18 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
         $formatter->setAttribute(\NumberFormatter::GROUPING_USED, $this->grouping);
 
         return $formatter;
+    }
+
+    /**
+     * @internal
+     */
+    protected function castParsedValue($value)
+    {
+        if (\is_int($value) && $value === (int) $float = (float) $value) {
+            return $float;
+        }
+
+        return $value;
     }
 
     /**

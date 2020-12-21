@@ -18,9 +18,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
-use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Command\DebugCommand;
 use Symfony\Component\Form\DependencyInjection\FormPass;
-use Symfony\Component\Form\FormRegistryInterface;
+use Symfony\Component\Form\FormRegistry;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -70,8 +70,12 @@ class FormPassTest extends TestCase
     {
         $container = $this->createContainerBuilder();
 
+        $container->register('form.registry', FormRegistry::class);
+        $commandDefinition = new Definition(DebugCommand::class, [new Reference('form.registry')]);
+        $commandDefinition->setPublic(true);
+
         $container->setDefinition('form.extension', $this->createExtensionDefinition());
-        $container->setDefinition('console.command.form_debug', $this->createDebugCommandDefinition());
+        $container->setDefinition('console.command.form_debug', $commandDefinition);
         $container->register('my.type1', __CLASS__.'_Type1')->addTag('form.type')->setPublic(true);
         $container->register('my.type2', __CLASS__.'_Type2')->addTag('form.type')->setPublic(true);
 
@@ -152,12 +156,10 @@ class FormPassTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage extended-type attribute, none was configured for the "my.type_extension" service
-     */
     public function testAddTaggedFormTypeExtensionWithoutExtendedTypeAttribute()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('extended-type attribute, none was configured for the "my.type_extension" service');
         $container = $this->createContainerBuilder();
 
         $container->setDefinition('form.extension', $this->createExtensionDefinition());
@@ -259,19 +261,6 @@ class FormPassTest extends TestCase
         return $definition;
     }
 
-    private function createDebugCommandDefinition()
-    {
-        $definition = new Definition('Symfony\Component\Form\Command\DebugCommand');
-        $definition->setPublic(true);
-        $definition->setArguments([
-            $formRegistry = $this->getMockBuilder(FormRegistryInterface::class)->getMock(),
-            [],
-            ['Symfony\Component\Form\Extension\Core\Type'],
-        ]);
-
-        return $definition;
-    }
-
     private function createContainerBuilder()
     {
         $container = new ContainerBuilder();
@@ -279,12 +268,4 @@ class FormPassTest extends TestCase
 
         return $container;
     }
-}
-
-class FormPassTest_Type1 extends AbstractType
-{
-}
-
-class FormPassTest_Type2 extends AbstractType
-{
 }

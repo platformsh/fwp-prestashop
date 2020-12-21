@@ -2,7 +2,7 @@
 
 <container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
         <parameter key="validator.mapping.cache.prefix" />
@@ -23,7 +23,7 @@
                 <argument type="service" id="validator.validator_factory" />
             </call>
             <call method="setTranslator">
-                <argument type="service" id="translator" />
+                <argument type="service" id="translator" on-invalid="ignore" />
             </call>
             <call method="setTranslationDomain">
                 <argument>%validator.translation_domain%</argument>

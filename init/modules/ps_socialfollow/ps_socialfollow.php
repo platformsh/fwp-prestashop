@@ -29,16 +29,29 @@ if (!defined('_CAN_LOAD_FILES_')) {
 }
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Validation;
 
 class Ps_Socialfollow extends Module implements WidgetInterface
 {
     private $templateFile;
 
+    const SOCIAL_NETWORKS = [
+        'facebook',
+        'twitter',
+        'rss',
+        'youtube',
+        'pinterest',
+        'vimeo',
+        'instagram',
+        'linkedin',
+    ];
+
     public function __construct()
     {
         $this->name = 'ps_socialfollow';
         $this->author = 'PrestaShop';
-        $this->version = '2.0.0';
+        $this->version = '2.1.0';
 
         $this->bootstrap = true;
         parent::__construct();
@@ -58,10 +71,10 @@ class Ps_Socialfollow extends Module implements WidgetInterface
             Configuration::updateValue('BLOCKSOCIAL_TWITTER', '') &&
             Configuration::updateValue('BLOCKSOCIAL_RSS', '') &&
             Configuration::updateValue('BLOCKSOCIAL_YOUTUBE', '') &&
-            Configuration::updateValue('BLOCKSOCIAL_GOOGLE_PLUS', '') &&
             Configuration::updateValue('BLOCKSOCIAL_PINTEREST', '') &&
             Configuration::updateValue('BLOCKSOCIAL_VIMEO', '') &&
             Configuration::updateValue('BLOCKSOCIAL_INSTAGRAM', '') &&
+            Configuration::updateValue('BLOCKSOCIAL_LINKEDIN', '') &&
             $this->registerHook('displayFooter'));
     }
 
@@ -71,25 +84,17 @@ class Ps_Socialfollow extends Module implements WidgetInterface
             Configuration::deleteByName('BLOCKSOCIAL_TWITTER') &&
             Configuration::deleteByName('BLOCKSOCIAL_RSS') &&
             Configuration::deleteByName('BLOCKSOCIAL_YOUTUBE') &&
-            Configuration::deleteByName('BLOCKSOCIAL_GOOGLE_PLUS') &&
             Configuration::deleteByName('BLOCKSOCIAL_PINTEREST') &&
             Configuration::deleteByName('BLOCKSOCIAL_VIMEO') &&
             Configuration::deleteByName('BLOCKSOCIAL_INSTAGRAM') &&
+            Configuration::deleteByName('BLOCKSOCIAL_LINKEDIN') &&
             parent::uninstall());
     }
 
     public function getContent()
     {
         if (Tools::isSubmit('submitModule')) {
-            Configuration::updateValue('BLOCKSOCIAL_FACEBOOK', Tools::getValue('blocksocial_facebook', ''));
-            Configuration::updateValue('BLOCKSOCIAL_TWITTER', Tools::getValue('blocksocial_twitter', ''));
-            Configuration::updateValue('BLOCKSOCIAL_RSS', Tools::getValue('blocksocial_rss', ''));
-            Configuration::updateValue('BLOCKSOCIAL_YOUTUBE', Tools::getValue('blocksocial_youtube', ''));
-            Configuration::updateValue('BLOCKSOCIAL_GOOGLE_PLUS', Tools::getValue('blocksocial_google_plus', ''));
-            Configuration::updateValue('BLOCKSOCIAL_PINTEREST', Tools::getValue('blocksocial_pinterest', ''));
-            Configuration::updateValue('BLOCKSOCIAL_VIMEO', Tools::getValue('blocksocial_vimeo', ''));
-            Configuration::updateValue('BLOCKSOCIAL_INSTAGRAM', Tools::getValue('blocksocial_instagram', ''));
-
+            $this->updateFields();
             $this->_clearCache('*');
 
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules').'&configure='.$this->name.'&tab_module='.$this->tab.'&conf=4&module_name='.$this->name);
@@ -138,12 +143,6 @@ class Ps_Socialfollow extends Module implements WidgetInterface
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->trans('Google+ URL:', array(), 'Modules.Socialfollow.Admin'),
-                        'name' => 'blocksocial_google_plus',
-                        'desc' => $this->trans('Your official Google+ page.', array(), 'Modules.Socialfollow.Admin'),
-                    ),
-                    array(
-                        'type' => 'text',
                         'label' => $this->trans('Pinterest URL:', array(), 'Modules.Socialfollow.Admin'),
                         'name' => 'blocksocial_pinterest',
                         'desc' => $this->trans('Your official Pinterest account.', array(), 'Modules.Socialfollow.Admin'),
@@ -159,6 +158,12 @@ class Ps_Socialfollow extends Module implements WidgetInterface
                         'label' => $this->trans('Instagram URL:', array(), 'Modules.Socialfollow.Admin'),
                         'name' => 'blocksocial_instagram',
                         'desc' => $this->trans('Your official Instagram account.', array(), 'Modules.Socialfollow.Admin'),
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->trans('LinkedIn URL:', array(), 'Modules.Socialfollow.Admin'),
+                        'name' => 'blocksocial_linkedin',
+                        'desc' => $this->trans('Your official LinkedIn account.', array(), 'Modules.Socialfollow.Admin'),
                     ),
                 ),
                 'submit' => array(
@@ -180,16 +185,11 @@ class Ps_Socialfollow extends Module implements WidgetInterface
 
     public function getConfigFieldsValues()
     {
-        return array(
-            'blocksocial_facebook' => Tools::getValue('blocksocial_facebook', Configuration::get('BLOCKSOCIAL_FACEBOOK')),
-            'blocksocial_twitter' => Tools::getValue('blocksocial_twitter', Configuration::get('BLOCKSOCIAL_TWITTER')),
-            'blocksocial_rss' => Tools::getValue('blocksocial_rss', Configuration::get('BLOCKSOCIAL_RSS')),
-            'blocksocial_youtube' => Tools::getValue('blocksocial_youtube', Configuration::get('BLOCKSOCIAL_YOUTUBE')),
-            'blocksocial_google_plus' => Tools::getValue('blocksocial_google_plus', Configuration::get('BLOCKSOCIAL_GOOGLE_PLUS')),
-            'blocksocial_pinterest' => Tools::getValue('blocksocial_pinterest', Configuration::get('BLOCKSOCIAL_PINTEREST')),
-            'blocksocial_vimeo' => Tools::getValue('blocksocial_vimeo', Configuration::get('BLOCKSOCIAL_VIMEO')),
-            'blocksocial_instagram' => Tools::getValue('blocksocial_instagram', Configuration::get('BLOCKSOCIAL_INSTAGRAM')),
-        );
+        $result = [];
+        foreach (static::SOCIAL_NETWORKS as $social) {
+            $result['blocksocial_' . $social] = Configuration::get('BLOCKSOCIAL_' . strtoupper($social));
+        }
+        return $result;
     }
 
     public function renderWidget($hookName = null, array $configuration = [])
@@ -237,14 +237,6 @@ class Ps_Socialfollow extends Module implements WidgetInterface
             );
         }
 
-        if ($sf_googleplus = Configuration::get('BLOCKSOCIAL_GOOGLE_PLUS')) {
-            $social_links['googleplus'] = array(
-                'label' => $this->trans('Google +', array(), 'Modules.Socialfollow.Shop'),
-                'class' => 'googleplus',
-                'url' => $sf_googleplus,
-            );
-        }
-
         if ($sf_pinterest = Configuration::get('BLOCKSOCIAL_PINTEREST')) {
             $social_links['pinterest'] = array(
                 'label' => $this->trans('Pinterest', array(), 'Modules.Socialfollow.Shop'),
@@ -269,8 +261,35 @@ class Ps_Socialfollow extends Module implements WidgetInterface
             );
         }
 
+        if ($sf_linkedin = Configuration::get('BLOCKSOCIAL_LINKEDIN')) {
+            $social_links['linkedin'] = array(
+                'label' => $this->trans('LinkedIn', array(), 'Modules.Socialfollow.Shop'),
+                'class' => 'linkedin',
+                'url' => $sf_linkedin,
+            );
+        }
+
         return array(
             'social_links' => $social_links,
         );
+    }
+
+    /**
+     * Update form fields.
+     * Check all social networks form value and verify the URL is valid.
+     * Do nothing if a violation is spotted.
+     */
+    protected function updateFields()
+    {
+        $validator = Validation::createValidator();
+        $constraints = [new Url()];
+
+        foreach (static::SOCIAL_NETWORKS as $social) {
+            $value = Tools::getValue('blocksocial_' . $social, '');
+            $violations = $validator->validate($value, $constraints);
+            if (0 === count($violations)) {
+                Configuration::updateValue('BLOCKSOCIAL_' . strtoupper($social), $value);
+            }
+        }
     }
 }

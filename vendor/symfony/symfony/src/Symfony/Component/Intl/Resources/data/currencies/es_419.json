@@ -1,25 +1,17 @@
 {
-    "Version": "2.1.43.65",
+    "Version": "36",
     "Names": {
-        "AMD": [
-            "AMD",
-            "dram armenio"
-        ],
         "CAD": [
             "CAD",
             "dólar canadiense"
-        ],
-        "ERN": [
-            "ERN",
-            "nafka"
         ],
         "EUR": [
             "EUR",
             "euro"
         ],
-        "MYR": [
-            "MYR",
-            "ringgit malayo"
+        "MWK": [
+            "MWK",
+            "kwacha malauí"
         ],
         "THB": [
             "THB",
@@ -33,29 +25,9 @@
             "UZS",
             "som uzbeko"
         ],
-        "VEF": [
-            "VEF",
-            "bolívar venezolano"
-        ],
-        "VES": [
-            "VES",
-            "VES"
-        ],
         "VND": [
             "VND",
             "dong"
-        ],
-        "XAF": [
-            "XAF",
-            "franco CFA BEAC"
-        ],
-        "XOF": [
-            "XOF",
-            "franco CFA BCEAO"
-        ],
-        "ZMW": [
-            "ZMW",
-            "kuacha zambiano"
         ]
     }
 }

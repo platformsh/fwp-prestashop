@@ -1,12 +1,13 @@
 <?php
 
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -17,21 +18,21 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Core\Addon\Module;
 
 use Context;
 use Db;
-use PrestaShop\PrestaShop\Adapter\Cache\CacheClearer;
-use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use Doctrine\Common\Cache\FilesystemCache;
+use GuzzleHttp\Client;
+use PrestaShop\PrestaShop\Adapter\Addons\AddonsDataProvider;
+use PrestaShop\PrestaShop\Adapter\Cache\Clearer;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Adapter\LegacyLogger;
@@ -39,19 +40,17 @@ use PrestaShop\PrestaShop\Adapter\Module\AdminModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataUpdater;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleZipManager;
-use PrestaShop\PrestaShop\Adapter\Addons\AddonsDataProvider;
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Adapter\Tools;
 use PrestaShop\PrestaShop\Core\Addon\Theme\ThemeManagerBuilder;
+use PrestaShop\PrestaShop\Core\Util\File\YamlParser;
 use PrestaShopBundle\Event\Dispatcher\NullDispatcher;
 use PrestaShopBundle\Service\DataProvider\Admin\CategoriesProvider;
 use PrestaShopBundle\Service\DataProvider\Marketplace\ApiClient;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
-use Symfony\Component\Yaml\Yaml;
-use GuzzleHttp\Client;
-use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Routing\Router;
 
 class ModuleManagerBuilder
 {
@@ -80,7 +79,7 @@ class ModuleManagerBuilder
     public static $cacheProvider = null;
 
     /**
-     * @return null|ModuleManagerBuilder
+     * @return ModuleManagerBuilder|null
      */
     public static function getInstance()
     {
@@ -111,7 +110,7 @@ class ModuleManagerBuilder
                     self::$moduleZipManager,
                     self::$translator,
                     new NullDispatcher(),
-                    new CacheClearer()
+                    new Clearer\SymfonyCacheClearer()
                 );
             }
         }
@@ -126,9 +125,9 @@ class ModuleManagerBuilder
      */
     public function buildRepository()
     {
-        if (is_null(self::$modulesRepository)) {
+        if (null === self::$modulesRepository) {
             $sfContainer = SymfonyContainer::getInstance();
-            if (!is_null($sfContainer)) {
+            if (null !== $sfContainer) {
                 self::$modulesRepository = $sfContainer->get('prestashop.core.admin.module.repository');
             } else {
                 self::$modulesRepository = new ModuleRepository(
@@ -153,33 +152,16 @@ class ModuleManagerBuilder
          * build & buildRepository. No need to init manually all the dependancies.
          */
         $sfContainer = SymfonyContainer::getInstance();
-        if (!is_null($sfContainer)) {
+        if (null !== $sfContainer) {
             return;
         }
 
-        $phpConfigFile = $this->getConfigDir() . '/config.php';
-        if (file_exists($phpConfigFile)
-            && filemtime($phpConfigFile) >= filemtime($this->getConfigDir() . DIRECTORY_SEPARATOR . 'config.yml')) {
-            $config = require $phpConfigFile;
-        } else {
-            $config = Yaml::parse(
-                file_get_contents(
-                    $this->getConfigDir() . DIRECTORY_SEPARATOR . 'config.yml'
-                )
-            );
-            try {
-                $filesystem = new Filesystem();
-                $filesystem->dumpFile($phpConfigFile, '<?php return ' . var_export($config, true) . ';' . "\n");
-            } catch (IOException $e) {
-                return false;
-            }
-        }
+        $yamlParser = new YamlParser((new Configuration())->get('_PS_CACHE_DIR_'));
 
-        $prestashopAddonsConfig = Yaml::parse(
-            file_get_contents(
-                $this->getConfigDir() . DIRECTORY_SEPARATOR . 'addons/categories.yml'
-            )
-        );
+        $config = $yamlParser->parse($this->getConfigDir() . '/config.yml');
+        $prestashopAddonsConfig =
+            $yamlParser->parse($this->getConfigDir() . '/addons/categories.yml');
+
         $clientConfig = $config['csa_guzzle']['clients']['addons_api']['config'];
 
         self::$translator = Context::getContext()->getTranslator();
@@ -220,14 +202,12 @@ class ModuleManagerBuilder
 
         self::$legacyLogger = new LegacyLogger();
         self::$categoriesProvider = new CategoriesProvider(
-            $marketPlaceClient,
-            self::$legacyLogger,
             $prestashopAddonsConfig['prestashop']['addons']['categories'],
             $themeModules
         );
         self::$lecacyContext = new LegacyContext();
 
-        if (is_null(self::$adminModuleDataProvider)) {
+        if (null === self::$adminModuleDataProvider) {
             self::$moduleDataProvider = new ModuleDataProvider(self::$legacyLogger, self::$translator);
             self::$adminModuleDataProvider = new AdminModuleDataProvider(
                 self::$translator,
@@ -255,7 +235,7 @@ class ModuleManagerBuilder
         // get the environment to load the good routing file
         $routeFileName = _PS_MODE_DEV_ === true ? 'routing_dev.yml' : 'routing.yml';
         $routesDirectory = $this->getConfigDir();
-        $locator = new FileLocator(array($routesDirectory));
+        $locator = new FileLocator([$routesDirectory]);
         $loader = new YamlFileLoader($locator);
 
         return new Router($loader, $routeFileName);
@@ -263,7 +243,7 @@ class ModuleManagerBuilder
 
     protected function getConfigDir()
     {
-        return _PS_ROOT_DIR_ . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config';
+        return _PS_ROOT_DIR_ . '/app/config';
     }
 
     /**

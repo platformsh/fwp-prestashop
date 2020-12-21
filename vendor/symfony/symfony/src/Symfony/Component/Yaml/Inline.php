@@ -126,13 +126,13 @@ class Inline
                     $result = self::parseScalar($value, $flags, null, $i, null === $tag, $references);
             }
 
-            if (null !== $tag) {
-                return new TaggedValue($tag, $result);
-            }
-
             // some comments are allowed at the end
             if (preg_replace('/\s+#.*$/A', '', substr($value, $i))) {
                 throw new ParseException(sprintf('Unexpected characters near "%s".', substr($value, $i)), self::$parsedLineNumber + 1, $value, self::$parsedFilename);
+            }
+
+            if (null !== $tag) {
+                return new TaggedValue($tag, $result);
             }
 
             return $result;
@@ -504,6 +504,11 @@ class Inline
             $isKeyQuoted = \in_array($mapping[$i], ['"', "'"], true);
             $key = self::parseScalar($mapping, $flags, [':', ' '], $i, false, [], true);
 
+            if ('!php/const' === $key) {
+                $key .= self::parseScalar($mapping, $flags, [':', ' '], $i, false, [], true);
+                $key = self::evaluateScalar($key, $flags);
+            }
+
             if (':' !== $key && false === $i = strpos($mapping, ':', $i)) {
                 break;
             }
@@ -633,7 +638,7 @@ class Inline
                 throw new ParseException('A reference must contain at least one character.', self::$parsedLineNumber + 1, $value, self::$parsedFilename);
             }
 
-            if (!array_key_exists($value, $references)) {
+            if (!\array_key_exists($value, $references)) {
                 throw new ParseException(sprintf('Reference "%s" does not exist.', $value), self::$parsedLineNumber + 1, $value, self::$parsedFilename);
             }
 
@@ -644,7 +649,7 @@ class Inline
             case 'null' === $scalarLower:
             case '' === $scalar:
             case '~' === $scalar:
-                return;
+                return null;
             case 'true' === $scalarLower:
                 return true;
             case 'false' === $scalarLower:
@@ -672,7 +677,7 @@ class Inline
                             throw new ParseException('Object support when parsing a YAML file has been disabled.', self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                         }
 
-                        return;
+                        return null;
                     case 0 === strpos($scalar, '!!php/object:'):
                         if (self::$objectSupport) {
                             @trigger_error(self::getDeprecationMessage('The !!php/object: tag to indicate dumped PHP objects is deprecated since Symfony 3.1 and will be removed in 4.0. Use the !php/object (without the colon) tag instead.'), E_USER_DEPRECATED);
@@ -684,7 +689,7 @@ class Inline
                             throw new ParseException('Object support when parsing a YAML file has been disabled.', self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                         }
 
-                        return;
+                        return null;
                     case 0 === strpos($scalar, '!php/object'):
                         if (self::$objectSupport) {
                             return unserialize(self::parseScalar(substr($scalar, 12)));
@@ -694,7 +699,7 @@ class Inline
                             throw new ParseException('Object support when parsing a YAML file has been disabled.', self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                         }
 
-                        return;
+                        return null;
                     case 0 === strpos($scalar, '!php/const:'):
                         if (self::$constantSupport) {
                             @trigger_error(self::getDeprecationMessage('The !php/const: tag to indicate dumped PHP constants is deprecated since Symfony 3.4 and will be removed in 4.0. Use the !php/const (without the colon) tag instead.'), E_USER_DEPRECATED);
@@ -709,7 +714,7 @@ class Inline
                             throw new ParseException(sprintf('The string "%s" could not be parsed as a constant. Have you forgotten to pass the "Yaml::PARSE_CONSTANT" flag to the parser?', $scalar), self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                         }
 
-                        return;
+                        return null;
                     case 0 === strpos($scalar, '!php/const'):
                         if (self::$constantSupport) {
                             $i = 0;
@@ -723,7 +728,7 @@ class Inline
                             throw new ParseException(sprintf('The string "%s" could not be parsed as a constant. Have you forgotten to pass the "Yaml::PARSE_CONSTANT" flag to the parser?', $scalar), self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                         }
 
-                        return;
+                        return null;
                     case 0 === strpos($scalar, '!!float '):
                         return (float) substr($scalar, 8);
                     case 0 === strpos($scalar, '!!binary '):
@@ -735,11 +740,11 @@ class Inline
             // Optimize for returning strings.
             // no break
             case '+' === $scalar[0] || '-' === $scalar[0] || '.' === $scalar[0] || is_numeric($scalar[0]):
+                if (Parser::preg_match('{^[+-]?[0-9][0-9_]*$}', $scalar)) {
+                    $scalar = str_replace('_', '', (string) $scalar);
+                }
+
                 switch (true) {
-                    case Parser::preg_match('{^[+-]?[0-9][0-9_]*$}', $scalar):
-                        $scalar = str_replace('_', '', (string) $scalar);
-                        // omitting the break / return as integers are handled in the next case
-                        // no break
                     case ctype_digit($scalar):
                         $raw = $scalar;
                         $cast = (int) $scalar;
@@ -749,7 +754,7 @@ class Inline
                         $raw = $scalar;
                         $cast = (int) $scalar;
 
-                        return '0' == $scalar[1] ? octdec($scalar) : (((string) $raw === (string) $cast) ? $cast : $raw);
+                        return '0' == $scalar[1] ? -octdec(substr($scalar, 1)) : (($raw === (string) $cast) ? $cast : $raw);
                     case is_numeric($scalar):
                     case Parser::preg_match(self::getHexRegex(), $scalar):
                         $scalar = str_replace('_', '', $scalar);
@@ -795,7 +800,7 @@ class Inline
     private static function parseTag($value, &$i, $flags)
     {
         if ('!' !== $value[$i]) {
-            return;
+            return null;
         }
 
         $tagLength = strcspn($value, " \t\n", $i + 1);
@@ -807,7 +812,7 @@ class Inline
         // Is followed by a scalar
         if ((!isset($value[$nextOffset]) || !\in_array($value[$nextOffset], ['[', '{'], true)) && 'tagged' !== $tag) {
             // Manage non-whitelisted scalars in {@link self::evaluateScalar()}
-            return;
+            return null;
         }
 
         // Built-in tags

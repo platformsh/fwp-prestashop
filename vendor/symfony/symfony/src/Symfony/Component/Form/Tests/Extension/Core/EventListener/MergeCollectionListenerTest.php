@@ -17,21 +17,15 @@ use Symfony\Component\Form\FormEvent;
 
 abstract class MergeCollectionListenerTest extends TestCase
 {
-    protected $dispatcher;
-    protected $factory;
     protected $form;
 
     protected function setUp()
     {
-        $this->dispatcher = $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcherInterface')->getMock();
-        $this->factory = $this->getMockBuilder('Symfony\Component\Form\FormFactoryInterface')->getMock();
         $this->form = $this->getForm('axes');
     }
 
     protected function tearDown()
     {
-        $this->dispatcher = null;
-        $this->factory = null;
         $this->form = null;
     }
 
@@ -188,10 +182,10 @@ abstract class MergeCollectionListenerTest extends TestCase
 
     /**
      * @dataProvider getBooleanMatrix2
-     * @expectedException \Symfony\Component\Form\Exception\UnexpectedTypeException
      */
     public function testRequireArrayOrTraversable($allowAdd, $allowDelete)
     {
+        $this->expectException('Symfony\Component\Form\Exception\UnexpectedTypeException');
         $newData = 'no array or traversable';
         $event = new FormEvent($this->form, $newData);
         $listener = new MergeCollectionListener($allowAdd, $allowDelete);

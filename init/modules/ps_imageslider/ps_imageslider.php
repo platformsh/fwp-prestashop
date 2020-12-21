@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * 2007-2020 PrestaShop.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2020 PrestaShop SA
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * International Registered Trademark & Property of PrestaShop SA
+ */
 
 /**
  * @since   1.5.0
@@ -34,7 +34,12 @@ if (!defined('_PS_VERSION_')) {
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
-include_once(_PS_MODULE_DIR_.'ps_imageslider/Ps_HomeSlide.php');
+$autoloadPath = __DIR__ . '/vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+}
+
+include_once(__DIR__ . '/Ps_HomeSlide.php');
 
 class Ps_ImageSlider extends Module implements WidgetInterface
 {
@@ -49,7 +54,7 @@ class Ps_ImageSlider extends Module implements WidgetInterface
     {
         $this->name = 'ps_imageslider';
         $this->tab = 'front_office_features';
-        $this->version = '3.0.0';
+        $this->version = '3.1.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->secure_key = Tools::encrypt($this->name);
@@ -305,10 +310,6 @@ class Ps_ImageSlider extends Module implements WidgetInterface
             if (!Validate::isInt(Tools::getValue('active_slide')) || (Tools::getValue('active_slide') != 0 && Tools::getValue('active_slide') != 1)) {
                 $errors[] = $this->getTranslator()->trans('Invalid slide state.', array(), 'Modules.Imageslider.Admin');
             }
-            /* Checks position */
-            if (!Validate::isInt(Tools::getValue('position')) || (Tools::getValue('position') < 0)) {
-                $errors[] = $this->getTranslator()->trans('Invalid slide position.', array(), 'Modules.Imageslider.Admin');
-            }
             /* If edit : checks id_slide */
             if (Tools::isSubmit('id_slide')) {
                 if (!Validate::isInt(Tools::getValue('id_slide')) && !$this->slideExists(Tools::getValue('id_slide'))) {
@@ -442,9 +443,9 @@ class Ps_ImageSlider extends Module implements WidgetInterface
                 }
             } else {
                 $slide = new Ps_HomeSlide();
+                /* Sets position */
+                $slide->position = (int)$this->getNextPosition();
             }
-            /* Sets position */
-            $slide->position = (int)Tools::getValue('position');
             /* Sets active */
             $slide->active = (int)Tools::getValue('active_slide');
 
@@ -480,7 +481,7 @@ class Ps_ImageSlider extends Module implements WidgetInterface
                         $errors[] = $error;
                     } elseif (!$temp_name || !move_uploaded_file($_FILES['image_'.$language['id_lang']]['tmp_name'], $temp_name)) {
                         return false;
-                    } elseif (!ImageManager::resize($temp_name, dirname(__FILE__).'/images/'.$salt.'_'.$_FILES['image_'.$language['id_lang']]['name'], null, null, $type)) {
+                    } elseif (!ImageManager::resize($temp_name, __DIR__.'/images/'.$salt.'_'.$_FILES['image_'.$language['id_lang']]['name'], null, null, $type)) {
                         $errors[] = $this->displayError($this->getTranslator()->trans('An error occurred during the image upload process.', array(), 'Admin.Notifications.Error'));
                     }
                     if (isset($temp_name)) {
@@ -546,7 +547,7 @@ class Ps_ImageSlider extends Module implements WidgetInterface
         $slides = $this->getSlides(true);
         if (is_array($slides)) {
             foreach ($slides as &$slide) {
-                $slide['sizes'] = @getimagesize((dirname(__FILE__) . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . $slide['image']));
+                $slide['sizes'] = @getimagesize((__DIR__ . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . $slide['image']));
                 if (isset($slide['sizes'][3]) && $slide['sizes'][3]) {
                     $slide['size'] = $slide['sizes'][3];
                 }

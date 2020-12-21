@@ -68,13 +68,14 @@ class ShowProcessor extends AbstractProcessor {
             case 'FROM':
                 $resultList[] = array('expr_type' => ExpressionType::RESERVED, 'base_expr' => trim($token));
                 if ($prev === 'INDEX' || $prev === 'COLUMNS') {
-                    continue;
+                    break;
                 }
                 $category = $upper;
                 break;
 
             case 'CREATE':
             case 'DATABASE':
+            case 'SCHEMA':
             case 'FUNCTION':
             case 'PROCEDURE':
             case 'ENGINE':
@@ -100,6 +101,7 @@ class ShowProcessor extends AbstractProcessor {
             case 'TRIGGERS':
             case 'VARIABLES':
             case 'DATABASES':
+            case 'SCHEMAS':
             case 'ERRORS':
             case 'TABLES':
             case 'WARNINGS':
@@ -121,6 +123,7 @@ class ShowProcessor extends AbstractProcessor {
                     $resultList[] = $limit;
                     break;
                 case 'FROM':
+                case 'SCHEMA':
                 case 'DATABASE':
                     $resultList[] = array('expr_type' => ExpressionType::DATABASE, 'name' => $token,
                                           'no_quotes' => $this->revokeQuotation($token), 'base_expr' => $token);

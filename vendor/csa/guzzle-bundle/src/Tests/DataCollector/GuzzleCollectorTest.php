@@ -4,6 +4,7 @@
  * This file is part of the CsaGuzzleBundle package
  *
  * (c) Charles Sarrazin <charles@sarraz.in>
+ * (c) PrestaShop and Contributors
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * @covers \Csa\Bundle\GuzzleBundle\DataCollector\GuzzleCollector
  */
-class GuzzleCollectorTest extends \PHPUnit_Framework_TestCase
+class GuzzleCollectorTest extends \PHPUnit\Framework\TestCase
 {
     public function testCollect()
     {
@@ -35,7 +36,7 @@ class GuzzleCollectorTest extends \PHPUnit_Framework_TestCase
         $collector = new GuzzleCollector($debugSubscriber);
 
         $request = Request::createFromGlobals();
-        $response = $this->getMock('Symfony\Component\HttpFoundation\Response');
+        $response = $this->createMock('Symfony\Component\HttpFoundation\Response');
         $collector->collect($request, $response, new \Exception());
         $this->assertCount(0, $collector->getCalls());
 

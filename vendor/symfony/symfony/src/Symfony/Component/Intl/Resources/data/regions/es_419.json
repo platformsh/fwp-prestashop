@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.43.65",
+    "Version": "36",
     "Names": {
         "AC": "Isla Ascensión",
         "BA": "Bosnia-Herzegovina",
@@ -8,8 +8,6 @@
         "GG": "Guernesey",
         "IC": "Islas Canarias",
         "TA": "Tristán da Cunha",
-        "TL": "Timor Oriental",
-        "UM": "Islas Ultramarinas de EE.UU.",
-        "VI": "Islas Vírgenes de los Estados Unidos"
+        "UM": "Islas Ultramarinas de EE.UU."
     }
 }

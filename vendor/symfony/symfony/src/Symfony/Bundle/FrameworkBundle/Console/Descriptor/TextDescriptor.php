@@ -17,6 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -339,7 +340,11 @@ class TextDescriptor extends Descriptor
                 if ($argument instanceof Reference) {
                     $argumentsInformation[] = sprintf('Service(%s)', (string) $argument);
                 } elseif ($argument instanceof IteratorArgument) {
-                    $argumentsInformation[] = sprintf('Iterator (%d element(s))', \count($argument->getValues()));
+                    if ($argument instanceof TaggedIteratorArgument) {
+                        $argumentsInformation[] = sprintf('Tagged Iterator for "%s"%s', $argument->getTag(), $options['is_debug'] ? '' : sprintf(' (%d element(s))', \count($argument->getValues())));
+                    } else {
+                        $argumentsInformation[] = sprintf('Iterator (%d element(s))', \count($argument->getValues()));
+                    }
                 } elseif ($argument instanceof Definition) {
                     $argumentsInformation[] = 'Inlined Service';
                 } else {
@@ -364,7 +369,7 @@ class TextDescriptor extends Descriptor
             return;
         }
 
-        return $this->describeContainerDefinition($builder->getDefinition((string) $alias), array_merge($options, ['id' => (string) $alias]));
+        $this->describeContainerDefinition($builder->getDefinition((string) $alias), array_merge($options, ['id' => (string) $alias]));
     }
 
     /**
@@ -385,7 +390,7 @@ class TextDescriptor extends Descriptor
      */
     protected function describeEventDispatcherListeners(EventDispatcherInterface $eventDispatcher, array $options = [])
     {
-        $event = array_key_exists('event', $options) ? $options['event'] : null;
+        $event = \array_key_exists('event', $options) ? $options['event'] : null;
 
         if (null !== $event) {
             $title = sprintf('Registered Listeners for "%s" Event', $event);
@@ -420,7 +425,6 @@ class TextDescriptor extends Descriptor
         $tableHeaders = ['Order', 'Callable', 'Priority'];
         $tableRows = [];
 
-        $order = 1;
         foreach ($eventListeners as $order => $listener) {
             $tableRows[] = [sprintf('#%d', $order + 1), $this->formatCallable($listener), $eventDispatcher->getListenerPriority($event, $listener)];
         }
@@ -429,8 +433,6 @@ class TextDescriptor extends Descriptor
     }
 
     /**
-     * @param array $config
-     *
      * @return string
      */
     private function formatRouterConfig(array $config)
@@ -489,7 +491,6 @@ class TextDescriptor extends Descriptor
 
     /**
      * @param string $content
-     * @param array  $options
      */
     private function writeText($content, array $options = [])
     {

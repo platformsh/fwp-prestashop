@@ -2,7 +2,7 @@
 <module>
     <name>ps_currencyselector</name>
     <displayName><![CDATA[Currency selector]]></displayName>
-    <version><![CDATA[2.0.0]]></version>
+    <version><![CDATA[2.0.1]]></version>
     <description><![CDATA[Adds a block allowing customers to choose their preferred shopping currency.]]></description>
     <author><![CDATA[PrestaShop]]></author>
     <is_configurable>0</is_configurable>

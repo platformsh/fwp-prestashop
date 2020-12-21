@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,13 +17,22 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\MultipleValidationWithAnd;
+use Egulias\EmailValidator\Validation\RFCValidation;
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CustomerName;
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Factory\CustomerNameValidatorFactory;
+use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\NumericIsoCode;
+use PrestaShop\PrestaShop\Core\Email\SwiftMailerValidation;
+use PrestaShop\PrestaShop\Core\String\CharacterCleaner;
+use Symfony\Component\Validator\Validation;
+
 class ValidateCore
 {
     const ADMIN_PASSWORD_LENGTH = 8;
@@ -47,7 +57,10 @@ class ValidateCore
      */
     public static function isEmail($email)
     {
-        return !empty($email) && preg_match(Tools::cleanNonUnicodeSupport('/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+(?:[.]?[_a-z\p{L}0-9-])*\.[a-z\p{L}0-9]+$/ui'), $email);
+        return !empty($email) && (new EmailValidator())->isValid($email, new MultipleValidationWithAnd([
+                new RFCValidation(),
+                new SwiftMailerValidation(), // special validation to be compatible with Swift Mailer
+            ]));
     }
 
     /**
@@ -61,15 +74,15 @@ class ValidateCore
     public static function isModuleUrl($url, &$errors)
     {
         if (!$url || $url == 'http://') {
-            $errors[] = Context::getContext()->getTranslator()->trans('Please specify module URL', array(), 'Admin.Modules.Notification');
+            $errors[] = Context::getContext()->getTranslator()->trans('Please specify module URL', [], 'Admin.Modules.Notification');
         } elseif (substr($url, -4) != '.tar' && substr($url, -4) != '.zip' && substr($url, -4) != '.tgz' && substr($url, -7) != '.tar.gz') {
-            $errors[] = Context::getContext()->getTranslator()->trans('Unknown archive type.', array(), 'Admin.Modules.Notification');
+            $errors[] = Context::getContext()->getTranslator()->trans('Unknown archive type.', [], 'Admin.Modules.Notification');
         } else {
             if ((strpos($url, 'http')) === false) {
                 $url = 'http://' . $url;
             }
             if (!is_array(@get_headers($url))) {
-                $errors[] = Context::getContext()->getTranslator()->trans('Invalid URL', array(), 'Admin.Notifications.Error');
+                $errors[] = Context::getContext()->getTranslator()->trans('Invalid URL', [], 'Admin.Notifications.Error');
             }
         }
         if (!count($errors)) {
@@ -112,12 +125,12 @@ class ValidateCore
      */
     public static function isFloat($float)
     {
-        return strval((float) $float) == strval($float);
+        return (string) ((float) $float) == (string) $float;
     }
 
     public static function isUnsignedFloat($float)
     {
-        return strval((float) $float) == strval($float) && $float >= 0;
+        return (string) ((float) $float) == (string) $float && $float >= 0;
     }
 
     /**
@@ -161,15 +174,20 @@ class ValidateCore
      *
      * @param string $name Name to validate
      *
-     * @return int 1 if given input is a name, 0 else
+     * @return bool
      */
     public static function isCustomerName($name)
     {
-        $validityPattern = Tools::cleanNonUnicodeSupport(
-            '/^(?:[^0-9!<>,;?=+()\/\\@#"°*`{}_^$%:¤\[\]|\.。]|[\.。](?:\s|$))*$/u'
+        $validatorBuilder = Validation::createValidatorBuilder();
+        $validatorBuilder->setConstraintValidatorFactory(
+            new CustomerNameValidatorFactory(new CharacterCleaner())
         );
+        $validator = $validatorBuilder->getValidator();
+        $violations = $validator->validate($name, [
+            new CustomerName(),
+        ]);
 
-        return preg_match($validityPattern, $name);
+        return (count($violations) !== 0) ? 0 : 1;
     }
 
     /**
@@ -177,7 +195,7 @@ class ValidateCore
      *
      * @param string $name Name to validate
      *
-     * @return int 1 if given input is a name, 0 else
+     * @return bool
      */
     public static function isName($name)
     {
@@ -320,7 +338,7 @@ class ValidateCore
 
     public static function isNumericIsoCode($iso_code)
     {
-        return preg_match('/^[0-9]{2,3}$/', $iso_code);
+        return preg_match(NumericIsoCode::PATTERN, $iso_code);
     }
 
     /**
@@ -602,7 +620,7 @@ class ValidateCore
 
     public static function isDateOrNull($date)
     {
-        if (is_null($date) || $date === '0000-00-00 00:00:00' || $date === '0000-00-00') {
+        if (null === $date || $date === '0000-00-00 00:00:00' || $date === '0000-00-00') {
             return true;
         }
 
@@ -613,27 +631,22 @@ class ValidateCore
      * Check for birthDate validity.
      *
      * @param string $date birthdate to validate
+     * @param string $format optional format
      *
      * @return bool Validity is ok or not
      */
-    public static function isBirthDate($date)
+    public static function isBirthDate($date, $format = 'Y-m-d')
     {
         if (empty($date) || $date == '0000-00-00') {
             return true;
         }
-        if (preg_match('/^([0-9]{4})-((?:0?[1-9])|(?:1[0-2]))-((?:0?[1-9])|(?:[1-2][0-9])|(?:3[01]))([0-9]{2}:[0-9]{2}:[0-9]{2})?$/', $date, $birth_date)) {
-            if ($birth_date[1] > date('Y')
-                || ($birth_date[1] > date('Y') && $birth_date[2] > date('m'))
-                || ($birth_date[1] > date('Y') && $birth_date[2] > date('m') && $birth_date[3] > date('d'))
-                || ($birth_date[1] == date('Y') && $birth_date[2] == date('m') && $birth_date[3] > date('d'))
-                || ($birth_date[1] == date('Y') && $birth_date[2] > date('m'))) {
-                return false;
-            }
 
-            return true;
+        $d = DateTime::createFromFormat($format, $date);
+        if (!empty(DateTime::getLastErrors()['warning_count']) || false === $d) {
+            return false;
         }
 
-        return false;
+        return $d->setTime(0, 0, 0)->getTimestamp() <= time();
     }
 
     /**
@@ -694,6 +707,18 @@ class ValidateCore
     public static function isUpc($upc)
     {
         return !$upc || preg_match('/^[0-9]{0,12}$/', $upc);
+    }
+
+    /**
+     * Check for MPN validity.
+     *
+     * @param string $mpn to validate
+     *
+     * @return bool Validity is ok or not
+     */
+    public static function isMpn($mpn)
+    {
+        return Tools::strlen($mpn) <= 40;
     }
 
     /**
@@ -854,9 +879,9 @@ class ValidateCore
     }
 
     /**
-     * Check object validity.
+     * Check color validity.
      *
-     * @param int $object Object to validate
+     * @param string $color Color to validate
      *
      * @return bool Validity is ok or not
      */
@@ -919,7 +944,7 @@ class ValidateCore
 
     public static function isMySQLEngine($engine)
     {
-        return in_array($engine, array('InnoDB', 'MyISAM'));
+        return in_array($engine, ['InnoDB', 'MyISAM']);
     }
 
     public static function isUnixName($data)
@@ -1092,7 +1117,7 @@ class ValidateCore
      */
     public static function isLocalizationPackSelection($data)
     {
-        return in_array((string) $data, array('states', 'taxes', 'currencies', 'languages', 'units', 'groups'));
+        return in_array((string) $data, ['states', 'taxes', 'currencies', 'languages', 'units', 'groups']);
     }
 
     /**
@@ -1182,7 +1207,7 @@ class ValidateCore
      */
     public static function isStockManagement($stock_management)
     {
-        if (!in_array($stock_management, array('WA', 'FIFO', 'LIFO'))) {
+        if (!in_array($stock_management, ['WA', 'FIFO', 'LIFO'])) {
             return false;
         }
 
@@ -1203,7 +1228,7 @@ class ValidateCore
         }
         $sum = 0;
         for ($i = 0; $i != 14; ++$i) {
-            $tmp = ((($i + 1) % 2) + 1) * intval($siret[$i]);
+            $tmp = ((($i + 1) % 2) + 1) * (int) ($siret[$i]);
             if ($tmp >= 10) {
                 $tmp -= 9;
             }

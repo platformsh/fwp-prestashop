@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.43.94",
+    "Version": "36",
     "Names": {
         "AC": "Ascension",
         "AD": "Andorra",
@@ -44,7 +44,7 @@
         "CF": "Centralafrikanska republiken",
         "CG": "Kongo-Brazzaville",
         "CH": "Schweiz",
-        "CI": "Elfenbenskusten",
+        "CI": "Côte d’Ivoire",
         "CK": "Cooköarna",
         "CL": "Chile",
         "CM": "Kamerun",
@@ -146,7 +146,7 @@
         "MF": "Saint-Martin",
         "MG": "Madagaskar",
         "MH": "Marshallöarna",
-        "MK": "Makedonien",
+        "MK": "Nordmakedonien",
         "ML": "Mali",
         "MM": "Myanmar (Burma)",
         "MN": "Mongoliet",
@@ -248,6 +248,8 @@
         "VU": "Vanuatu",
         "WF": "Wallis- och Futunaöarna",
         "WS": "Samoa",
+        "XA": "fejkade accenter (för test)",
+        "XB": "fejkad bidi (för test)",
         "XK": "Kosovo",
         "YE": "Jemen",
         "YT": "Mayotte",

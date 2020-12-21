@@ -53,7 +53,7 @@ class PassConfig
             new ServiceLocatorTagPass(),
             new RegisterServiceSubscribersPass(),
             new DecoratorServicePass(),
-            new ResolveParameterPlaceHoldersPass(false),
+            new ResolveParameterPlaceHoldersPass(false, false),
             new ResolveFactoryClassPass(),
             new FactoryReturnTypePass($resolveClassPass),
             new CheckDefinitionValidityPass(),
@@ -113,9 +113,8 @@ class PassConfig
     /**
      * Adds a pass.
      *
-     * @param CompilerPassInterface $pass     A Compiler pass
-     * @param string                $type     The pass type
-     * @param int                   $priority Used to sort the passes
+     * @param CompilerPassInterface $pass A Compiler pass
+     * @param string                $type The pass type
      *
      * @throws InvalidArgumentException when a pass type doesn't exist
      */

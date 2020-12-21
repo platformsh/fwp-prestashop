@@ -26,7 +26,7 @@ trait MemcachedTrait
         'persistent_id' => null,
         'username' => null,
         'password' => null,
-        'serializer' => 'php',
+        \Memcached::OPT_SERIALIZER => \Memcached::SERIALIZER_PHP,
     ];
 
     private $client;
@@ -135,7 +135,7 @@ trait MemcachedTrait
             $client->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
             $client->setOption(\Memcached::OPT_NO_BLOCK, true);
             $client->setOption(\Memcached::OPT_TCP_NODELAY, true);
-            if (!array_key_exists('LIBKETAMA_COMPATIBLE', $options) && !array_key_exists(\Memcached::OPT_LIBKETAMA_COMPATIBLE, $options)) {
+            if (!\array_key_exists('LIBKETAMA_COMPATIBLE', $options) && !\array_key_exists(\Memcached::OPT_LIBKETAMA_COMPATIBLE, $options)) {
                 $client->setOption(\Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
             }
             foreach ($options as $name => $value) {
@@ -249,6 +249,7 @@ trait MemcachedTrait
         foreach ($this->checkResultCode($this->getClient()->deleteMulti($encodedIds)) as $result) {
             if (\Memcached::RES_SUCCESS !== $result && \Memcached::RES_NOTFOUND !== $result) {
                 $ok = false;
+                break;
             }
         }
 

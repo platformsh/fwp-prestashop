@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,21 +17,20 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Adapter;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use PrestaShopBundle\Service\Hook\HookEvent;
-use PrestaShopBundle\Service\Hook\RenderingHookEvent;
 use Context;
 use Hook;
+use PrestaShopBundle\Service\Hook\HookEvent;
+use PrestaShopBundle\Service\Hook\RenderingHookEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * The subscriber for HookDispatcher that triggers legacy Hooks.
@@ -222,7 +222,7 @@ class LegacyHookSubscriber implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        $listeners = array();
+        $listeners = [];
 
         //Hack SF2 cache clear : if context not mounted, bypass legacy call
         $legacyContext = Context::getContext();
@@ -234,11 +234,11 @@ class LegacyHookSubscriber implements EventSubscriberInterface
 
         if (is_array($hooks)) {
             foreach ($hooks as $hook) {
-                $name = $hook['name'];
+                $name = strtolower($hook['name']);
                 $id = $hook['id_hook'];
 
-                $moduleListeners = array();
-                $modules = array();
+                $moduleListeners = [];
+                $modules = [];
                 //SF2 cache clear bug fix : call bqSQL alias function
                 if (function_exists('bqSQL')) {
                     $modules = Hook::getHookModuleExecList($name);
@@ -248,10 +248,10 @@ class LegacyHookSubscriber implements EventSubscriberInterface
                     foreach ($modules as $order => $module) {
                         $moduleId = $module['id_module'];
                         $functionName = 'call_' . $id . '_' . $moduleId;
-                        $moduleListeners[] = array($functionName, 2000 - $order);
+                        $moduleListeners[] = [$functionName, 2000 - $order];
                     }
                 } else {
-                    $moduleListeners[] = array('call_' . $id . '_0', 2000);
+                    $moduleListeners[] = ['call_' . $id . '_0', 2000];
                 }
 
                 $listeners[$name] = $moduleListeners;
@@ -288,7 +288,7 @@ class LegacyHookSubscriber implements EventSubscriberInterface
         $moduleId = (int) $ids[1];
         list($event, $hookName) = $args;
 
-        /* @var $event HookEvent */
+        /** @var $event HookEvent */
         $content = Hook::exec($hookName, $event->getHookParameters(), $moduleId, ($event instanceof RenderingHookEvent));
 
         if (

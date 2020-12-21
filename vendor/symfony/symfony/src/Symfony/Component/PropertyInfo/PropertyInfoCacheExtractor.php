@@ -84,7 +84,6 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
      * Retrieves the cached data if applicable or delegates to the decorated extractor.
      *
      * @param string $method
-     * @param array  $arguments
      *
      * @return mixed
      */
@@ -100,7 +99,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
         // Calling rawurlencode escapes special characters not allowed in PSR-6's keys
         $key = rawurlencode($method.'.'.$serializedArguments);
 
-        if (array_key_exists($key, $this->arrayCache)) {
+        if (\array_key_exists($key, $this->arrayCache)) {
             return $this->arrayCache[$key];
         }
 

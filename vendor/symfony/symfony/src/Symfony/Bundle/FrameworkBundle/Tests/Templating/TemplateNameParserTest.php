@@ -26,13 +26,13 @@ class TemplateNameParserTest extends TestCase
         $kernel
             ->expects($this->any())
             ->method('getBundle')
-            ->will($this->returnCallback(function ($bundle) {
+            ->willReturnCallback(function ($bundle) {
                 if (\in_array($bundle, ['SensioFooBundle', 'SensioCmsFooBundle', 'FooBundle'])) {
                     return true;
                 }
 
                 throw new \InvalidArgumentException();
-            }))
+            })
         ;
         $this->parser = new TemplateNameParser($kernel);
     }
@@ -74,11 +74,9 @@ class TemplateNameParserTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testParseValidNameWithNotFoundBundle()
     {
+        $this->expectException('InvalidArgumentException');
         $this->parser->parse('BarBundle:Post:index.html.php');
     }
 
@@ -100,8 +98,8 @@ class TemplateNameParserTest extends TestCase
     {
         return [
             ['/path/to/section/index.html.php', '/path/to/section/index.html.php', '/path/to/section/index.html.php', new BaseTemplateReference('/path/to/section/index.html.php', 'php')],
-            ['C:\\path\\to\\section\\name.html.php', 'C:path/to/section/name.html.php', 'C:path/to/section/name.html.php', new BaseTemplateReference('C:path/to/section/name.html.php', 'php')],
-            ['C:\\path\\to\\section\\name:foo.html.php', 'C:path/to/section/name:foo.html.php', 'C:path/to/section/name:foo.html.php', new BaseTemplateReference('C:path/to/section/name:foo.html.php', 'php')],
+            ['C:\\path\\to\\section\\name.html.php', 'C:/path/to/section/name.html.php', 'C:/path/to/section/name.html.php', new BaseTemplateReference('C:/path/to/section/name.html.php', 'php')],
+            ['C:\\path\\to\\section\\name:foo.html.php', 'C:/path/to/section/name:foo.html.php', 'C:/path/to/section/name:foo.html.php', new BaseTemplateReference('C:/path/to/section/name:foo.html.php', 'php')],
             ['\\path\\to\\section\\name.html.php', '/path/to/section/name.html.php', '/path/to/section/name.html.php', new BaseTemplateReference('/path/to/section/name.html.php', 'php')],
             ['/path/to/section/name.php', '/path/to/section/name.php', '/path/to/section/name.php', new BaseTemplateReference('/path/to/section/name.php', 'php')],
         ];

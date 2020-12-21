@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.44.50",
+    "Version": "36",
     "Names": {
         "aa": "afarski",
         "ab": "abhaski",
@@ -98,7 +98,7 @@
         "din": "dinka",
         "dje": "zarma",
         "doi": "dogri",
-        "dsb": "donji lužičkosrpski",
+        "dsb": "donjolužičkosrpski",
         "dua": "duala",
         "dum": "srednjeholandski",
         "dv": "maldivski",
@@ -172,7 +172,7 @@
         "hmn": "hmonški",
         "ho": "hiri motu",
         "hr": "hrvatski",
-        "hsb": "gornji lužičkosrpski",
+        "hsb": "gornjolužičkosrpski",
         "ht": "haićanski",
         "hu": "mađarski",
         "hup": "hupa",

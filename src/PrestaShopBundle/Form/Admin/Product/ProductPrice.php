@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,21 +17,20 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShopBundle\Form\Admin\Product;
 
 use PrestaShopBundle\Form\Admin\Type\CommonAbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type as FormType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * This form class is responsible to generate the product price form.
@@ -86,10 +86,8 @@ class ProductPrice extends CommonAbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->tax_rules = array_merge(
-            [$this->translator->trans('No tax', [], 'Admin.Catalog.Feature') => 0],
-            $this->tax_rules
-        );
+        $this->tax_rules = [$this->translator->trans('No tax', [], 'Admin.Catalog.Feature') => 0] + $this->tax_rules;
+
         $builder->add(
             'price',
             FormType\MoneyType::class,
@@ -185,7 +183,8 @@ class ProductPrice extends CommonAbstractType
                     'attr' => ['placeholder' => $this->translator->trans('Per kilo, per litre', [], 'Admin.Catalog.Help')],
                 ]
             )
-            ->add('specific_price',
+            ->add(
+                'specific_price',
                 ProductSpecificPrice::class,
                 [
                     'id_product' => $options['id_product'],

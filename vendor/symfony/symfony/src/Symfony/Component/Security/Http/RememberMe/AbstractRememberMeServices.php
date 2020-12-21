@@ -44,10 +44,8 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
     private $userProviders;
 
     /**
-     * @param array           $userProviders
      * @param string          $secret
      * @param string          $providerKey
-     * @param array           $options
      * @param LoggerInterface $logger
      *
      * @throws \InvalidArgumentException
@@ -101,6 +99,10 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
      */
     final public function autoLogin(Request $request)
     {
+        if (($cookie = $request->attributes->get(self::COOKIE_ATTR_NAME)) && null === $cookie->getValue()) {
+            return null;
+        }
+
         if (null === $cookie = $request->cookies->get($this->options['name'])) {
             return null;
         }
@@ -150,6 +152,8 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
 
             throw $e;
         }
+
+        return null;
     }
 
     /**

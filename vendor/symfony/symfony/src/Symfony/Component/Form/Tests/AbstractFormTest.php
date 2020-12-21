@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Form\Tests;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -56,7 +57,6 @@ abstract class AbstractFormTest extends TestCase
      * @param string                   $name
      * @param EventDispatcherInterface $dispatcher
      * @param string|null              $dataClass
-     * @param array                    $options
      *
      * @return FormBuilder
      */
@@ -66,7 +66,7 @@ abstract class AbstractFormTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getDataMapper()
     {
@@ -74,7 +74,7 @@ abstract class AbstractFormTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getDataTransformer()
     {
@@ -82,7 +82,7 @@ abstract class AbstractFormTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getFormValidator()
     {

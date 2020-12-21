@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.43.65",
+    "Version": "36",
     "Names": {
         "AC": "Đảo Ascension",
         "AD": "Andorra",
@@ -81,7 +81,7 @@
         "GA": "Gabon",
         "GB": "Vương quốc Anh",
         "GD": "Grenada",
-        "GE": "Gruzia",
+        "GE": "Georgia",
         "GF": "Guiana thuộc Pháp",
         "GG": "Guernsey",
         "GH": "Ghana",
@@ -146,7 +146,7 @@
         "MF": "St. Martin",
         "MG": "Madagascar",
         "MH": "Quần đảo Marshall",
-        "MK": "Macedonia",
+        "MK": "Bắc Macedonia",
         "ML": "Mali",
         "MM": "Myanmar (Miến Điện)",
         "MN": "Mông Cổ",
@@ -248,6 +248,8 @@
         "VU": "Vanuatu",
         "WF": "Wallis và Futuna",
         "WS": "Samoa",
+        "XA": "Pseudo-Accents",
+        "XB": "Pseudo-Bidi",
         "XK": "Kosovo",
         "YE": "Yemen",
         "YT": "Mayotte",

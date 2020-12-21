@@ -2,7 +2,7 @@
 <module>
 	<name>statspersonalinfos</name>
 	<displayName><![CDATA[Registered customer information]]></displayName>
-	<version><![CDATA[2.0.2]]></version>
+	<version><![CDATA[2.0.3]]></version>
 	<description><![CDATA[Adds information about your registered customers (such as gender and age) to the Stats dashboard.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>

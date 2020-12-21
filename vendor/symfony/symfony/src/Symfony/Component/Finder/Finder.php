@@ -29,7 +29,7 @@ use Symfony\Component\Finder\Iterator\SortableIterator;
  *
  * All rules may be invoked several times.
  *
- * All methods return the current Finder object to allow easy chaining:
+ * All methods return the current Finder object to allow chaining:
  *
  *     $finder = Finder::create()->files()->name('*.php')->in(__DIR__);
  *
@@ -528,7 +528,7 @@ class Finder implements \IteratorAggregate, \Countable
     /**
      * Searches files and directories which match defined rules.
      *
-     * @param string|array $dirs A directory path or an array of directories
+     * @param string|string[] $dirs A directory path or an array of directories
      *
      * @return $this
      *
@@ -541,7 +541,8 @@ class Finder implements \IteratorAggregate, \Countable
         foreach ((array) $dirs as $dir) {
             if (is_dir($dir)) {
                 $resolvedDirs[] = $this->normalizeDir($dir);
-            } elseif ($glob = glob($dir, (\defined('GLOB_BRACE') ? GLOB_BRACE : 0) | GLOB_ONLYDIR)) {
+            } elseif ($glob = glob($dir, (\defined('GLOB_BRACE') ? GLOB_BRACE : 0) | GLOB_ONLYDIR | GLOB_NOSORT)) {
+                sort($glob);
                 $resolvedDirs = array_merge($resolvedDirs, array_map([$this, 'normalizeDir'], $glob));
             } else {
                 throw new \InvalidArgumentException(sprintf('The "%s" directory does not exist.', $dir));
@@ -645,12 +646,15 @@ class Finder implements \IteratorAggregate, \Countable
      */
     private function searchInDirectory($dir)
     {
+        $exclude = $this->exclude;
+        $notPaths = $this->notPaths;
+
         if (static::IGNORE_VCS_FILES === (static::IGNORE_VCS_FILES & $this->ignore)) {
-            $this->exclude = array_merge($this->exclude, self::$vcsPatterns);
+            $exclude = array_merge($exclude, self::$vcsPatterns);
         }
 
         if (static::IGNORE_DOT_FILES === (static::IGNORE_DOT_FILES & $this->ignore)) {
-            $this->notPaths[] = '#(^|/)\..+(/|$)#';
+            $notPaths[] = '#(^|/)\..+(/|$)#';
         }
 
         $minDepth = 0;
@@ -683,8 +687,8 @@ class Finder implements \IteratorAggregate, \Countable
 
         $iterator = new Iterator\RecursiveDirectoryIterator($dir, $flags, $this->ignoreUnreadableDirs);
 
-        if ($this->exclude) {
-            $iterator = new Iterator\ExcludeDirectoryFilterIterator($iterator, $this->exclude);
+        if ($exclude) {
+            $iterator = new Iterator\ExcludeDirectoryFilterIterator($iterator, $exclude);
         }
 
         $iterator = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::SELF_FIRST);
@@ -717,8 +721,8 @@ class Finder implements \IteratorAggregate, \Countable
             $iterator = new Iterator\CustomFilterIterator($iterator, $this->filters);
         }
 
-        if ($this->paths || $this->notPaths) {
-            $iterator = new Iterator\PathFilterIterator($iterator, $this->paths, $this->notPaths);
+        if ($this->paths || $notPaths) {
+            $iterator = new Iterator\PathFilterIterator($iterator, $this->paths, $notPaths);
         }
 
         if ($this->sort) {
@@ -732,7 +736,7 @@ class Finder implements \IteratorAggregate, \Countable
     /**
      * Normalizes given directory names by removing trailing slashes.
      *
-     * Excluding: (s)ftp:// wrapper
+     * Excluding: (s)ftp:// or ssh2.(s)ftp:// wrapper
      *
      * @param string $dir
      *
@@ -742,7 +746,7 @@ class Finder implements \IteratorAggregate, \Countable
     {
         $dir = rtrim($dir, '/'.\DIRECTORY_SEPARATOR);
 
-        if (preg_match('#^s?ftp://#', $dir)) {
+        if (preg_match('#^(ssh2\.)?s?ftp://#', $dir)) {
             $dir .= '/';
         }
 

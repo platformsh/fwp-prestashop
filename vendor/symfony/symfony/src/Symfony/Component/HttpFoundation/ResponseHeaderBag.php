@@ -160,7 +160,7 @@ class ResponseHeaderBag extends HeaderBag
      */
     public function hasCacheControlDirective($key)
     {
-        return array_key_exists($key, $this->computedCacheControl);
+        return \array_key_exists($key, $this->computedCacheControl);
     }
 
     /**
@@ -168,7 +168,7 @@ class ResponseHeaderBag extends HeaderBag
      */
     public function getCacheControlDirective($key)
     {
-        return array_key_exists($key, $this->computedCacheControl) ? $this->computedCacheControl[$key] : null;
+        return \array_key_exists($key, $this->computedCacheControl) ? $this->computedCacheControl[$key] : null;
     }
 
     public function setCookie(Cookie $cookie)
@@ -309,13 +309,13 @@ class ResponseHeaderBag extends HeaderBag
      */
     protected function computeCacheControlValue()
     {
-        if (!$this->cacheControl && !$this->has('ETag') && !$this->has('Last-Modified') && !$this->has('Expires')) {
-            return 'no-cache, private';
-        }
-
         if (!$this->cacheControl) {
+            if ($this->has('Last-Modified') || $this->has('Expires')) {
+                return 'private, must-revalidate'; // allows for heuristic expiration (RFC 7234 Section 4.2.2) in the case of "Last-Modified"
+            }
+
             // conservative by default
-            return 'private, must-revalidate';
+            return 'no-cache, private';
         }
 
         $header = $this->getCacheControlHeader();

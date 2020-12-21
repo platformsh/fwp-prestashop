@@ -11,12 +11,14 @@
 
 namespace Symfony\Bridge\Doctrine\Form;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\Common\Persistence\Mapping\MappingException;
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
+use Doctrine\Common\Persistence\Mapping\MappingException as LegacyCommonMappingException;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException as LegacyMappingException;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Mapping\MappingException;
 use Symfony\Component\Form\FormTypeGuesserInterface;
 use Symfony\Component\Form\Guess\Guess;
 use Symfony\Component\Form\Guess\TypeGuess;
@@ -28,7 +30,10 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
 
     private $cache = [];
 
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @param ManagerRegistry|LegacyManagerRegistry $registry
+     */
+    public function __construct($registry)
     {
         $this->registry = $registry;
     }
@@ -90,7 +95,7 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
         $classMetadatas = $this->getMetadata($class);
 
         if (!$classMetadatas) {
-            return;
+            return null;
         }
 
         /** @var ClassMetadataInfo $classMetadata */
@@ -118,6 +123,8 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
 
             return new ValueGuess(!$mapping['joinColumns'][0]['nullable'], Guess::HIGH_CONFIDENCE);
         }
+
+        return null;
     }
 
     /**
@@ -137,6 +144,8 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
                 return new ValueGuess(null, Guess::MEDIUM_CONFIDENCE);
             }
         }
+
+        return null;
     }
 
     /**
@@ -150,6 +159,8 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
                 return new ValueGuess(null, Guess::MEDIUM_CONFIDENCE);
             }
         }
+
+        return null;
     }
 
     protected function getMetadata($class)
@@ -157,7 +168,7 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
         // normalize class name
         $class = ClassUtils::getRealClass(ltrim($class, '\\'));
 
-        if (array_key_exists($class, $this->cache)) {
+        if (\array_key_exists($class, $this->cache)) {
             return $this->cache[$class];
         }
 
@@ -167,9 +178,13 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
                 return $this->cache[$class] = [$em->getClassMetadata($class), $name];
             } catch (MappingException $e) {
                 // not an entity or mapped super class
+            } catch (LegacyCommonMappingException $e) {
+                // not an entity or mapped super class
             } catch (LegacyMappingException $e) {
                 // not an entity or mapped super class, using Doctrine ORM 2.2
             }
         }
+
+        return null;
     }
 }

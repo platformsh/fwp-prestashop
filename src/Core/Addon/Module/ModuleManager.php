@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,18 +17,16 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Core\Addon\Module;
 
 use Exception;
-use PrestaShop\PrestaShop\Adapter\Cache\CacheClearer;
 use PrestaShop\PrestaShop\Adapter\Module\AdminModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Module\Module;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataProvider;
@@ -36,6 +35,7 @@ use PrestaShop\PrestaShop\Adapter\Module\ModuleZipManager;
 use PrestaShop\PrestaShop\Core\Addon\AddonManagerInterface;
 use PrestaShop\PrestaShop\Core\Addon\AddonsCollection;
 use PrestaShop\PrestaShop\Core\Addon\Module\Exception\UnconfirmedModuleActionException;
+use PrestaShop\PrestaShop\Core\Cache\Clearer\CacheClearerInterface;
 use PrestaShopBundle\Event\ModuleManagementEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -96,9 +96,9 @@ class ModuleManager implements AddonManagerInterface
     private $actionParams;
 
     /**
-     * @var CacheClearer
+     * @var CacheClearerInterface
      */
-    private $cacheClearer;
+    private $symfonyCacheClearer;
 
     /**
      * Used to check if the cache has already been cleaned.
@@ -115,7 +115,7 @@ class ModuleManager implements AddonManagerInterface
      * @param ModuleZipManager $moduleZipManager
      * @param TranslatorInterface $translator
      * @param EventDispatcherInterface $eventDispatcher
-     * @param CacheClearer $cacheClearer
+     * @param CacheClearerInterface $symfonyCacheClearer
      */
     public function __construct(
         AdminModuleDataProvider $adminModuleProvider,
@@ -125,7 +125,7 @@ class ModuleManager implements AddonManagerInterface
         ModuleZipManager $moduleZipManager,
         TranslatorInterface $translator,
         EventDispatcherInterface $eventDispatcher,
-        CacheClearer $cacheClearer
+        CacheClearerInterface $symfonyCacheClearer
     ) {
         $this->adminModuleProvider = $adminModuleProvider;
         $this->moduleProvider = $modulesProvider;
@@ -134,7 +134,7 @@ class ModuleManager implements AddonManagerInterface
         $this->moduleZipManager = $moduleZipManager;
         $this->translator = $translator;
         $this->eventDispatcher = $eventDispatcher;
-        $this->cacheClearer = $cacheClearer;
+        $this->symfonyCacheClearer = $symfonyCacheClearer;
         $this->actionParams = new ParameterBag();
     }
 
@@ -196,9 +196,9 @@ class ModuleManager implements AddonManagerInterface
      */
     public function countModulesWithNotificationsDetailed()
     {
-        $notificationCounts = array(
+        $notificationCounts = [
             'count' => 0,
-        );
+        ];
 
         foreach ((array) $this->groupModulesByInstallationProgress() as $key => $modules) {
             $count = count($modules);
@@ -216,10 +216,10 @@ class ModuleManager implements AddonManagerInterface
     {
         $installedProducts = $this->moduleRepository->getInstalledModules();
 
-        $modules = (object) array(
-            'to_configure' => array(),
-            'to_update' => array(),
-        );
+        $modules = (object) [
+            'to_configure' => [],
+            'to_update' => [],
+        ];
 
         /*
          * @var \PrestaShop\PrestaShop\Adapter\Module\Module
@@ -260,7 +260,7 @@ class ModuleManager implements AddonManagerInterface
             return $installedProduct->getInstance()->warning;
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -277,13 +277,7 @@ class ModuleManager implements AddonManagerInterface
     {
         // in CLI mode, there is no employee set up
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to install modules.',
-                    array(),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to install modules.', [], 'Admin.Modules.Notification'));
         }
 
         if (is_file($source)) {
@@ -327,15 +321,7 @@ class ModuleManager implements AddonManagerInterface
         // * Employee can delete
         // * Employee can delete this specific module
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to uninstall the module %module%.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to uninstall the module %module%.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
@@ -345,7 +331,7 @@ class ModuleManager implements AddonManagerInterface
         $result = $module->onUninstall();
 
         if ($result && $this->actionParams->get('deletion', false)) {
-            $result &= $this->removeModuleFromDisk($name);
+            $result = $result && $this->removeModuleFromDisk($name);
         }
 
         $this->checkAndClearCache($result);
@@ -367,15 +353,7 @@ class ModuleManager implements AddonManagerInterface
     public function upgrade($name, $version = 'latest', $source = null)
     {
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to upgrade the module %module%.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to upgrade the module %module%.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
@@ -412,35 +390,17 @@ class ModuleManager implements AddonManagerInterface
     public function disable($name)
     {
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to disable the module %module%.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to disable the module %module%.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
 
         $module = $this->moduleRepository->getModule($name);
+
         try {
             $result = $module->onDisable();
         } catch (Exception $e) {
-            throw new Exception(
-                $this->translator->trans(
-                    'Error when disabling module %module%. %error_details%.',
-                    array(
-                        '%module%' => $name,
-                        '%error_details%' => $e->getMessage(),
-                    ),
-                    'Admin.Modules.Notification'
-                ),
-                0,
-                $e
-            );
+            throw new Exception($this->translator->trans('Error when disabling module %module%. %error_details%.', ['%module%' => $name, '%error_details%' => $e->getMessage()], 'Admin.Modules.Notification'), 0, $e);
         }
 
         $this->checkAndClearCache($result);
@@ -459,35 +419,17 @@ class ModuleManager implements AddonManagerInterface
     public function enable($name)
     {
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to enable the module %module%.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to enable the module %module%.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
 
         $module = $this->moduleRepository->getModule($name);
+
         try {
             $result = $module->onEnable();
         } catch (Exception $e) {
-            throw new Exception(
-                $this->translator->trans(
-                    'Error when enabling module %module%. %error_details%.',
-                    array(
-                        '%module%' => $name,
-                        '%error_details%' => $e->getMessage(),
-                    ),
-                    'Admin.Modules.Notification'
-                ),
-                0,
-                $e
-            );
+            throw new Exception($this->translator->trans('Error when enabling module %module%. %error_details%.', ['%module%' => $name, '%error_details%' => $e->getMessage()], 'Admin.Modules.Notification'), 0, $e);
         }
 
         $this->checkAndClearCache($result);
@@ -522,35 +464,17 @@ class ModuleManager implements AddonManagerInterface
     public function disableMobile($name)
     {
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to disable the module %module% on mobile.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to disable the module %module% on mobile.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
 
         $module = $this->moduleRepository->getModule($name);
+
         try {
             $result = $module->onMobileDisable();
         } catch (Exception $e) {
-            throw new Exception(
-                $this->translator->trans(
-                    'Error when disabling module %module% on mobile. %error_details%',
-                    array(
-                        '%module%' => $name,
-                        '%error_details%' => $e->getMessage(),
-                    ),
-                    'Admin.Modules.Notification'
-                ),
-                0,
-                $e
-            );
+            throw new Exception($this->translator->trans('Error when disabling module %module% on mobile. %error_details%', ['%module%' => $name, '%error_details%' => $e->getMessage()], 'Admin.Modules.Notification'), 0, $e);
         }
 
         $this->checkAndClearCache($result);
@@ -584,35 +508,17 @@ class ModuleManager implements AddonManagerInterface
     public function enableMobile($name)
     {
         if (!$this->adminModuleProvider->isAllowedAccess(__FUNCTION__, $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to enable the module %module% on mobile.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to enable the module %module% on mobile.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
 
         $module = $this->moduleRepository->getModule($name);
+
         try {
             $result = $module->onMobileEnable();
         } catch (Exception $e) {
-            throw new Exception(
-                $this->translator->trans(
-                    'Error when enabling module %module% on mobile. %error_details%',
-                    array(
-                        '%module%' => $name,
-                        '%error_details%' => $e->getMessage(),
-                    ),
-                    'Admin.Modules.Notification'
-                ),
-                0,
-                $e
-            );
+            throw new Exception($this->translator->trans('Error when enabling module %module% on mobile. %error_details%', ['%module%' => $name, '%error_details%' => $e->getMessage()], 'Admin.Modules.Notification'), 0, $e);
         }
 
         $this->checkAndClearCache($result);
@@ -630,20 +536,13 @@ class ModuleManager implements AddonManagerInterface
     public function reset($name, $keep_data = false)
     {
         if (!$this->adminModuleProvider->isAllowedAccess('install') || !$this->adminModuleProvider->isAllowedAccess('uninstall', $name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'You are not allowed to reset the module %module%.',
-                    array(
-                        '%module%' => $name,
-                    ),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('You are not allowed to reset the module %module%.', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
 
         $this->checkIsInstalled($name);
 
         $module = $this->moduleRepository->getModule($name);
+
         try {
             if ((bool) $keep_data && method_exists($module->getInstance(), 'reset')) {
                 $this->dispatch(ModuleManagementEvent::UNINSTALL, $module);
@@ -653,18 +552,7 @@ class ModuleManager implements AddonManagerInterface
                 $status = ($this->uninstall($name) && $this->install($name));
             }
         } catch (Exception $e) {
-            throw new Exception(
-                $this->translator->trans(
-                    'Error when resetting module %module%. %error_details%',
-                    array(
-                        '%module%' => $name,
-                        '%error_details%' => $e->getMessage(),
-                    ),
-                    'Admin.Modules.Notification'
-                ),
-                0,
-                $e
-            );
+            throw new Exception($this->translator->trans('Error when resetting module %module%. %error_details%', ['%module%' => $name, '%error_details%' => $e->getMessage()], 'Admin.Modules.Notification'), 0, $e);
         }
 
         return $status;
@@ -692,6 +580,19 @@ class ModuleManager implements AddonManagerInterface
     public function isInstalled($name)
     {
         return $this->moduleProvider->isInstalled($name);
+    }
+
+    /**
+     * Shortcut to the module data provider in order to know the module id depends
+     * on its name.
+     *
+     * @param string $name The technical module name
+     *
+     * @return int the Module Id, or 0 if not found
+     */
+    public function getModuleIdByName($name)
+    {
+        return $this->moduleProvider->getModuleIdByName($name);
     }
 
     /**
@@ -724,7 +625,7 @@ class ModuleManager implements AddonManagerInterface
             // Invalid instance: Missing or with syntax error
             $message = $this->translator->trans(
                 'The module is invalid and cannot be loaded.',
-                array(),
+                [],
                 'Admin.Modules.Notification'
             );
         }
@@ -732,7 +633,7 @@ class ModuleManager implements AddonManagerInterface
         if (empty($message)) {
             $message = $this->translator->trans(
                 'Unfortunately, the module did not return additional details.',
-                array(),
+                [],
                 'Admin.Modules.Notification'
             );
         }
@@ -754,13 +655,7 @@ class ModuleManager implements AddonManagerInterface
     private function checkIsInstalled($name)
     {
         if (!$this->moduleProvider->isInstalled($name)) {
-            throw new Exception(
-                $this->translator->trans(
-                    'The module %module% must be installed first',
-                    array('%module%' => $name),
-                    'Admin.Modules.Notification'
-                )
-            );
+            throw new Exception($this->translator->trans('The module %module% must be installed first', ['%module%' => $name], 'Admin.Modules.Notification'));
         }
     }
 
@@ -776,9 +671,7 @@ class ModuleManager implements AddonManagerInterface
     {
         if ($action === 'install') {
             if ($module->attributes->has('prestatrust') && !$this->actionParams->has('confirmPrestaTrust')) {
-                throw (new UnconfirmedModuleActionException())->setModule($module)
-                    ->setAction($action)
-                    ->setSubject('PrestaTrust');
+                throw (new UnconfirmedModuleActionException())->setModule($module)->setAction($action)->setSubject('PrestaTrust');
             }
         }
     }
@@ -802,7 +695,7 @@ class ModuleManager implements AddonManagerInterface
             return;
         }
 
-        $this->cacheClearer->clearSymfonyCache();
+        $this->symfonyCacheClearer->clear();
         $this->cacheCleared = true;
     }
 }

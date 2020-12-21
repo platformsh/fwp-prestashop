@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
-class ProfilerTest extends WebTestCase
+class ProfilerTest extends AbstractWebTestCase
 {
     /**
      * @dataProvider getConfigs
@@ -24,16 +24,16 @@ class ProfilerTest extends WebTestCase
         }
 
         $client->request('GET', '/profiler');
-        $this->assertFalse($client->getProfile());
+        $this->assertNull($client->getProfile());
 
         // enable the profiler for the next request
         $client->enableProfiler();
-        $crawler = $client->request('GET', '/profiler');
-        $profile = $client->getProfile();
-        $this->assertInternalType('object', $profile);
+        $this->assertNull($client->getProfile());
+        $client->request('GET', '/profiler');
+        $this->assertIsObject($client->getProfile());
 
         $client->request('GET', '/profiler');
-        $this->assertFalse($client->getProfile());
+        $this->assertNull($client->getProfile());
     }
 
     public function getConfigs()

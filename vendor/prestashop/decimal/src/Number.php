@@ -8,6 +8,7 @@
 
 namespace PrestaShop\Decimal;
 
+use InvalidArgumentException;
 use PrestaShop\Decimal\Operation\Rounding;
 
 /**
@@ -54,25 +55,27 @@ class Number
      * (string) new Number('123456', 6); // -> '0.123456'
      * ```
      *
-     * Note: exponents are always positive.
+     * Note: decimal positions must always be a positive number.
      *
      * @param string $number Number or coefficient
-     * @param int $exponent [default=null] If provided, the number is considered a coefficient of
-     * the scientific notation.
+     * @param int $exponent [default=null] If provided, the number can be considered as the negative
+     * exponent of the scientific notation, or the number of fractional digits.
      */
     public function __construct($number, $exponent = null)
     {
         if (!is_string($number)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('Invalid type - expected string, but got (%s) "%s"', gettype($number), print_r($number, true))
             );
         }
 
         if (null === $exponent) {
-            $this->initFromString($number);
-        } else {
-            $this->initFromScientificNotation($number, $exponent);
+            $decimalNumber = Builder::parseNumber($number);
+            $number = $decimalNumber->getSign() . $decimalNumber->getCoefficient();
+            $exponent = $decimalNumber->getExponent();
         }
+
+        $this->initFromScientificNotation($number, $exponent);
 
         if ('0' === $this->coefficient) {
             // make sure the sign is always positive for zero
@@ -340,10 +343,22 @@ class Number
      * @param int $precision [optional] By default, up to Operation\Division::DEFAULT_PRECISION number of decimals.
      *
      * @return self
+     *
+     * @throws Exception\DivisionByZeroException
      */
     public function dividedBy(self $divisor, $precision = Operation\Division::DEFAULT_PRECISION)
     {
         return (new Operation\Division())->compute($this, $divisor, $precision);
+    }
+
+    /**
+     * Indicates if this number equals zero
+     *
+     * @return bool
+     */
+    public function equalsZero()
+    {
+        return '0' == $this->getCoefficient();
     }
 
     /**
@@ -359,6 +374,26 @@ class Number
     }
 
     /**
+     * Indicates if this number is greater than zero
+     *
+     * @return bool
+     */
+    public function isGreaterThanZero()
+    {
+        return $this->isPositive() && !$this->equalsZero();
+    }
+
+    /**
+     * Indicates if this number is greater or equal than zero
+     *
+     * @return bool
+     */
+    public function isGreaterOrEqualThanZero()
+    {
+        return $this->isPositive();
+    }
+
+    /**
      * Indicates if this number is greater or equal compared to the provided one
      *
      * @param self $number
@@ -368,6 +403,26 @@ class Number
     public function isGreaterOrEqualThan(self $number)
     {
         return (0 <= (new Operation\Comparison())->compare($this, $number));
+    }
+
+    /**
+     * Indicates if this number is lower than zero
+     *
+     * @return bool
+     */
+    public function isLowerThanZero()
+    {
+        return $this->isNegative() && !$this->equalsZero();
+    }
+
+    /**
+     * Indicates if this number is lower or equal than zero
+     *
+     * @return bool
+     */
+    public function isLowerOrEqualThanZero()
+    {
+        return $this->isNegative() || $this->equalsZero();
     }
 
     /**
@@ -456,39 +511,6 @@ class Number
     }
 
     /**
-     * Initializes the number using a string
-     *
-     * @param string $number
-     */
-    private function initFromString($number)
-    {
-        if (!preg_match("/^(?<sign>[-+])?(?<integerPart>\d+)(?:\.(?<fractionalPart>\d+))?$/", $number, $parts)) {
-            throw new \InvalidArgumentException(
-                sprintf('"%s" cannot be interpreted as a number', print_r($number, true))
-            );
-        }
-
-        $this->isNegative = ('-' === $parts['sign']);
-
-        // extract the integer part and remove leading zeroes and plus sign
-        $integerPart = ltrim($parts['integerPart'], '0');
-
-        $fractionalPart = '';
-        if (array_key_exists('fractionalPart', $parts)) {
-            // extract the fractional part and remove trailing zeroes
-            $fractionalPart = rtrim($parts['fractionalPart'], '0');
-        }
-
-        $this->exponent = strlen($fractionalPart);
-        $this->coefficient = $integerPart . $fractionalPart;
-
-        // when coefficient is '0' or a sequence of '0'
-        if ('' === $this->coefficient) {
-            $this->coefficient = '0';
-        }
-    }
-
-    /**
      * Initializes the number using a coefficient and exponent
      *
      * @param string $coefficient
@@ -497,13 +519,13 @@ class Number
     private function initFromScientificNotation($coefficient, $exponent)
     {
         if ($exponent < 0) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('Invalid value for exponent. Expected a positive integer or 0, but got "%s"', $coefficient)
             );
         }
 
         if (!preg_match("/^(?<sign>[-+])?(?<integerPart>\d+)$/", $coefficient, $parts)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('"%s" cannot be interpreted as a number', $coefficient)
             );
         }
