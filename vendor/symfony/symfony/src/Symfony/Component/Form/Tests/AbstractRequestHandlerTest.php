@@ -200,7 +200,7 @@ abstract class AbstractRequestHandlerTest extends TestCase
         $form = $this->createForm('param1', $method, true);
         $form->add($this->createForm('field1'));
         $form->add($this->createBuilder('field2', false, ['allow_file_upload' => true])->getForm());
-        $file = $this->getMockFile();
+        $file = $this->getUploadedFile();
 
         $this->setRequestData($method, [
             'param1' => [
@@ -225,7 +225,7 @@ abstract class AbstractRequestHandlerTest extends TestCase
     public function testParamTakesPrecedenceOverFile($method)
     {
         $form = $this->createForm('param1', $method);
-        $file = $this->getMockFile();
+        $file = $this->getUploadedFile();
 
         $this->setRequestData($method, [
             'param1' => 'DATA',
@@ -247,7 +247,7 @@ abstract class AbstractRequestHandlerTest extends TestCase
         $form = $this->createBuilder('param1', false, ['allow_file_upload' => true])
             ->setMethod($method)
             ->getForm();
-        $file = $this->getMockFile();
+        $file = $this->getUploadedFile();
 
         $this->setRequestData($method, [
             'param1' => null,
@@ -269,14 +269,14 @@ abstract class AbstractRequestHandlerTest extends TestCase
         $form = $this->createBuilder('param1', false, ['allow_file_upload' => true])
             ->setMethod($method)
             ->getForm();
-        $file = $this->getMockFile();
+        $file = $this->getUploadedFile();
 
         $this->setRequestData($method, [
             'param1' => null,
         ], [
-            'param2' => $this->getMockFile('2'),
+            'param2' => $this->getUploadedFile('2'),
             'param1' => $file,
-            'param3' => $this->getMockFile('3'),
+            'param3' => $this->getUploadedFile('3'),
         ]);
 
         $this->requestHandler->handleRequest($form, $this->request);
@@ -286,16 +286,36 @@ abstract class AbstractRequestHandlerTest extends TestCase
     }
 
     /**
+     * @dataProvider methodExceptGetProvider
+     */
+    public function testSubmitFileWithNamelessForm($method)
+    {
+        $form = $this->createForm('', $method, true);
+        $fileForm = $this->createBuilder('document', false, ['allow_file_upload' => true])->getForm();
+        $form->add($fileForm);
+        $file = $this->getUploadedFile();
+        $this->setRequestData($method, [
+            'document' => null,
+        ], [
+            'document' => $file,
+        ]);
+        $this->requestHandler->handleRequest($form, $this->request);
+
+        $this->assertTrue($form->isSubmitted());
+        $this->assertSame($file, $fileForm->getData());
+    }
+
+    /**
      * @dataProvider getPostMaxSizeFixtures
      */
     public function testAddFormErrorIfPostMaxSizeExceeded($contentLength, $iniMax, $shouldFail, array $errorParams = [])
     {
         $this->serverParams->expects($this->once())
             ->method('getContentLength')
-            ->will($this->returnValue($contentLength));
+            ->willReturn($contentLength);
         $this->serverParams->expects($this->any())
             ->method('getNormalizedIniPostMaxSize')
-            ->will($this->returnValue($iniMax));
+            ->willReturn($iniMax);
 
         $options = ['post_max_size_message' => 'Max {{ max }}!'];
         $form = $this->factory->createNamed('name', 'Symfony\Component\Form\Extension\Core\Type\TextType', null, $options);
@@ -326,13 +346,13 @@ abstract class AbstractRequestHandlerTest extends TestCase
             [1024, '1K', false],
             [null, '1K', false],
             [1024, '', false],
-            [1024, 0, false],
+            [1024, '0', false],
         ];
     }
 
     public function testUploadedFilesAreAccepted()
     {
-        $this->assertTrue($this->requestHandler->isFileUpload($this->getMockFile()));
+        $this->assertTrue($this->requestHandler->isFileUpload($this->getUploadedFile()));
     }
 
     public function testInvalidFilesAreRejected()
@@ -340,13 +360,37 @@ abstract class AbstractRequestHandlerTest extends TestCase
         $this->assertFalse($this->requestHandler->isFileUpload($this->getInvalidFile()));
     }
 
+    /**
+     * @dataProvider uploadFileErrorCodes
+     */
+    public function testFailedFileUploadIsTurnedIntoFormError($errorCode, $expectedErrorCode)
+    {
+        $this->assertSame($expectedErrorCode, $this->requestHandler->getUploadFileError($this->getFailedUploadedFile($errorCode)));
+    }
+
+    public function uploadFileErrorCodes()
+    {
+        return [
+            'no error' => [UPLOAD_ERR_OK, null],
+            'upload_max_filesize ini directive' => [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_INI_SIZE],
+            'MAX_FILE_SIZE from form' => [UPLOAD_ERR_FORM_SIZE, UPLOAD_ERR_FORM_SIZE],
+            'partially uploaded' => [UPLOAD_ERR_PARTIAL, UPLOAD_ERR_PARTIAL],
+            'no file upload' => [UPLOAD_ERR_NO_FILE, UPLOAD_ERR_NO_FILE],
+            'missing temporary directory' => [UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_NO_TMP_DIR],
+            'write failure' => [UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_CANT_WRITE],
+            'stopped by extension' => [UPLOAD_ERR_EXTENSION, UPLOAD_ERR_EXTENSION],
+        ];
+    }
+
     abstract protected function setRequestData($method, $data, $files = []);
 
     abstract protected function getRequestHandler();
 
-    abstract protected function getMockFile($suffix = '');
+    abstract protected function getUploadedFile($suffix = '');
 
     abstract protected function getInvalidFile();
+
+    abstract protected function getFailedUploadedFile($errorCode);
 
     protected function createForm($name, $method = null, $compound = false)
     {

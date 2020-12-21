@@ -26,7 +26,7 @@ class AuthenticationException extends \RuntimeException implements \Serializable
     /**
      * Get the token.
      *
-     * @return TokenInterface
+     * @return TokenInterface|null
      */
     public function getToken()
     {
@@ -51,7 +51,7 @@ class AuthenticationException extends \RuntimeException implements \Serializable
             $this->line,
         ];
 
-        return $this->doSerialize($serialized, \func_num_args() ? \func_get_arg(0) : null);
+        return $this->doSerialize($serialized, \func_num_args() ? func_get_arg(0) : null);
     }
 
     /**

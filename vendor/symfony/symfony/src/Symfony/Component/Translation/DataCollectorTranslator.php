@@ -11,12 +11,13 @@
 
 namespace Symfony\Component\Translation;
 
+use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 
 /**
  * @author Abdellatif Ait boudad <a.aitboudad@gmail.com>
  */
-class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInterface
+class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInterface, WarmableInterface
 {
     const MESSAGE_DEFINED = 0;
     const MESSAGE_MISSING = 1;
@@ -88,6 +89,16 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function warmUp($cacheDir)
+    {
+        if ($this->translator instanceof WarmableInterface) {
+            $this->translator->warmUp($cacheDir);
+        }
+    }
+
+    /**
      * Gets the fallback locales.
      *
      * @return array The fallback locales
@@ -134,6 +145,7 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
         $id = (string) $id;
         $catalogue = $this->translator->getCatalogue($locale);
         $locale = $catalogue->getLocale();
+        $fallbackLocale = null;
         if ($catalogue->defines($id, $domain)) {
             $state = self::MESSAGE_DEFINED;
         } elseif ($catalogue->has($id, $domain)) {
@@ -142,10 +154,9 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
             $fallbackCatalogue = $catalogue->getFallbackCatalogue();
             while ($fallbackCatalogue) {
                 if ($fallbackCatalogue->defines($id, $domain)) {
-                    $locale = $fallbackCatalogue->getLocale();
+                    $fallbackLocale = $fallbackCatalogue->getLocale();
                     break;
                 }
-
                 $fallbackCatalogue = $fallbackCatalogue->getFallbackCatalogue();
             }
         } else {
@@ -154,6 +165,7 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
 
         $this->messages[] = [
             'locale' => $locale,
+            'fallbackLocale' => $fallbackLocale,
             'domain' => $domain,
             'id' => $id,
             'translation' => $translation,

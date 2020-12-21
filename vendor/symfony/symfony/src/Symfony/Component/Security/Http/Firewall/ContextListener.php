@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\RememberMe\RememberMeServicesInterface;
 
 /**
  * ContextListener manages the SecurityContext persistence through a session.
@@ -44,6 +45,7 @@ class ContextListener implements ListenerInterface
     private $registered;
     private $trustResolver;
     private $logoutOnUserChange = false;
+    private $rememberMeServices;
 
     /**
      * @param iterable|UserProviderInterface[] $userProviders
@@ -103,6 +105,10 @@ class ContextListener implements ListenerInterface
 
         if ($token instanceof TokenInterface) {
             $token = $this->refreshUser($token);
+
+            if (!$token && $this->logoutOnUserChange && $this->rememberMeServices) {
+                $this->rememberMeServices->loginFail($request);
+            }
         } elseif (null !== $token) {
             if (null !== $this->logger) {
                 $this->logger->warning('Expected a security token from the session, got something else.', ['key' => $this->sessionKey, 'received' => $token]);
@@ -162,10 +168,15 @@ class ContextListener implements ListenerInterface
 
         $userNotFoundByProvider = false;
         $userDeauthenticated = false;
+        $userClass = \get_class($user);
 
         foreach ($this->userProviders as $provider) {
             if (!$provider instanceof UserProviderInterface) {
                 throw new \InvalidArgumentException(sprintf('User provider "%s" must implement "%s".', \get_class($provider), UserProviderInterface::class));
+            }
+
+            if (!$provider->supportsClass($userClass)) {
+                continue;
             }
 
             try {
@@ -227,7 +238,7 @@ class ContextListener implements ListenerInterface
             return null;
         }
 
-        throw new \RuntimeException(sprintf('There is no user provider for user "%s".', \get_class($user)));
+        throw new \RuntimeException(sprintf('There is no user provider for user "%s".', $userClass));
     }
 
     private function safelyUnserialize($serializedToken)
@@ -267,5 +278,10 @@ class ContextListener implements ListenerInterface
     public static function handleUnserializeCallback($class)
     {
         throw new \UnexpectedValueException('Class not found: '.$class, 0x37313bc);
+    }
+
+    public function setRememberMeServices(RememberMeServicesInterface $rememberMeServices)
+    {
+        $this->rememberMeServices = $rememberMeServices;
     }
 }

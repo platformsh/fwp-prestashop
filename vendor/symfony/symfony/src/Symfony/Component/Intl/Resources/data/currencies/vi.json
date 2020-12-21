@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.43.65",
+    "Version": "36",
     "Names": {
         "ADP": [
             "ADP",
@@ -395,7 +395,7 @@
         ],
         "GEL": [
             "GEL",
-            "Lari Gruzia"
+            "Lari Georgia"
         ],
         "GHC": [
             "GHC",
@@ -491,7 +491,7 @@
         ],
         "IQD": [
             "IQD",
-            "Dinar I-rắc"
+            "Dinar Iraq"
         ],
         "IRR": [
             "IRR",
@@ -775,7 +775,7 @@
         ],
         "PGK": [
             "PGK",
-            "Kina Papua New Guinean"
+            "Kina Papua New Guinea"
         ],
         "PHP": [
             "PHP",
@@ -975,7 +975,7 @@
         ],
         "UAH": [
             "UAH",
-            "Hryvnia Ucraina"
+            "Hryvnia Ukraina"
         ],
         "UAK": [
             "UAK",

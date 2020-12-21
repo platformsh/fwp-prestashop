@@ -24,8 +24,8 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use PrestaShop\PrestaShop\Adapter\ObjectPresenter;
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -39,33 +39,34 @@ class Ps_Currencyselector extends Module implements WidgetInterface
     {
         $this->name = 'ps_currencyselector';
         $this->author = 'PrestaShop';
-        $this->version = '2.0.0';
+        $this->version = '2.0.1';
         $this->need_instance = 0;
 
         parent::__construct();
 
-        $this->displayName = $this->trans('Currency block', array(), 'Modules.Currencyselector.Admin');
-        $this->description = $this->trans('Adds a block allowing customers to choose their preferred shopping currency.', array(), 'Modules.Currencyselector.Admin');
+        $this->displayName = $this->trans('Currency block', [], 'Modules.Currencyselector.Admin');
+        $this->description = $this->trans('Adds a block allowing customers to choose their preferred shopping currency.', [], 'Modules.Currencyselector.Admin');
 
-        $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
 
         $this->templateFile = 'module:ps_currencyselector/ps_currencyselector.tpl';
     }
 
     public function install()
     {
-        return (parent::install()
-            && $this->registerHook('actionAdminCurrenciesControllerSaveAfter'));
+        return parent::install()
+            && $this->registerHook('actionAdminCurrenciesControllerSaveAfter');
     }
 
-    public function hookActionAdminCurrenciesControllerSaveAfter($params) {
+    public function hookActionAdminCurrenciesControllerSaveAfter($params)
+    {
         return parent::_clearCache($this->templateFile);
     }
 
     public function getWidgetVariables($hookName, array $configuration)
     {
         $current_currency = null;
-        $serializer = new ObjectPresenter;
+        $serializer = new ObjectPresenter();
         $currencies = array_map(
             function ($currency) use ($serializer, &$current_currency) {
                 $currencyArray = $serializer->present($currency);
@@ -76,17 +77,27 @@ class Ps_Currencyselector extends Module implements WidgetInterface
 
                 $url = $this->context->link->getLanguageLink($this->context->language->id);
 
-                $extraParams = array(
-                    'SubmitCurrency' => 1,
-                    'id_currency' => $currency->id
+                $parsedUrl = parse_url($url);
+                $urlParams = [];
+                if (isset($parsedUrl['query'])) {
+                    parse_str($parsedUrl['query'], $urlParams);
+                }
+                $newParams = array_merge(
+                    $urlParams,
+                    [
+                        'SubmitCurrency' => 1,
+                        'id_currency' => $currency->id,
+                    ]
+                );
+                $newUrl = sprintf('%s://%s%s%s?%s',
+                    $parsedUrl['scheme'],
+                    $parsedUrl['host'],
+                    isset($parsedUrl['port']) ? ':' . $parsedUrl['port'] : '',
+                    $parsedUrl['path'],
+                    http_build_query($newParams)
                 );
 
-                $partialQueryString = http_build_query($extraParams);
-                $separator = empty(parse_url($url)['query']) ? '?' : '&';
-
-                $url .= $separator . $partialQueryString;
-
-                $currencyArray['url'] = $url;
+                $currencyArray['url'] = $newUrl;
 
                 if ($currency->id === $this->context->currency->id) {
                     $currencyArray['current'] = true;
@@ -100,10 +111,10 @@ class Ps_Currencyselector extends Module implements WidgetInterface
             Currency::getCurrencies(true, true)
         );
 
-        return array(
+        return [
             'currencies' => $currencies,
-            'current_currency' => $current_currency
-        );
+            'current_currency' => $current_currency,
+        ];
     }
 
     public function renderWidget($hookName, array $configuration)

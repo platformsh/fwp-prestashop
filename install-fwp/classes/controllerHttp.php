@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,12 +17,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 use PrestaShopBundle\Install\LanguageList;
@@ -96,32 +96,32 @@ class InstallControllerHttp
             array(
                 'name' => 'welcome',
                 'displayName' => $this->translator->trans('Choose your language', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpWelcome'
+                'controllerClass' => 'InstallControllerHttpWelcome',
             ),
             array(
                 'name' => 'license',
                 'displayName' => $this->translator->trans('License agreements', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpLicense'
+                'controllerClass' => 'InstallControllerHttpLicense',
             ),
             array(
                 'name' => 'system',
                 'displayName' => $this->translator->trans('System compatibility', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpSystem'
+                'controllerClass' => 'InstallControllerHttpSystem',
             ),
             array(
                 'name' => 'configure',
                 'displayName' => $this->translator->trans('Store information', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpConfigure'
+                'controllerClass' => 'InstallControllerHttpConfigure',
             ),
             array(
                 'name' => 'database',
                 'displayName' => $this->translator->trans('System configuration', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpDatabase'
+                'controllerClass' => 'InstallControllerHttpDatabase',
             ),
             array(
                 'name' => 'process',
                 'displayName' => $this->translator->trans('Store installation', array(), 'Install'),
-                'controllerClass' => 'InstallControllerHttpProcess'
+                'controllerClass' => 'InstallControllerHttpProcess',
             ),
         );
         self::$steps = new StepList($stepConfig);
@@ -143,7 +143,7 @@ class InstallControllerHttp
             $this->session->lang ?: false
         );
 
-        $this->translator = Context::getContext()->getTranslator();
+        $this->translator = Context::getContext()->getTranslator(true);
 
         if (isset($this->session->lang)) {
             $lang = $this->session->lang;
@@ -175,7 +175,7 @@ class InstallControllerHttp
         $self = new self();
 
         if (Tools::getValue('compile_templates')) {
-            require_once(_PS_INSTALL_CONTROLLERS_PATH_.'http/smarty_compile.php');
+            require_once _PS_INSTALL_CONTROLLERS_PATH_.'http/smarty_compile.php';
             exit;
         }
 
@@ -197,6 +197,7 @@ class InstallControllerHttp
                     foreach ($abbreviations as $abbreviation) {
                         if ($session->shop_timezone == $abbreviation['timezone_id']) {
                             @date_default_timezone_set($session->shop_timezone);
+
                             break 2;
                         }
                     }
@@ -229,6 +230,7 @@ class InstallControllerHttp
                 && !$check_step->getControllerInstance()->validate()) {
                 self::$steps->setOffset($key);
                 $session->step = $session->last_step = self::$steps->current()->getName();
+
                 break;
             }
         }
@@ -242,6 +244,12 @@ class InstallControllerHttp
             if (self::$steps->current()->getControllerInstance()->validate()) {
                 self::$steps->next();
             }
+
+            // Don't display system step if mandatory requirements is valid
+            if (self::$steps->current()->getName() == 'system' && self::$steps->current()->getControllerInstance()->validate()) {
+                self::$steps->next();
+            }
+
             $session->step = self::$steps->current()->getName();
 
             // Change last step
@@ -355,6 +363,7 @@ class InstallControllerHttp
             }
         }
         InstallSession::getInstance()->support_phone = $this->phone;
+
         return $this->phone;
     }
 
@@ -466,13 +475,14 @@ class InstallControllerHttp
             ob_start();
         }
 
-        include($path.$template.'.php');
+        include $path.$template.'.php';
 
         if ($get_output) {
             $content = ob_get_contents();
             if (ob_get_level() && ob_get_length() > 0) {
                 ob_end_clean();
             }
+
             return $content;
         }
     }
@@ -485,6 +495,7 @@ class InstallControllerHttp
             $null = null;
             $ref = &$null;
         }
+
         return $ref;
     }
 

@@ -8,12 +8,10 @@ use Symfony\Component\Workflow\Transition;
 
 class DefinitionBuilderTest extends TestCase
 {
-    /**
-     * @expectedException \Symfony\Component\Workflow\Exception\InvalidArgumentException
-     */
     public function testAddPlaceInvalidName()
     {
-        $builder = new DefinitionBuilder(['a"', 'b']);
+        $this->expectException('Symfony\Component\Workflow\Exception\InvalidArgumentException');
+        new DefinitionBuilder(['a"', 'b']);
     }
 
     public function testSetInitialPlace()

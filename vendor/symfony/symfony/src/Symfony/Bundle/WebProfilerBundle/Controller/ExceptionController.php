@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Loader\ExistsLoaderInterface;
+use Twig\Loader\SourceContextLoaderInterface;
 
 /**
  * ExceptionController.
@@ -60,7 +61,7 @@ class ExceptionController
         $exception = $this->profiler->loadProfile($token)->getCollector('exception')->getException();
         $template = $this->getTemplate();
 
-        if (!$this->twig->getLoader()->exists($template)) {
+        if (!$this->templateExists($template)) {
             $handler = new ExceptionHandler($this->debug, $this->twig->getCharset(), $this->fileLinkFormat);
 
             return new Response($handler->getContent($exception), 200, ['Content-Type' => 'text/html']);
@@ -118,17 +119,22 @@ class ExceptionController
     protected function templateExists($template)
     {
         $loader = $this->twig->getLoader();
-        if ($loader instanceof ExistsLoaderInterface) {
-            return $loader->exists($template);
+
+        if (1 === Environment::MAJOR_VERSION && !$loader instanceof ExistsLoaderInterface) {
+            try {
+                if ($loader instanceof SourceContextLoaderInterface) {
+                    $loader->getSourceContext($template);
+                } else {
+                    $loader->getSource($template);
+                }
+
+                return true;
+            } catch (LoaderError $e) {
+            }
+
+            return false;
         }
 
-        try {
-            $loader->getSource($template);
-
-            return true;
-        } catch (LoaderError $e) {
-        }
-
-        return false;
+        return $loader->exists($template);
     }
 }

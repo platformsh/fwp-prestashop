@@ -3,6 +3,7 @@
 namespace Doctrine\Bundle\DoctrineBundle\Controller;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Exception;
 use PDO;
@@ -12,9 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\VarDumper\Cloner\Data;
 
-/**
- * ProfilerController.
- */
 class ProfilerController implements ContainerAwareInterface
 {
     /** @var ContainerInterface */
@@ -58,7 +56,10 @@ class ProfilerController implements ContainerAwareInterface
         /** @var Connection $connection */
         $connection = $this->container->get('doctrine')->getConnection($connectionName);
         try {
-            if ($connection->getDatabasePlatform() instanceof SQLServerPlatform) {
+            $platform = $connection->getDatabasePlatform();
+            if ($platform instanceof SqlitePlatform) {
+                $results = $this->explainSQLitePlatform($connection, $query);
+            } elseif ($platform instanceof SQLServerPlatform) {
                 $results = $this->explainSQLServerPlatform($connection, $query);
             } else {
                 $results = $this->explainOtherPlatform($connection, $query);
@@ -71,6 +72,18 @@ class ProfilerController implements ContainerAwareInterface
             'data' => $results,
             'query' => $query,
         ]));
+    }
+
+    private function explainSQLitePlatform(Connection $connection, $query)
+    {
+        $params = $query['params'];
+
+        if ($params instanceof Data) {
+            $params = $params->getValue(true);
+        }
+
+        return $connection->executeQuery('EXPLAIN QUERY PLAN ' . $query['sql'], $params, $query['types'])
+            ->fetchAll(PDO::FETCH_ASSOC);
     }
 
     private function explainSQLServerPlatform(Connection $connection, $query)
@@ -89,6 +102,7 @@ class ProfilerController implements ContainerAwareInterface
 
         $stmt = $connection->executeQuery($sql, $params, $query['types']);
         $stmt->nextRowset();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

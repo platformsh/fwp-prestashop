@@ -19,12 +19,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class SecurityExtensionTest extends TestCase
 {
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage The check_path "/some_area/login_check" for login method "form_login" is not matched by the firewall pattern "/secured_area/.*".
-     */
     public function testInvalidCheckPath()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('The check_path "/some_area/login_check" for login method "form_login" is not matched by the firewall pattern "/secured_area/.*".');
         $container = $this->getRawContainer();
 
         $container->loadFromExtension('security', [
@@ -46,12 +44,10 @@ class SecurityExtensionTest extends TestCase
         $container->compile();
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage No authentication listener registered for firewall "some_firewall"
-     */
     public function testFirewallWithoutAuthenticationListener()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('No authentication listener registered for firewall "some_firewall"');
         $container = $this->getRawContainer();
 
         $container->loadFromExtension('security', [
@@ -70,12 +66,10 @@ class SecurityExtensionTest extends TestCase
         $container->compile();
     }
 
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage Unable to create definition for "security.user.provider.concrete.my_foo" user provider
-     */
     public function testFirewallWithInvalidUserProvider()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('Unable to create definition for "security.user.provider.concrete.my_foo" user provider');
         $container = $this->getRawContainer();
 
         $extension = $container->getExtension('security');
@@ -186,11 +180,11 @@ class SecurityExtensionTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     * @expectedExceptionMessage Firewalls "some_firewall" and "some_other_firewall" need to have the same value for option "logout_on_user_change" as they are sharing the context "my_context"
      */
     public function testThrowsIfLogoutOnUserChangeDifferentForSharedContext()
     {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('Firewalls "some_firewall" and "some_other_firewall" need to have the same value for option "logout_on_user_change" as they are sharing the context "my_context"');
         $container = $this->getRawContainer();
 
         $container->loadFromExtension('security', [
@@ -321,6 +315,7 @@ class SecurityExtensionTest extends TestCase
 
         $container->getCompilerPassConfig()->setOptimizationPasses([]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);
+        $container->getCompilerPassConfig()->setAfterRemovingPasses([]);
 
         return $container;
     }

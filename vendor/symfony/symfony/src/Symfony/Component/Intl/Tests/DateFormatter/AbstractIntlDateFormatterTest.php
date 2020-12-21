@@ -24,9 +24,21 @@ use Symfony\Component\Intl\Util\IcuVersion;
  */
 abstract class AbstractIntlDateFormatterTest extends TestCase
 {
+    private $defaultLocale;
+
     protected function setUp()
     {
+        parent::setUp();
+
+        $this->defaultLocale = \Locale::getDefault();
         \Locale::setDefault('en');
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        \Locale::setDefault($this->defaultLocale);
     }
 
     /**
@@ -76,6 +88,7 @@ abstract class AbstractIntlDateFormatterTest extends TestCase
     public function formatProvider()
     {
         $dateTime = new \DateTime('@0');
+        $dateTimeImmutable = new \DateTimeImmutable('@0');
 
         $formatData = [
             /* general */
@@ -250,6 +263,12 @@ abstract class AbstractIntlDateFormatterTest extends TestCase
         $formatData[] = ['h:mm a', $dateTime, '12:00 AM'];
         $formatData[] = ['yyyyy.MMMM.dd hh:mm aaa', $dateTime, '01970.January.01 12:00 AM'];
 
+        /* general, DateTimeImmutable */
+        $formatData[] = ['y-M-d', $dateTimeImmutable, '1970-1-1'];
+        $formatData[] = ["EEE, MMM d, ''yy", $dateTimeImmutable, "Thu, Jan 1, '70"];
+        $formatData[] = ['h:mm a', $dateTimeImmutable, '12:00 AM'];
+        $formatData[] = ['yyyyy.MMMM.dd hh:mm aaa', $dateTimeImmutable, '01970.January.01 12:00 AM'];
+
         if (IcuVersion::compare(Intl::getIcuVersion(), '59.1', '>=', 1)) {
             // Before ICU 59.1 GMT was used instead of UTC
             $formatData[] = ["yyyy.MM.dd 'at' HH:mm:ss zzz", 0, '1970.01.01 at 00:00:00 UTC'];
@@ -272,6 +291,8 @@ abstract class AbstractIntlDateFormatterTest extends TestCase
 
         $this->assertSame('1970.01.01 at 00:00:00 GMT', $gmtFormatter->format(new \DateTime('@0')));
         $this->assertSame('1970.01.01 at 00:00:00 UTC', $utcFormatter->format(new \DateTime('@0')));
+        $this->assertSame('1970.01.01 at 00:00:00 GMT', $gmtFormatter->format(new \DateTimeImmutable('@0')));
+        $this->assertSame('1970.01.01 at 00:00:00 UTC', $utcFormatter->format(new \DateTimeImmutable('@0')));
     }
 
     /**
@@ -618,6 +639,7 @@ abstract class AbstractIntlDateFormatterTest extends TestCase
     {
         return [
             ['y-M-d', '1970-1-1', 0],
+            ['y-MM-d', '1970-1-1', 0],
             ['y-MMM-d', '1970-Jan-1', 0],
             ['y-MMMM-d', '1970-January-1', 0],
         ];
@@ -636,6 +658,7 @@ abstract class AbstractIntlDateFormatterTest extends TestCase
     {
         return [
             ['y-M-d', '1970-1-1', 0],
+            ['y-M-dd', '1970-1-1', 0],
             ['y-M-dd', '1970-1-01', 0],
             ['y-M-ddd', '1970-1-001', 0],
         ];

@@ -128,7 +128,8 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
         $hash = spl_object_hash($form);
 
         if (!isset($this->dataByForm[$hash])) {
-            $this->dataByForm[$hash] = [];
+            // field was created by form event
+            $this->collectConfiguration($form);
         }
 
         $this->dataByForm[$hash] = array_replace(
@@ -228,9 +229,6 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
         return $this->data;
     }
 
-    /**
-     * @internal
-     */
     public function serialize()
     {
         if ($this->hasVarDumper) {

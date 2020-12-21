@@ -37,7 +37,7 @@ ReflectionClass {
 %A]
   constants: array:3 [
     "IS_IMPLICIT_ABSTRACT" => 16
-    "IS_EXPLICIT_ABSTRACT" => 32
+    "IS_EXPLICIT_ABSTRACT" => %d
     "IS_FINAL" => %d
   ]
   properties: array:%d [
@@ -129,7 +129,7 @@ EOTXT;
 
     public function testReflectionParameter()
     {
-        $var = new \ReflectionParameter(__NAMESPACE__.'\reflectionParameterFixture', 0);
+        $var = new \ReflectionParameter(reflectionParameterFixture::class, 0);
 
         $this->assertDumpMatchesFormat(
             <<<'EOTXT'

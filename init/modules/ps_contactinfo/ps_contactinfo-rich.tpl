@@ -51,7 +51,7 @@
       d='Modules.Contactinfo.Shop'
     }
   {/if}
-  {if $contact_infos.email}
+  {if $contact_infos.email && $display_email}
     <br>
     {* First tag [1][/1] is for a HTML tag. *}
     {l

@@ -28,8 +28,6 @@ class DoctrineTestHelper
     /**
      * Returns an entity manager for testing.
      *
-     * @param Configuration|null $config
-     *
      * @return EntityManager
      */
     public static function createTestEntityManager(Configuration $config = null)
@@ -58,7 +56,7 @@ class DoctrineTestHelper
         $config = new Configuration();
         $config->setEntityNamespaces(['SymfonyTestsDoctrine' => 'Symfony\Bridge\Doctrine\Tests\Fixtures']);
         $config->setAutoGenerateProxyClasses(true);
-        $config->setProxyDir(\sys_get_temp_dir());
+        $config->setProxyDir(sys_get_temp_dir());
         $config->setProxyNamespace('SymfonyTests\Doctrine');
         $config->setMetadataDriverImpl(new AnnotationDriver(new AnnotationReader()));
         $config->setQueryCacheImpl(new ArrayCache());

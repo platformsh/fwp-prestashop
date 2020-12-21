@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * 2007-2020 PrestaShop SA and Contributors
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://www.prestashop.com for more information.
+ *
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2020 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * International Registered Trademark & Property of PrestaShop SA
+ */
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
@@ -52,12 +52,18 @@ class Ps_MainMenu extends Module implements WidgetInterface
      */
     protected $spacer_size = '5';
 
+    /*
+     * Array of files from the category image directory
+     */
+    private $imageFiles;
+
     public function __construct()
     {
         $this->name = 'ps_mainmenu';
         $this->tab = 'front_office_features';
-        $this->version = '2.1.1';
+        $this->version = '2.2.0';
         $this->author = 'PrestaShop';
+        $this->imageFiles = null;
 
         $this->bootstrap = true;
         parent::__construct();
@@ -712,10 +718,13 @@ class Ps_MainMenu extends Module implements WidgetInterface
 
         foreach ($categories as $key => $category) {
             $node = $this->makeNode([]);
-
             if ($category['level_depth'] > 1) {
                 $cat = new Category($category['id_category']);
                 $link = $cat->getLink();
+                // Check if customer is set and check access
+                if (Validate::isLoadedObject($this->context->customer) && !$cat->checkAccess($this->context->customer->id)) {
+                    continue;
+                }
             } else {
                 $link = $this->context->link->getPageLink('index');
             }
@@ -737,10 +746,12 @@ class Ps_MainMenu extends Module implements WidgetInterface
             if (isset($category['children']) && !empty($category['children'])) {
                 $node['children'] = $this->generateCategoriesMenu($category['children'], 1);
 
-                $files = scandir(_PS_CAT_IMG_DIR_);
+                if ($this->imageFiles === null) {
+                    $this->imageFiles = scandir(_PS_CAT_IMG_DIR_);
+                }
 
-                if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
-                    foreach ($files as $file) {
+                if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $this->imageFiles)) > 0) {
+                    foreach ($this->imageFiles as $file) {
                         if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
                             $image_url = $this->context->link->getMediaLink(_THEME_CAT_DIR_.$file);
                             $node['image_urls'][] = $image_url;
@@ -942,20 +953,40 @@ class Ps_MainMenu extends Module implements WidgetInterface
 
     protected function getCacheDirectory()
     {
-        return _PS_CACHE_DIR_ . 'ps_mainmenu';
+        $dir =_PS_CACHE_DIR_ . 'ps_mainmenu';
+
+        if (isset($this->context->customer)) {
+            $groups = $this->context->customer->getGroups();
+            if (!empty($groups)) {
+                $dir .=  '/' . implode('_', $groups);
+            }
+        }
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        return $dir;
     }
 
     protected function clearMenuCache()
     {
-        $dir = $this->getCacheDirectory();
+        $this->cleanMenuCacheDirectory(_PS_CACHE_DIR_ . 'ps_mainmenu');
+    }
 
+    private function cleanMenuCacheDirectory($dir)
+    {
         if (!is_dir($dir)) {
             return;
         }
-
         foreach (scandir($dir) as $entry) {
-            if (preg_match('/\.json$/', $entry)) {
-                unlink($dir . DIRECTORY_SEPARATOR . $entry);
+            if (in_array($entry, ['.', '..'])) {
+                continue;
+            }
+            $path = $dir . DIRECTORY_SEPARATOR . $entry;
+            if (is_dir($path)) {
+                $this->cleanMenuCacheDirectory($path);
+            } elseif (preg_match('/\.json$/', $entry)) {
+                unlink($path);
             }
         }
     }
@@ -1058,7 +1089,7 @@ class Ps_MainMenu extends Module implements WidgetInterface
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => (Tools::getIsset('updatelinksmenutop') && !Tools::getValue('updatelinksmenutop')) ?
+                    'title' => (Tools::getIsset('updatelinksmenutop') && Tools::getValue('updatelinksmenutop')) ?
                         $this->trans('Update link', array(), 'Modules.Mainmenu.Admin') : $this->trans('Add a new link', array(), 'Modules.Mainmenu.Admin'),
                     'icon' => 'icon-link'
                 ),
@@ -1112,7 +1143,7 @@ class Ps_MainMenu extends Module implements WidgetInterface
         $helper->identifier = $this->identifier;
         $helper->fields_value = $this->getAddLinkFieldsValues();
 
-        if (Tools::getIsset('updatelinksmenutop') && !Tools::getValue('updatelinksmenutop')) {
+        if (Tools::getIsset('updatelinksmenutop') && Tools::getValue('updatelinksmenutop')) {
             $fields_form['form']['submit'] = array(
                 'name' => 'updatelinksmenutop',
                 'title' => $this->trans('Update', array(), 'Admin.Actions')
@@ -1396,7 +1427,9 @@ class Ps_MainMenu extends Module implements WidgetInterface
         $id_lang = $this->context->language->id;
         $id_shop = $this->context->shop->id;
 
-        $key = self::MENU_JSON_CACHE_KEY . '_' . $id_lang . '_' . $id_shop . '.json';
+        $this->user_groups = Customer::getGroupsStatic($this->context->customer->id);
+        $groupsKey = empty($this->user_groups) ? '' : '_' . join("_", $this->user_groups);
+        $key = self::MENU_JSON_CACHE_KEY . '_' . $id_lang . '_' . $id_shop . $groupsKey . '.json';
         $cacheDir = $this->getCacheDirectory();
         $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . $key;
         $menu = json_decode(@file_get_contents($cacheFile), true);

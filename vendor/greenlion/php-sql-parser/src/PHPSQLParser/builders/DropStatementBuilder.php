@@ -40,7 +40,6 @@
  */
 
 namespace PHPSQLParser\builders;
-use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
 /**
  * This class implements the builder for the whole DROP TABLE statement. 
@@ -52,31 +51,13 @@ use PHPSQLParser\exceptions\UnableToCreateSQLException;
  */
 class DropStatementBuilder implements Builder {
 
-    protected function buildReserved($parsed) {
-        $builder = new ReservedBuilder();
-        return $builder->build($parsed);
-    }
+	protected function buildDROP( $parsed ) {
+		$builder = new DropBuilder();
+		return $builder->build( $parsed );
+	}
 
-    protected function buildExpression($parsed) {
-        $builder = new DropExpressionBuilder();
-        return $builder->build($parsed);
-    }
-
-    public function build(array $parsed) {
-        $drop = $parsed['DROP'];
-        $sql = '';
-        foreach ($drop['sub_tree'] as $k => $v) {
-            $len = strlen($sql);
-            $sql .= $this->buildReserved($v);
-            $sql .= $this->buildExpression($v);
-
-            if ($len == strlen($sql)) {
-                throw new UnableToCreateSQLException('DROP subtree', $k, $v, 'expr_type');
-            }
-
-            $sql .= ' ';
-        }
-        return 'DROP ' . substr($sql, 0, -1);
-    }
+	public function build( array $parsed ) {
+		return $this->buildDROP( $parsed );
+	}
 }
 ?>

@@ -72,11 +72,6 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         }
     }
 
-    /**
-     * Gets the logs.
-     *
-     * @return array An array of logs
-     */
     public function getLogs()
     {
         return isset($this->data['logs']) ? $this->data['logs'] : [];
@@ -126,9 +121,13 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
             return [];
         }
 
+        if ('' === $logContent = trim(file_get_contents($file))) {
+            return [];
+        }
+
         $bootTime = filemtime($file);
         $logs = [];
-        foreach (unserialize(file_get_contents($file)) as $log) {
+        foreach (unserialize($logContent) as $log) {
             $log['context'] = ['exception' => new SilencedErrorContext($log['type'], $log['file'], $log['line'], $log['trace'], $log['count'])];
             $log['timestamp'] = $bootTime;
             $log['priority'] = 100;

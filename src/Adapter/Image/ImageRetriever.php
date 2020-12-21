@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,22 +17,21 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Adapter\Image;
 
-use Link;
-use Language;
-use Product;
-use ImageType;
 use Image;
 use ImageManager;
+use ImageType;
+use Language;
+use Link;
+use Product;
 
 /**
  * This class is mainly responsible of Product images.
@@ -54,9 +54,8 @@ class ImageRetriever
      *
      * @return array
      */
-    public function getProductImages(array $product, Language $language)
+    public function getAllProductImages(array $product, Language $language)
     {
-        $productAttributeId = $product['id_product_attribute'];
         $productInstance = new Product(
             $product['id_product'],
             false,
@@ -83,8 +82,7 @@ class ImageRetriever
 
         $images = array_map(function (array $image) use (
             $productInstance,
-            $imageToCombinations,
-            $productAttributeId
+            $imageToCombinations
         ) {
             $image = array_merge($this->getImage(
                 $productInstance,
@@ -100,7 +98,21 @@ class ImageRetriever
             return $image;
         }, $images);
 
-        $filteredImages = array();
+        return $images;
+    }
+
+    /**
+     * @param array $product
+     * @param Language $language
+     *
+     * @return array
+     */
+    public function getProductImages(array $product, Language $language)
+    {
+        $images = $this->getAllProductImages($product, $language);
+
+        $productAttributeId = $product['id_product_attribute'];
+        $filteredImages = [];
 
         foreach ($images as $image) {
             if (in_array($productAttributeId, $image['associatedVariants'])) {
@@ -129,10 +141,10 @@ class ImageRetriever
             $type = 'products';
             $getImageURL = 'getImageLink';
             $root = _PS_PROD_IMG_DIR_;
-            $imageFolderPath = implode(DIRECTORY_SEPARATOR, array(
+            $imageFolderPath = implode(DIRECTORY_SEPARATOR, [
                 rtrim($root, DIRECTORY_SEPARATOR),
                 rtrim(Image::getImgFolderStatic($id_image), DIRECTORY_SEPARATOR),
-            ));
+            ]);
         } elseif (get_class($object) === 'Store') {
             $type = 'stores';
             $getImageURL = 'getStoreImageLink';
@@ -194,13 +206,14 @@ class ImageRetriever
         $large = end($urls);
         $medium = $urls[$keys[ceil((count($keys) - 1) / 2)]];
 
-        return array(
+        return [
             'bySize' => $urls,
             'small' => $small,
             'medium' => $medium,
             'large' => $large,
             'legend' => isset($object->meta_title) ? $object->meta_title : $object->name,
-        );
+            'id_image' => $id_image,
+        ];
     }
 
     /**
@@ -273,12 +286,12 @@ class ImageRetriever
         $large = end($urls);
         $medium = $urls[$keys[ceil((count($keys) - 1) / 2)]];
 
-        return array(
+        return [
             'bySize' => $urls,
             'small' => $small,
             'medium' => $medium,
             'large' => $large,
             'legend' => '',
-        );
+        ];
     }
 }

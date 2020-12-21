@@ -17,7 +17,7 @@ use Symfony\Component\Form\Exception\TransformationFailedException;
 /**
  * Transforms between a timezone identifier string and a DateTimeZone object.
  *
- * @author Roland Franssen <franssen.roland@gmai.com>
+ * @author Roland Franssen <franssen.roland@gmail.com>
  */
 class DateTimeZoneToStringTransformer implements DataTransformerInterface
 {
@@ -34,19 +34,19 @@ class DateTimeZoneToStringTransformer implements DataTransformerInterface
     public function transform($dateTimeZone)
     {
         if (null === $dateTimeZone) {
-            return;
+            return null;
         }
 
         if ($this->multiple) {
             if (!\is_array($dateTimeZone)) {
-                throw new TransformationFailedException('Expected an array.');
+                throw new TransformationFailedException('Expected an array of \DateTimeZone objects.');
             }
 
             return array_map([new self(), 'transform'], $dateTimeZone);
         }
 
         if (!$dateTimeZone instanceof \DateTimeZone) {
-            throw new TransformationFailedException('Expected a \DateTimeZone.');
+            throw new TransformationFailedException('Expected a \DateTimeZone object.');
         }
 
         return $dateTimeZone->getName();
@@ -58,19 +58,19 @@ class DateTimeZoneToStringTransformer implements DataTransformerInterface
     public function reverseTransform($value)
     {
         if (null === $value) {
-            return;
+            return null;
         }
 
         if ($this->multiple) {
             if (!\is_array($value)) {
-                throw new TransformationFailedException('Expected an array.');
+                throw new TransformationFailedException('Expected an array of timezone identifier strings.');
             }
 
             return array_map([new self(), 'reverseTransform'], $value);
         }
 
         if (!\is_string($value)) {
-            throw new TransformationFailedException('Expected a string.');
+            throw new TransformationFailedException('Expected a timezone identifier string.');
         }
 
         try {

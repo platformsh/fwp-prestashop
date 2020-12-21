@@ -2,7 +2,7 @@
 
 <container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
         <parameter key="security.authentication.trust_resolver.anonymous_class">Symfony\Component\Security\Core\Authentication\Token\AnonymousToken</parameter>
@@ -150,15 +150,15 @@
             <argument />                   <!-- name -->
             <argument />                   <!-- user_checker -->
             <argument />                   <!-- request_matcher -->
-            <argument />                   <!-- security enabled -->
-            <argument />                   <!-- stateless -->
+            <argument>false</argument>     <!-- security enabled -->
+            <argument>false</argument>     <!-- stateless -->
             <argument />                   <!-- provider -->
             <argument />                   <!-- context -->
             <argument />                   <!-- entry_point -->
             <argument />                   <!-- access_denied_handler -->
             <argument />                   <!-- access_denied_url -->
             <argument type="collection" /> <!-- listeners -->
-            <argument />                   <!-- switch_user -->
+            <argument>null</argument>      <!-- switch_user -->
         </service>
 
         <service id="security.logout_url_generator" class="Symfony\Component\Security\Http\Logout\LogoutUrlGenerator">

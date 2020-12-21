@@ -1,10 +1,10 @@
-    # .platform.app.yaml
+# .platform.app.yaml
 
 # The name of this application, which must be unique within a project.
 name: 'app'
 
 # The type key specifies the language and version for your application.
-type: 'php:7.0'
+type: 'php:7.3'
 
 # On PHP, there are multiple build flavors available. Pretty much everyone
 # except Drupal 7 users will want the composer flavor.
@@ -27,8 +27,7 @@ hooks:
         set -e
         TOUPDATE=$(sed '2,$d' version.txt)
 
-        if [ ! -f var/writeable/installed.lock ]; 
-        then
+        if [ ! -f var/writeable/installed.lock ]; then
             rsync -a init/modules/ modules/
             rsync -a init/img/ img/
             rsync -a init/config/ config/
@@ -37,16 +36,15 @@ hooks:
             rsync -a init/app-config/ app/config/
             rsync -a init/themes/ themes/
             rsync -a init/admin-fwp/import/ admin-fwp/import/
+            rsync -a init/admin-fwp/autoupgrade/ admin-fwp/autoupgrade/
             rsync -a init/mails/ mails/
+            rsync -a init/download/ download/
             rm -rf var/cache/*
-            cd install-fwp && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --email=$ADMIN_EMAIL --password=$ADMIN_PASSWORD --domain=$(echo $PLATFORM_ROUTES | base64 -d | jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
-            mysql -h database.internal -u user -e "UPDATE ps_configuration SET value = 1 WHERE name ='PS_SSL_ENABLED' OR name='PS_SSL_ENABLED_EVERYWHERE';" main
+            cd install-fwp && php index_cli.php --db_server=database.internal --db_name=main --db_user=user --email=$ADMIN_EMAIL --password=$ADMIN_PASSWORD --rewrite=0 --ssl=1 --language=fr --country=fr --newsletter=0 --domain=$(echo $PLATFORM_ROUTES | base64 -d | jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
             cd && touch var/writeable/installed.lock; echo "${TOUPDATE}" > var/writeable/version.lock
-        elif [ -f var/writeable/version.lock ];
-        then
+        elif [ -f var/writeable/version.lock ]; then
             PROD=$(sed '2,$d' var/writeable/version.lock)
-            if [ ${TOUPDATE} != ${PROD} ];
-            then
+            if [ ${TOUPDATE} != ${PROD} ]; then
                 rsync -a init/img/ img/
                 rsync -a init/config/ config/
                 rsync -a init/translations/ translations/
@@ -54,17 +52,29 @@ hooks:
                 rsync -a init/app-config/ app/config/
                 rsync -a init/themes/ themes/
                 rsync -a init/admin-fwp/import/ admin-fwp/import/
+                rsync -a init/admin-fwp/autoupgrade/ admin-fwp/autoupgrade/
                 rsync -a init/mails/ mails/
+                rsync -a init/download/ download/
                 rm -rf var/cache/*
                 cd install-fwp && php upgrade/upgrade.php
                 cd && touch var/writeable/updated-${TOUPDATE}.lock; echo "${TOUPDATE}" > var/writeable/version.lock
             fi
-        fi 
+        fi
         if [ $PLATFORM_BRANCH != 'master' ]; then
             shop_url=$(echo $PLATFORM_ROUTES | base64 -d | jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
+            rm -rf var/cache/*
             mysql -h database.internal -u user -e "UPDATE ps_configuration SET value ='$shop_url' WHERE name='PS_SHOP_DOMAIN' OR name='PS_SHOP_DOMAIN_SSL';" main
             mysql -h database.internal -u user -e "UPDATE ps_shop_url SET domain='$shop_url', domain_ssl='$shop_url';" main
         fi;
+        if [ $PLATFORM_BRANCH = 'master' ] && [ -f var/writeable/installed.lock ]; then
+            shop_domain=$(mysql -sN -h database.internal -u user -e "select value from ps_configuration where name='PS_SHOP_DOMAIN';" main)
+            shop_url=$(echo $PLATFORM_ROUTES | base64 -d | jq 'keys[0]'|sed 's|https\?://||'|sed 's|/||'|sed 's|\"||g')
+            if [ $shop_url != $shop_domain ]; then
+                rm -rf var/cache/*
+                mysql -h database.internal -u user -e "UPDATE ps_configuration SET value ='$shop_url' WHERE name='PS_SHOP_DOMAIN' OR name='PS_SHOP_DOMAIN_SSL';" main
+                mysql -h database.internal -u user -e "UPDATE ps_shop_url SET domain='$shop_url', domain_ssl='$shop_url';" main
+            fi
+        fi
 
 # The size of the persistent disk of the application (in MB).
 disk: 2048
@@ -76,6 +86,9 @@ mounts:
     'admin-fwp/import':
         source: local
         source_path: 'admin-fwp-import'
+    'admin-fwp/autoupgrade':
+        source: local
+        source_path: 'admin-fwp-autoupgrade'
     'mails':
         source: local
         source_path: 'mails'
@@ -138,3 +151,9 @@ web:
             root: 'install-fwp'
             scripts: false
             allow: false
+
+variables:
+    php:
+        memory_limit: 256M
+        post_max_size: 128M
+        upload_max_filesize: 128M

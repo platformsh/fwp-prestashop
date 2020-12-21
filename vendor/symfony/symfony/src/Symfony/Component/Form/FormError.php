@@ -49,7 +49,7 @@ class FormError implements \Serializable
      */
     public function __construct($message, $messageTemplate = null, array $messageParameters = [], $messagePluralization = null, $cause = null)
     {
-        $this->message = $message;
+        $this->message = (string) $message;
         $this->messageTemplate = $messageTemplate ?: $message;
         $this->messageParameters = $messageParameters;
         $this->messagePluralization = $messagePluralization;
@@ -127,7 +127,7 @@ class FormError implements \Serializable
     /**
      * Returns the form that caused this error.
      *
-     * @return FormInterface The form that caused this error
+     * @return FormInterface|null The form that caused this error
      */
     public function getOrigin()
     {

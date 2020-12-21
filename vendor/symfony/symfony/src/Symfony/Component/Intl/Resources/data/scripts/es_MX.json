@@ -1,8 +1,7 @@
 {
-    "Version": "2.1.44.5",
+    "Version": "36",
     "Names": {
         "Hanb": "hanb",
-        "Mlym": "malayálam",
-        "Telu": "telegu"
+        "Mlym": "malayálam"
     }
 }

@@ -18,13 +18,11 @@ class DefinitionTest extends TestCase
         $this->assertEquals('a', $definition->getInitialPlace());
     }
 
-    /**
-     * @expectedException \Symfony\Component\Workflow\Exception\InvalidArgumentException
-     */
     public function testAddPlacesInvalidArgument()
     {
+        $this->expectException('Symfony\Component\Workflow\Exception\InvalidArgumentException');
         $places = ['a"', 'e"'];
-        $definition = new Definition($places, []);
+        new Definition($places, []);
     }
 
     public function testSetInitialPlace()
@@ -35,13 +33,11 @@ class DefinitionTest extends TestCase
         $this->assertEquals($places[3], $definition->getInitialPlace());
     }
 
-    /**
-     * @expectedException \Symfony\Component\Workflow\Exception\LogicException
-     * @expectedExceptionMessage Place "d" cannot be the initial place as it does not exist.
-     */
     public function testSetInitialPlaceAndPlaceIsNotDefined()
     {
-        $definition = new Definition([], [], 'd');
+        $this->expectException('Symfony\Component\Workflow\Exception\LogicException');
+        $this->expectExceptionMessage('Place "d" cannot be the initial place as it does not exist.');
+        new Definition([], [], 'd');
     }
 
     public function testAddTransition()
@@ -55,23 +51,19 @@ class DefinitionTest extends TestCase
         $this->assertSame($transition, $definition->getTransitions()[0]);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Workflow\Exception\LogicException
-     * @expectedExceptionMessage Place "c" referenced in transition "name" does not exist.
-     */
     public function testAddTransitionAndFromPlaceIsNotDefined()
     {
+        $this->expectException('Symfony\Component\Workflow\Exception\LogicException');
+        $this->expectExceptionMessage('Place "c" referenced in transition "name" does not exist.');
         $places = range('a', 'b');
 
         new Definition($places, [new Transition('name', 'c', $places[1])]);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Workflow\Exception\LogicException
-     * @expectedExceptionMessage Place "c" referenced in transition "name" does not exist.
-     */
     public function testAddTransitionAndToPlaceIsNotDefined()
     {
+        $this->expectException('Symfony\Component\Workflow\Exception\LogicException');
+        $this->expectExceptionMessage('Place "c" referenced in transition "name" does not exist.');
         $places = range('a', 'b');
 
         new Definition($places, [new Transition('name', $places[0], 'c')]);

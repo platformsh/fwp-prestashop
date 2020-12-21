@@ -264,7 +264,7 @@ class Configuration implements ConfigurationInterface
                     ->canBeEnabled()
                     ->beforeNormalization()
                         ->always(function ($v) {
-                            if (true === $v['enabled']) {
+                            if (\is_array($v) && true === $v['enabled']) {
                                 $workflows = $v;
                                 unset($workflows['enabled']);
 
@@ -371,7 +371,7 @@ class Configuration implements ConfigurationInterface
                                                 }
 
                                                 foreach ($transitions as $name => $transition) {
-                                                    if (array_key_exists('name', $transition)) {
+                                                    if (\array_key_exists('name', $transition)) {
                                                         continue;
                                                     }
                                                     $transition['name'] = $name;
@@ -929,7 +929,11 @@ class Configuration implements ConfigurationInterface
                         ->ifString()->then(function ($v) { return ['enabled' => true, 'resources' => $v]; })
                     ->end()
                     ->beforeNormalization()
-                        ->ifTrue(function ($v) { return \is_array($v) && !isset($v['resources']); })
+                        ->ifTrue(function ($v) { return \is_array($v) && !isset($v['enabled']); })
+                        ->then(function ($v) { return $v + ['enabled' => true]; })
+                    ->end()
+                    ->beforeNormalization()
+                        ->ifTrue(function ($v) { return \is_array($v) && !isset($v['resources']) && !isset($v['resource']); })
                         ->then(function ($v) {
                             $e = $v['enabled'];
                             unset($v['enabled']);
@@ -948,7 +952,19 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->beforeNormalization()
                                 ->ifTrue(function ($v) { return \is_array($v) && array_keys($v) === range(0, \count($v) - 1); })
-                                ->then(function ($v) { return ['default' => $v]; })
+                                ->then(function ($v) {
+                                    $resources = [];
+                                    foreach ($v as $resource) {
+                                        $resources = array_merge_recursive(
+                                            $resources,
+                                            \is_array($resource) && isset($resource['name'])
+                                                ? [$resource['name'] => $resource['value']]
+                                                : ['default' => $resource]
+                                        );
+                                    }
+
+                                    return $resources;
+                                })
                             ->end()
                             ->prototype('array')
                                 ->beforeNormalization()->ifString()->then(function ($v) { return [$v]; })->end()

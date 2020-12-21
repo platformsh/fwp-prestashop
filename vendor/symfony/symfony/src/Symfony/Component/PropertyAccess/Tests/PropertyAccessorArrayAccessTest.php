@@ -45,11 +45,9 @@ abstract class PropertyAccessorArrayAccessTest extends TestCase
         $this->assertSame($value, $this->propertyAccessor->getValue($collection, $path));
     }
 
-    /**
-     * @expectedException \Symfony\Component\PropertyAccess\Exception\NoSuchIndexException
-     */
     public function testGetValueFailsIfNoSuchIndex()
     {
+        $this->expectException('Symfony\Component\PropertyAccess\Exception\NoSuchIndexException');
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()
             ->enableExceptionOnInvalidIndex()
             ->getPropertyAccessor();

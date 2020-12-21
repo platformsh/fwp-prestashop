@@ -31,9 +31,8 @@ class ProxyAdapter implements AdapterInterface, PruneableInterface, ResettableIn
     private $poolHash;
 
     /**
-     * @param CacheItemPoolInterface $pool
-     * @param string                 $namespace
-     * @param int                    $defaultLifetime
+     * @param string $namespace
+     * @param int    $defaultLifetime
      */
     public function __construct(CacheItemPoolInterface $pool, $namespace = '', $defaultLifetime = 0)
     {
@@ -42,15 +41,18 @@ class ProxyAdapter implements AdapterInterface, PruneableInterface, ResettableIn
         $this->namespace = '' === $namespace ? '' : CacheItem::validateKey($namespace);
         $this->namespaceLen = \strlen($namespace);
         $this->createCacheItem = \Closure::bind(
-            function ($key, $innerItem) use ($defaultLifetime, $poolHash) {
+            static function ($key, $innerItem) use ($defaultLifetime, $poolHash) {
                 $item = new CacheItem();
                 $item->key = $key;
-                $item->value = $innerItem->get();
-                $item->isHit = $innerItem->isHit();
                 $item->defaultLifetime = $defaultLifetime;
-                $item->innerItem = $innerItem;
                 $item->poolHash = $poolHash;
-                $innerItem->set(null);
+
+                if (null !== $innerItem) {
+                    $item->value = $innerItem->get();
+                    $item->isHit = $innerItem->isHit();
+                    $item->innerItem = $innerItem;
+                    $innerItem->set(null);
+                }
 
                 return $item;
             },
@@ -156,7 +158,18 @@ class ProxyAdapter implements AdapterInterface, PruneableInterface, ResettableIn
         if (null === $expiry && 0 < $item["\0*\0defaultLifetime"]) {
             $expiry = time() + $item["\0*\0defaultLifetime"];
         }
-        $innerItem = $item["\0*\0poolHash"] === $this->poolHash ? $item["\0*\0innerItem"] : $this->pool->getItem($this->namespace.$item["\0*\0key"]);
+
+        if ($item["\0*\0poolHash"] === $this->poolHash && $item["\0*\0innerItem"]) {
+            $innerItem = $item["\0*\0innerItem"];
+        } elseif ($this->pool instanceof AdapterInterface) {
+            // this is an optimization specific for AdapterInterface implementations
+            // so we can save a round-trip to the backend by just creating a new item
+            $f = $this->createCacheItem;
+            $innerItem = $f($this->namespace.$item["\0*\0key"], null);
+        } else {
+            $innerItem = $this->pool->getItem($this->namespace.$item["\0*\0key"]);
+        }
+
         $innerItem->set($item["\0*\0value"]);
         $innerItem->expiresAt(null !== $expiry ? \DateTime::createFromFormat('U', $expiry) : null);
 

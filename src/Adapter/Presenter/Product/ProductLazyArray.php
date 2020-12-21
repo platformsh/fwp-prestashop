@@ -1,11 +1,12 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -16,29 +17,29 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\PrestaShop\Adapter\Presenter\Product;
 
+use Configuration;
+use Hook;
+use Language;
+use Link;
 use PrestaShop\Decimal\Number;
 use PrestaShop\Decimal\Operation\Rounding;
-use PrestaShop\PrestaShop\Adapter\Entity\Product;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Presenter\AbstractLazyArray;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\ProductPresentationSettings;
+use Product;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
-use Configuration;
-use Language;
-use Link;
 use Tools;
 
 class ProductLazyArray extends AbstractLazyArray
@@ -145,7 +146,7 @@ class ProductLazyArray extends AbstractLazyArray
             return $this->product['attributes'];
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -191,7 +192,7 @@ class ProductLazyArray extends AbstractLazyArray
     /**
      * @arrayAccess
      *
-     * @return null|string
+     * @return string|null
      */
     public function getAddToCartUrl()
     {
@@ -220,24 +221,26 @@ class ProductLazyArray extends AbstractLazyArray
 
         switch ($this->product['condition']) {
             case 'new':
-                return array(
+                return [
                     'type' => 'new',
-                    'label' => $this->translator->trans('New product', array(), 'Shop.Theme.Catalog'),
+                    'label' => $this->translator->trans('New product', [], 'Shop.Theme.Catalog'),
                     'schema_url' => 'https://schema.org/NewCondition',
-                );
+                ];
             case 'used':
-                return array(
+                return [
                     'type' => 'used',
-                    'label' => $this->translator->trans('Used', array(), 'Shop.Theme.Catalog'),
+                    'label' => $this->translator->trans('Used', [], 'Shop.Theme.Catalog'),
                     'schema_url' => 'https://schema.org/UsedCondition',
-                );
+                ];
+
                 break;
             case 'refurbished':
-                return array(
+                return [
                     'type' => 'refurbished',
-                    'label' => $this->translator->trans('Refurbished', array(), 'Shop.Theme.Catalog'),
+                    'label' => $this->translator->trans('Refurbished', [], 'Shop.Theme.Catalog'),
                     'schema_url' => 'https://schema.org/RefurbishedCondition',
-                );
+                ];
+
                 break;
             default:
                 return false;
@@ -247,7 +250,7 @@ class ProductLazyArray extends AbstractLazyArray
     /**
      * @arrayAccess
      *
-     * @return null|string
+     * @return string|null
      */
     public function getDeliveryInformation()
     {
@@ -268,7 +271,7 @@ class ProductLazyArray extends AbstractLazyArray
     public function getEmbeddedAttributes()
     {
         $whitelist = $this->getProductAttributeWhitelist();
-        $embeddedProductAttributes = array();
+        $embeddedProductAttributes = [];
         foreach ($this->product as $attribute => $value) {
             if (in_array($attribute, $whitelist)) {
                 $embeddedProductAttributes[$attribute] = $value;
@@ -281,7 +284,7 @@ class ProductLazyArray extends AbstractLazyArray
     /**
      * @arrayAccess
      *
-     * @return null|string
+     * @return string|null
      */
     public function getFileSizeFormatted()
     {
@@ -320,7 +323,7 @@ class ProductLazyArray extends AbstractLazyArray
      */
     public function getQuantityDiscounts()
     {
-        return (isset($this->product['quantity_discounts'])) ? $this->product['quantity_discounts'] : array();
+        return (isset($this->product['quantity_discounts'])) ? $this->product['quantity_discounts'] : [];
     }
 
     /**
@@ -387,14 +390,14 @@ class ProductLazyArray extends AbstractLazyArray
      */
     public function getLabels()
     {
-        return array(
+        return [
             'tax_short' => ($this->settings->include_taxes)
-                ? $this->translator->trans('(tax incl.)', array(), 'Shop.Theme.Global')
-                : $this->translator->trans('(tax excl.)', array(), 'Shop.Theme.Global'),
+                ? $this->translator->trans('(tax incl.)', [], 'Shop.Theme.Global')
+                : $this->translator->trans('(tax excl.)', [], 'Shop.Theme.Global'),
             'tax_long' => ($this->settings->include_taxes)
-                ? $this->translator->trans('Tax included', array(), 'Shop.Theme.Global')
-                : $this->translator->trans('Tax excluded', array(), 'Shop.Theme.Global'),
-        );
+                ? $this->translator->trans('Tax included', [], 'Shop.Theme.Global')
+                : $this->translator->trans('Tax excluded', [], 'Shop.Theme.Global'),
+        ];
     }
 
     /**
@@ -405,11 +408,11 @@ class ProductLazyArray extends AbstractLazyArray
     public function getEcotax()
     {
         if (isset($this->product['ecotax'])) {
-            return array(
+            return [
                 'value' => $this->priceFormatter->format($this->product['ecotax']),
                 'amount' => $this->product['ecotax'],
                 'rate' => $this->product['ecotax_rate'],
-            );
+            ];
         }
 
         return null;
@@ -424,47 +427,61 @@ class ProductLazyArray extends AbstractLazyArray
      */
     public function getFlags()
     {
-        $flags = array();
+        $flags = [];
 
         $show_price = $this->shouldShowPrice($this->settings, $this->product);
 
         if ($show_price && $this->product['online_only']) {
-            $flags['online-only'] = array(
+            $flags['online-only'] = [
                 'type' => 'online-only',
-                'label' => $this->translator->trans('Online only', array(), 'Shop.Theme.Catalog'),
-            );
+                'label' => $this->translator->trans('Online only', [], 'Shop.Theme.Catalog'),
+            ];
         }
 
         if ($show_price && $this->product['on_sale'] && !$this->settings->catalog_mode) {
-            $flags['on-sale'] = array(
+            $flags['on-sale'] = [
                 'type' => 'on-sale',
-                'label' => $this->translator->trans('On sale!', array(), 'Shop.Theme.Catalog'),
-            );
+                'label' => $this->translator->trans('On sale!', [], 'Shop.Theme.Catalog'),
+            ];
         }
 
-        if ($show_price
-            && $this->product['reduction']
-            && !$this->settings->catalog_mode
-            && !$this->product['on_sale']) {
-            $flags['discount'] = array(
-                'type' => 'discount',
-                'label' => $this->translator->trans('Reduced price', array(), 'Shop.Theme.Catalog'),
-            );
+        if ($show_price && $this->product['reduction']) {
+            if ($this->product['discount_type'] === 'percentage') {
+                $flags['discount'] = [
+                    'type' => 'discount',
+                    'label' => $this->product['discount_percentage'],
+                ];
+            } elseif ($this->product['discount_type'] === 'amount') {
+                $flags['discount'] = [
+                    'type' => 'discount',
+                    'label' => $this->product['discount_amount_to_display'],
+                ];
+            } else {
+                $flags['discount'] = [
+                    'type' => 'discount',
+                    'label' => $this->translator->trans('Reduced price', [], 'Shop.Theme.Catalog'),
+                ];
+            }
         }
 
         if ($this->product['new']) {
-            $flags['new'] = array(
+            $flags['new'] = [
                 'type' => 'new',
-                'label' => $this->translator->trans('New', array(), 'Shop.Theme.Catalog'),
-            );
+                'label' => $this->translator->trans('New', [], 'Shop.Theme.Catalog'),
+            ];
         }
 
         if ($this->product['pack']) {
-            $flags['pack'] = array(
+            $flags['pack'] = [
                 'type' => 'pack',
-                'label' => $this->translator->trans('Pack', array(), 'Shop.Theme.Catalog'),
-            );
+                'label' => $this->translator->trans('Pack', [], 'Shop.Theme.Catalog'),
+            ];
         }
+
+        Hook::exec('actionProductFlagsModifier', [
+            'flags' => &$flags,
+            'product' => $this->product,
+        ]);
 
         return $flags;
     }
@@ -479,7 +496,7 @@ class ProductLazyArray extends AbstractLazyArray
         $colors = $this->productColorsRetriever->getColoredVariants($this->product['id_product']);
 
         if (!is_array($colors)) {
-            return array();
+            return [];
         }
 
         return array_map(function (array $color) {
@@ -491,7 +508,6 @@ class ProductLazyArray extends AbstractLazyArray
             $color['type'] = 'color';
             $color['html_color_code'] = $color['color'];
             unset($color['color']);
-            unset($color['id_attribute']); // because what is a template supposed to do with it?
 
             return $color;
         }, $colors);
@@ -549,7 +565,7 @@ class ProductLazyArray extends AbstractLazyArray
         ProductPresentationSettings $settings,
         array $product
     ) {
-        return $settings->showPrices && (bool) $product['show_price'];
+        return $settings->shouldShowPrice() && (bool) $product['show_price'];
     }
 
     /**
@@ -569,28 +585,68 @@ class ProductLazyArray extends AbstractLazyArray
         array $product,
         Language $language
     ) {
-        $this->product['images'] = $this->imageRetriever->getProductImages(
+        // Get all product images, including potential cover
+        $productImages = $this->imageRetriever->getAllProductImages(
             $product,
             $language
         );
 
-        if (isset($product['id_product_attribute'])) {
-            foreach ($this->product['images'] as $image) {
-                if (isset($image['cover']) && null !== $image['cover']) {
-                    $this->product['cover'] = $image;
+        // Get filtered product images matching the specified id_product_attribute
+        $this->product['images'] = $this->filterImagesForCombination($productImages, $product['id_product_attribute']);
 
+        // Get default image for selected combination (used for product page, cart details, ...)
+        $this->product['default_image'] = reset($this->product['images']);
+        foreach ($this->product['images'] as $image) {
+            // If one of the image is a cover it is used as such
+            if (isset($image['cover']) && null !== $image['cover']) {
+                $this->product['default_image'] = $image;
+
+                break;
+            }
+        }
+
+        // Get generic product image, used for product listing
+        if (isset($product['cover_image_id'])) {
+            // First try to find cover in product images
+            foreach ($productImages as $productImage) {
+                if ($productImage['id_image'] == $product['cover_image_id']) {
+                    $this->product['cover'] = $productImage;
                     break;
                 }
             }
-        }
 
-        if (!isset($this->product['cover'])) {
-            if (count($this->product['images']) > 0) {
-                $this->product['cover'] = array_values($this->product['images'])[0];
-            } else {
-                $this->product['cover'] = null;
+            // If the cover is not associated to the product images it is fetched manually
+            if (!isset($this->product['cover'])) {
+                $coverImage = $this->imageRetriever->getImage(new Product($product['id_product'], false, $language->getId()), $product['cover_image_id']);
+                $this->product['cover'] = array_merge($coverImage, [
+                    'legend' => $coverImage['legend'],
+                ]);
             }
         }
+
+        // If no cover fallback on default image
+        if (!isset($this->product['cover'])) {
+            $this->product['cover'] = $this->product['default_image'];
+        }
+    }
+
+    /**
+     * @param array $images
+     * @param int $productAttributeId
+     *
+     * @return array
+     */
+    private function filterImagesForCombination(array $images, int $productAttributeId)
+    {
+        $filteredImages = [];
+
+        foreach ($images as $image) {
+            if (in_array($productAttributeId, $image['associatedVariants'])) {
+                $filteredImages[] = $image;
+            }
+        }
+
+        return (0 === count($filteredImages)) ? $images : $filteredImages;
     }
 
     private function addPriceInformation(
@@ -624,12 +680,18 @@ class ProductLazyArray extends AbstractLazyArray
             // TODO: add percent sign according to locale preferences
             $this->product['discount_percentage'] = Tools::displayNumber($presNegativeReduction) . '%';
             $this->product['discount_percentage_absolute'] = Tools::displayNumber($presAbsoluteReduction) . '%';
-            // TODO: Fix issue with tax calculation
-            $this->product['discount_amount'] = $this->priceFormatter->format(
-                $product['reduction']
-            );
+            if ($settings->include_taxes) {
+                $regular_price = $product['price_without_reduction'];
+                $this->product['discount_amount'] = $this->priceFormatter->format(
+                    $product['reduction']
+                );
+            } else {
+                $regular_price = $product['price_without_reduction_without_tax'];
+                $this->product['discount_amount'] = $this->priceFormatter->format(
+                    $product['reduction_without_tax']
+                );
+            }
             $this->product['discount_amount_to_display'] = '-' . $this->product['discount_amount'];
-            $regular_price = $product['price_without_reduction'];
         }
 
         $this->product['price_amount'] = $price;
@@ -680,7 +742,8 @@ class ProductLazyArray extends AbstractLazyArray
         if ($settings->stock_management_enabled
             && !$product['allow_oosp']
             && ($product['quantity'] <= 0
-            || $product['quantity'] - $this->getQuantityWanted() < 0)
+            || $product['quantity'] - $this->getQuantityWanted() < 0
+            || $product['quantity'] - $this->getMinimalQuantity() < 0)
         ) {
             $shouldEnable = false;
         }
@@ -694,6 +757,14 @@ class ProductLazyArray extends AbstractLazyArray
     private function getQuantityWanted()
     {
         return (int) Tools::getValue('quantity_wanted', 1);
+    }
+
+    /**
+     * @return int Minimal quantity of product requested by the customer
+     */
+    private function getMinimalQuantity()
+    {
+        return (int) $this->product['minimal_quantity'];
     }
 
     /**
@@ -721,7 +792,7 @@ class ProductLazyArray extends AbstractLazyArray
             $ean13,
             $language->id,
             null,
-            $canonical ? null : $product['id_product_attribute'],
+            !$canonical && $product['id_product_attribute'] > 0 ? $product['id_product_attribute'] : null,
             false,
             false,
             true
@@ -763,10 +834,10 @@ class ProductLazyArray extends AbstractLazyArray
                     : Configuration::get('PS_LABEL_OOS_PRODUCTS_BOA', $language->id);
                 $this->product['availability_date'] = $product['available_date'];
                 $this->product['availability'] = 'available';
-            } elseif ($product['quantity_wanted'] > 0 && $product['quantity'] >= 0) {
+            } elseif ($product['quantity_wanted'] > 0 && $product['quantity'] > 0) {
                 $this->product['availability_message'] = $this->translator->trans(
                     'There are not enough products in stock',
-                    array(),
+                    [],
                     'Shop.Notifications.Error'
                 );
                 $this->product['availability'] = 'unavailable';
@@ -774,7 +845,7 @@ class ProductLazyArray extends AbstractLazyArray
             } elseif (!empty($product['quantity_all_versions']) && $product['quantity_all_versions'] > 0) {
                 $this->product['availability_message'] = $this->translator->trans(
                     'Product available with different options',
-                    array(),
+                    [],
                     'Shop.Theme.Catalog'
                 );
                 $this->product['availability_date'] = $product['available_date'];
@@ -799,7 +870,7 @@ class ProductLazyArray extends AbstractLazyArray
     {
         $this->product['availability_message'] = $this->translator->trans(
             'Last items in stock',
-            array(),
+            [],
             'Shop.Theme.Catalog'
         );
         $this->product['availability'] = 'last_remaining_items';
@@ -814,11 +885,13 @@ class ProductLazyArray extends AbstractLazyArray
     {
         switch ($key) {
             case 'ean13':
-                return $this->translator->trans('ean13', array(), 'Shop.Theme.Catalog');
+                return $this->translator->trans('ean13', [], 'Shop.Theme.Catalog');
             case 'isbn':
-                return $this->translator->trans('isbn', array(), 'Shop.Theme.Catalog');
+                return $this->translator->trans('isbn', [], 'Shop.Theme.Catalog');
             case 'upc':
-                return $this->translator->trans('upc', array(), 'Shop.Theme.Catalog');
+                return $this->translator->trans('upc', [], 'Shop.Theme.Catalog');
+            case 'mpn':
+                return $this->translator->trans('MPN', [], 'Shop.Theme.Catalog');
         }
 
         return $key;
@@ -829,121 +902,112 @@ class ProductLazyArray extends AbstractLazyArray
      */
     protected function getProductAttributeWhitelist()
     {
-        return array(
-            'id_shop_default',
-            'id_manufacturer',
-            'id_supplier',
-            'reference',
-            'is_virtual',
-            'id_category_default',
-            'id_product_attribute',
-            'id_product',
-            'id_customization',
-            'price',
-            'pack_stock_type',
-            'meta_description',
-            'meta_keywords',
-            'meta_title',
-            'link_rewrite',
-            'name',
-            'description',
-            'description_short',
-            'on_sale',
-            'online_only',
-            'ecotax',
-            'minimal_quantity',
-            'low_stock_threshold',
-            'low_stock_alert',
-            'price',
-            'unity',
-            'unit_price_ratio',
-            'additional_shipping_cost',
-            'customizable',
-            'text_fields',
-            'uploadable_files',
-            'redirect_type',
-            'id_type_redirected',
-            'available_for_order',
-            'available_date',
-            'show_condition',
-            'condition',
-            'show_price',
-            'indexed',
-            'visibility',
-            'cache_default_attribute',
-            'advanced_stock_management',
-            'date_add',
-            'date_upd',
-            'pack_stock_type',
-            'meta_description',
-            'meta_keywords',
-            'meta_title',
-            'link_rewrite',
-            'name',
-            'description',
-            'description_short',
-            'available_now',
-            'available_later',
-            'id',
-            'out_of_stock',
-            'new',
-            'quantity_wanted',
-            'extraContent',
-            'allow_oosp',
-            'category',
-            'category_name',
-            'link',
-            'attribute_price',
-            'price_tax_exc',
-            'price_without_reduction',
-            'reduction',
-            'specific_prices',
-            'quantity',
-            'quantity_all_versions',
-            'id_image',
-            'features',
-            'attachments',
-            'virtual',
-            'pack',
-            'packItems',
-            'nopackprice',
-            'customization_required',
-            'attributes',
-            'rate',
-            'tax_name',
-            'ecotax_rate',
-            'unit_price',
-            'customizations',
-            'is_customizable',
-            'show_quantities',
-            'quantity_label',
-            'quantity_discounts',
-            'customer_group_discount',
-            'weight_unit',
-            'images',
-            'cover',
-            'url',
-            'canonical_url',
-            'has_discount',
-            'discount_type',
-            'discount_percentage',
-            'discount_percentage_absolute',
-            'discount_amount',
-            'discount_amount_to_display',
-            'price_amount',
-            'unit_price_full',
+        return [
             'add_to_cart_url',
-            'main_variants',
-            'flags',
-            'labels',
-            'show_availability',
+            'additional_shipping_cost',
+            'advanced_stock_management',
+            'allow_oosp',
+            'attachments',
+            'attribute_price',
+            'attributes',
+            'availability',
             'availability_date',
             'availability_message',
-            'availability',
-            'reference_to_display',
+            'available_date',
+            'available_for_order',
+            'available_later',
+            'available_now',
+            'cache_default_attribute',
+            'canonical_url',
+            'category',
+            'category_name',
+            'condition',
+            'cover',
+            'customer_group_discount',
+            'customizable',
+            'customization_required',
+            'customizations',
+            'date_add',
+            'date_upd',
             'delivery_in_stock',
             'delivery_out_stock',
-        );
+            'description',
+            'description_short',
+            'discount_amount',
+            'discount_amount_to_display',
+            'discount_percentage',
+            'discount_percentage_absolute',
+            'discount_type',
+            'ecotax',
+            'ecotax_rate',
+            'extraContent',
+            'features',
+            'flags',
+            'has_discount',
+            'id',
+            'id_category_default',
+            'id_customization',
+            'id_image',
+            'id_manufacturer',
+            'id_product',
+            'id_product_attribute',
+            'id_shop_default',
+            'id_supplier',
+            'id_type_redirected',
+            'images',
+            'indexed',
+            'is_customizable',
+            'is_virtual',
+            'labels',
+            'link',
+            'link_rewrite',
+            'low_stock_alert',
+            'low_stock_threshold',
+            'main_variants',
+            'meta_description',
+            'meta_keywords',
+            'meta_title',
+            'minimal_quantity',
+            'name',
+            'new',
+            'nopackprice',
+            'on_sale',
+            'online_only',
+            'out_of_stock',
+            'pack',
+            'pack_stock_type',
+            'packItems',
+            'price',
+            'price_amount',
+            'price_tax_exc',
+            'price_without_reduction',
+            'quantity',
+            'quantity_all_versions',
+            'quantity_discounts',
+            'quantity_label',
+            'quantity_wanted',
+            'rate',
+            'redirect_type',
+            'reduction',
+            'reference',
+            'reference_to_display',
+            'show_availability',
+            'show_condition',
+            'show_price',
+            'show_quantities',
+            'specific_prices',
+            'tax_name',
+            'text_fields',
+            'unit_price',
+            'unit_price_full',
+            'unit_price_ratio',
+            'unity',
+            'uploadable_files',
+            'url',
+            'virtual',
+            'visibility',
+            'weight_unit',
+        ];
     }
 
     /**
@@ -955,14 +1019,14 @@ class ProductLazyArray extends AbstractLazyArray
      */
     protected function buildGroupedFeatures(array $productFeatures)
     {
-        $valuesByFeatureName = array();
-        $groupedFeatures = array();
+        $valuesByFeatureName = [];
+        $groupedFeatures = [];
 
         // features can either be "raw" (id_feature, id_product_id_feature_value)
         // or "full" (id_feature, name, value)
         // grouping can only be performed if they are "full"
         if (empty($productFeatures) || !array_key_exists('name', reset($productFeatures))) {
-            return array();
+            return [];
         }
 
         foreach ($productFeatures as $feature) {

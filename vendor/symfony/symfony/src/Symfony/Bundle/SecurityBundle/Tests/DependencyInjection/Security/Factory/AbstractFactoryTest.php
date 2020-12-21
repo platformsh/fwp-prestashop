@@ -61,7 +61,7 @@ class AbstractFactoryTest extends TestCase
             $options['failure_handler'] = $serviceId;
         }
 
-        list($container, $authProviderId, $listenerId, $entryPointId) = $this->callFactory('foo', $options, 'user_provider', 'entry_point');
+        list($container) = $this->callFactory('foo', $options, 'user_provider', 'entry_point');
 
         $definition = $container->getDefinition('abstract_listener.foo');
         $arguments = $definition->getArguments();
@@ -99,7 +99,7 @@ class AbstractFactoryTest extends TestCase
             $options['success_handler'] = $serviceId;
         }
 
-        list($container, $authProviderId, $listenerId, $entryPointId) = $this->callFactory('foo', $options, 'user_provider', 'entry_point');
+        list($container) = $this->callFactory('foo', $options, 'user_provider', 'entry_point');
 
         $definition = $container->getDefinition('abstract_listener.foo');
         $arguments = $definition->getArguments();
@@ -132,17 +132,17 @@ class AbstractFactoryTest extends TestCase
         $factory
             ->expects($this->once())
             ->method('createAuthProvider')
-            ->will($this->returnValue('auth_provider'))
+            ->willReturn('auth_provider')
         ;
         $factory
             ->expects($this->atLeastOnce())
             ->method('getListenerId')
-            ->will($this->returnValue('abstract_listener'))
+            ->willReturn('abstract_listener')
         ;
         $factory
             ->expects($this->any())
             ->method('getKey')
-            ->will($this->returnValue('abstract_factory'))
+            ->willReturn('abstract_factory')
         ;
 
         $container = new ContainerBuilder();

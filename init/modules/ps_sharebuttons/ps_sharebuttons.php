@@ -1,13 +1,13 @@
 <?php
-/**
-* 2007-2016 PrestaShop
+/*
+* 2007-2020 PrestaShop
 *
 * NOTICE OF LICENSE
 *
-* This source file is subject to the Open Software License (OSL 3.0)
+* This source file is subject to the Academic Free License (AFL 3.0)
 * that is bundled with this package in the file LICENSE.txt.
 * It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/osl-3.0.php
+* https://opensource.org/licenses/afl-3.0.php
 * If you did not receive a copy of the license and are unable to
 * obtain it through the world-wide-web, please send an email
 * to license@prestashop.com so we can send you a copy immediately.
@@ -16,11 +16,11 @@
 *
 * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
 * versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
+* needs please refer to https://www.prestashop.com for more information.
 *
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2016 PrestaShop SA
-*  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+*  @author PrestaShop SA <contact@prestashop.com>
+*  @copyright  2007-2020 PrestaShop SA
+*  @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
@@ -32,7 +32,7 @@ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 class Ps_Sharebuttons extends Module implements WidgetInterface
 {
-    protected static $networks = array('Facebook', 'Twitter', 'Google', 'Pinterest');
+    protected static $networks = ['Facebook', 'Twitter', 'Pinterest'];
 
     private $templateFile;
 
@@ -40,17 +40,17 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
     {
         $this->name = 'ps_sharebuttons';
         $this->author = 'PrestaShop';
-        $this->version = '2.0.1';
+        $this->version = '2.1.0';
         $this->need_instance = 0;
 
-        $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
         $this->_directory = dirname(__FILE__);
 
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->trans('Social media share buttons', array(), 'Modules.Sharebuttons.Admin');
-        $this->description = $this->trans('Displays social media sharing buttons (Twitter, Facebook, Google+ and Pinterest) on every product page.', array(), 'Modules.Sharebuttons.Admin');
+        $this->displayName = $this->trans('Social media share buttons', [], 'Modules.Sharebuttons.Admin');
+        $this->description = $this->trans('Displays social media sharing buttons (Twitter, Facebook and Pinterest) on every product page.', [], 'Modules.Sharebuttons.Admin');
 
         $this->templateFile = 'module:ps_sharebuttons/views/templates/hook/ps_sharebuttons.tpl';
     }
@@ -60,18 +60,16 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
         return parent::install()
             && Configuration::updateValue('PS_SC_TWITTER', 1)
             && Configuration::updateValue('PS_SC_FACEBOOK', 1)
-            && Configuration::updateValue('PS_SC_GOOGLE', 1)
             && Configuration::updateValue('PS_SC_PINTEREST', 1)
-            && $this->registerHook('displayProductButtons')
-        ;
+            && $this->registerHook('displayProductButtons');
     }
 
     public function getConfigFieldsValues()
     {
-        $values = array();
+        $values = [];
 
         foreach (self::$networks as $network) {
-            $values['PS_SC_'.Tools::strtoupper($network)] = (int)Tools::getValue('PS_SC_'.Tools::strtoupper($network), Configuration::get('PS_SC_'.Tools::strtoupper($network)));
+            $values['PS_SC_'.Tools::strtoupper($network)] = (int) Tools::getValue('PS_SC_'.Tools::strtoupper($network), Configuration::get('PS_SC_'.Tools::strtoupper($network)));
         }
 
         return $values;
@@ -82,12 +80,12 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
         $output = '';
         if (Tools::isSubmit('submitSocialSharing')) {
             foreach (self::$networks as $network) {
-                Configuration::updateValue('PS_SC_'.Tools::strtoupper($network), (int)Tools::getValue('PS_SC_'.Tools::strtoupper($network)));
+                Configuration::updateValue('PS_SC_'.Tools::strtoupper($network), (int) Tools::getValue('PS_SC_'.Tools::strtoupper($network)));
             }
 
             $this->_clearCache($this->templateFile);
 
-            $output .= $this->displayConfirmation($this->trans('Settings updated.', array(), 'Admin.Notifications.Success'));
+            $output .= $this->displayConfirmation($this->trans('Settings updated.', [], 'Admin.Notifications.Success'));
 
             Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true).'&conf=6&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name);
         }
@@ -96,43 +94,43 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
         $helper->submit_action = 'submitSocialSharing';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->tpl_vars = array('fields_value' => $this->getConfigFieldsValues());
+        $helper->tpl_vars = ['fields_value' => $this->getConfigFieldsValues()];
 
-        $fields = array();
+        $fields = [];
         foreach (self::$networks as $network) {
-            $fields[] = array(
+            $fields[] = [
                 'type' => 'switch',
                 'label' => $network,
                 'name' => 'PS_SC_'.Tools::strtoupper($network),
-                'values' => array(
-                    array(
+                'values' => [
+                    [
                         'id' => Tools::strtolower($network).'_active_on',
                         'value' => 1,
-                        'label' => $this->trans('Enabled', array(), 'Admin.Global')
-                    ),
-                    array(
+                        'label' => $this->trans('Enabled', [], 'Admin.Global'),
+                    ],
+                    [
                         'id' => Tools::strtolower($network).'_active_off',
                         'value' => 0,
-                        'label' => $this->trans('Disabled', array(), 'Admin.Global')
-                    )
-                )
-            );
+                        'label' => $this->trans('Disabled', [], 'Admin.Global'),
+                    ],
+                ],
+            ];
         }
 
-        return $output.$helper->generateForm(array(
-            array(
-                'form' => array(
-                    'legend' => array(
+        return $output.$helper->generateForm([
+            [
+                'form' => [
+                    'legend' => [
                         'title' => $this->displayName,
-                        'icon' => 'icon-share'
-                    ),
+                        'icon' => 'icon-share',
+                    ],
                     'input' => $fields,
-                    'submit' => array(
-                        'title' => $this->trans('Save', array(), 'Admin.Actions')
-                    )
-                )
-            )
-        ));
+                    'submit' => [
+                        'title' => $this->trans('Save', [], 'Admin.Actions'),
+                    ],
+                ],
+            ],
+        ]);
     }
 
     public function renderWidget($hookName, array $params)
@@ -162,52 +160,44 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
         }
 
         $social_share_links = [];
-        $sharing_url = addcslashes($this->context->link->getProductLink($product), "'");
-        $sharing_name = addcslashes($product->name, "'");
+        $sharing_url = urlencode(addcslashes($this->context->link->getProductLink($product), "'"));
+        $sharing_name = urlencode(addcslashes($product->name, "'"));
 
         $image_cover_id = $product->getCover($product->id);
         if (is_array($image_cover_id) && isset($image_cover_id['id_image'])) {
-            $image_cover_id = (int)$image_cover_id['id_image'];
+            $image_cover_id = (int) $image_cover_id['id_image'];
         } else {
             $image_cover_id = 0;
         }
 
-        $sharing_img = addcslashes($this->context->link->getImageLink($product->link_rewrite, $image_cover_id), "'");
+        $sharing_img = urlencode(addcslashes($this->context->link->getImageLink($product->link_rewrite, $image_cover_id), "'"));
 
         if (Configuration::get('PS_SC_FACEBOOK')) {
-            $social_share_links['facebook'] = array(
-                'label' => $this->trans('Share', array(), 'Modules.Sharebuttons.Shop'),
+            $social_share_links['facebook'] = [
+                'label' => $this->trans('Share', [], 'Modules.Sharebuttons.Shop'),
                 'class' => 'facebook',
-                'url' => 'http://www.facebook.com/sharer.php?u='.$sharing_url,
-            );
+                'url' => 'https://www.facebook.com/sharer.php?u='.$sharing_url,
+            ];
         }
 
         if (Configuration::get('PS_SC_TWITTER')) {
-            $social_share_links['twitter'] = array(
-                'label' => $this->trans('Tweet', array(), 'Modules.Sharebuttons.Shop'),
+            $social_share_links['twitter'] = [
+                'label' => $this->trans('Tweet', [], 'Modules.Sharebuttons.Shop'),
                 'class' => 'twitter',
                 'url' => 'https://twitter.com/intent/tweet?text='.$sharing_name.' '.$sharing_url,
-            );
-        }
-
-        if (Configuration::get('PS_SC_GOOGLE')) {
-            $social_share_links['googleplus'] = array(
-                'label' => $this->trans('Google+', array(), 'Modules.Sharebuttons.Shop'),
-                'class' => 'googleplus',
-                'url' => 'https://plus.google.com/share?url='.$sharing_url,
-            );
+            ];
         }
 
         if (Configuration::get('PS_SC_PINTEREST')) {
-            $social_share_links['pinterest'] = array(
-                'label' => $this->trans('Pinterest', array(), 'Modules.Sharebuttons.Shop'),
+            $social_share_links['pinterest'] = [
+                'label' => $this->trans('Pinterest', [], 'Modules.Sharebuttons.Shop'),
                 'class' => 'pinterest',
-                'url' => 'http://www.pinterest.com/pin/create/button/?media='.$sharing_img.'&url='.$sharing_url,
-            );
+                'url' => 'https://www.pinterest.com/pin/create/button/?media='.$sharing_img.'&url='.$sharing_url,
+            ];
         }
 
-        return array(
+        return [
             'social_share_links' => $social_share_links,
-        );
+        ];
     }
 }

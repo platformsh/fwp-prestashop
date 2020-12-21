@@ -11,6 +11,7 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\DependencyInjection;
 
+use Psr\Http\Message\StreamFactoryInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -20,7 +21,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\ClassExistenceResource;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Security\Core\Authorization\ExpressionLanguage as SecurityExpressionLanguage;
-use Zend\Diactoros\ServerRequestFactory;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -148,7 +148,7 @@ class SensioFrameworkExtraExtension extends Extension
         if ($config['psr_message']['enabled']) {
             $loader->load('psr7.xml');
 
-            if (!class_exists(ServerRequestFactory::class)) {
+            if (!interface_exists(StreamFactoryInterface::class)) {
                 $definitionsToRemove[] = 'sensio_framework_extra.psr7.argument_value_resolver.server_request';
             }
         }

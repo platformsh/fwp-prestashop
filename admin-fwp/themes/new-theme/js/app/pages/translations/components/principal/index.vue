@@ -1,10 +1,11 @@
 <!--**
- * 2007-2018 PrestaShop
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/OSL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -15,12 +16,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
  *-->
 <template>
   <transition name="fade">
@@ -96,10 +96,10 @@
 
 <script>
   import TranslationInput from './translation-input';
-  import PSButton from 'app/widgets/ps-button';
-  import PSPagination from 'app/widgets/ps-pagination';
-  import PSAlert from 'app/widgets/ps-alert';
-  import { EventBus } from 'app/utils/event-bus';
+  import PSButton from '@app/widgets/ps-button';
+  import PSPagination from '@app/widgets/ps-pagination';
+  import PSAlert from '@app/widgets/ps-alert';
+  import { EventBus } from '@app/utils/event-bus';
 
   export default {
     props: [
@@ -129,7 +129,9 @@
         return this.$store.state.currentDomain;
       },
       currentDomainTotalTranslations() {
-        return (this.$store.state.currentDomainTotalTranslations <= 1) ? `- ${this.trans('label_total_domain_singular').replace('%nb_translation%', this.$store.state.currentDomainTotalTranslations)}` : `- ${this.trans('label_total_domain').replace('%nb_translations%', this.$store.state.currentDomainTotalTranslations)}`;
+        return (this.$store.state.currentDomainTotalTranslations <= 1)
+          ? `- ${this.trans('label_total_domain_singular').replace('%nb_translation%', this.$store.state.currentDomainTotalTranslations)}`
+          : `- ${this.trans('label_total_domain').replace('%nb_translations%', this.$store.state.currentDomainTotalTranslations)}`;
       },
       currentDomainTotalMissingTranslations() {
         return this.$store.state.currentDomainTotalMissingTranslations;
@@ -137,13 +139,12 @@
       currentDomainTotalMissingTranslationsString() {
         let totalMissingTranslationsString = '';
 
-        if (
-          this.currentDomainTotalMissingTranslations
-          && this.currentDomainTotalMissingTranslations === 1
-        ) {
-          totalMissingTranslationsString = this.trans('label_missing_singular');
-        } else if (this.currentDomainTotalMissingTranslations) {
-          totalMissingTranslationsString = this.trans('label_missing').replace('%d', this.currentDomainTotalMissingTranslations);
+        if (this.currentDomainTotalMissingTranslations) {
+          if (this.currentDomainTotalMissingTranslations === 1) {
+            totalMissingTranslationsString = this.trans('label_missing_singular');
+          } else {
+            totalMissingTranslationsString = this.trans('label_missing').replace('%d', this.currentDomainTotalMissingTranslations);
+          }
         }
 
         return totalMissingTranslationsString;
@@ -158,14 +159,17 @@
         return this.$store.getters.searchTags.length;
       },
       searchInfo() {
-        return (this.$store.state.totalTranslations <= 1) ? this.trans('search_info_singular').replace('%s', this.$store.getters.searchTags.join(' - ')).replace('%d', this.$store.state.totalTranslations) : this.trans('search_info').replace('%s', this.$store.getters.searchTags.join(' - ')).replace('%d', this.$store.state.totalTranslations);
+        const transKey = (this.$store.state.totalTranslations <= 1) ? 'search_info_singular' : 'search_info';
+        return this.trans(transKey)
+          .replace('%s', this.$store.getters.searchTags.join(' - '))
+          .replace('%d', this.$store.state.totalTranslations);
       },
     },
     methods: {
       /**
        * Dispatch the event to change the page index,
        * get the translations and reset the modified translations into the state
-       * @param {Integer} pageIndex
+       * @param {Number} pageIndex
        */
       changePage: function changePage(pageIndex) {
         this.$store.dispatch('updatePageIndex', pageIndex);
@@ -223,13 +227,15 @@
       },
       getModifiedTranslations() {
         this.modifiedTranslations = [];
+        const targetTheme = (window.data.type === 'modules') ? '' : window.data.selected;
+
         this.$store.state.modifiedTranslations.forEach((translation) => {
           this.modifiedTranslations.push({
             default: translation.default,
             edited: translation.edited,
             domain: translation.tree_domain.join(''),
             locale: window.data.locale,
-            theme: window.data.selected,
+            theme: targetTheme,
           });
         });
 
@@ -270,7 +276,7 @@
   };
 </script>
 
-<style lang="sass" scoped>
+<style lang="scss" scoped>
   @import "../../../../../../scss/config/_settings.scss";
 
   .fade-enter-active, .fade-leave-active {

@@ -2,7 +2,7 @@
 <module>
 	<name>statsvisits</name>
 	<displayName><![CDATA[Visits and Visitors]]></displayName>
-	<version><![CDATA[2.0.2]]></version>
+	<version><![CDATA[2.0.3]]></version>
 	<description><![CDATA[Adds statistics about your visits and visitors tot the Stats dashboard.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>

@@ -38,13 +38,8 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
     private $unresolvedChildren = [];
 
     /**
-     * Creates a new form builder.
-     *
-     * @param string                   $name
-     * @param string|null              $dataClass
-     * @param EventDispatcherInterface $dispatcher
-     * @param FormFactoryInterface     $factory
-     * @param array                    $options
+     * @param string      $name
+     * @param string|null $dataClass
      */
     public function __construct($name, $dataClass, EventDispatcherInterface $dispatcher, FormFactoryInterface $factory, array $options = [])
     {
@@ -72,7 +67,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
         }
 
         if (!\is_string($child) && !\is_int($child)) {
-            throw new UnexpectedTypeException($child, 'string, integer or Symfony\Component\Form\FormBuilderInterface');
+            throw new UnexpectedTypeException($child, 'string or Symfony\Component\Form\FormBuilderInterface');
         }
 
         if (null !== $type && !\is_string($type) && !$type instanceof FormTypeInterface) {
@@ -81,10 +76,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
 
         // Add to "children" to maintain order
         $this->children[$child] = null;
-        $this->unresolvedChildren[$child] = [
-            'type' => $type,
-            'options' => $options,
-        ];
+        $this->unresolvedChildren[$child] = [$type, $options];
 
         return $this;
     }
@@ -152,15 +144,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
             throw new BadMethodCallException('FormBuilder methods cannot be accessed anymore once the builder is turned into a FormConfigInterface instance.');
         }
 
-        if (isset($this->unresolvedChildren[$name])) {
-            return true;
-        }
-
-        if (isset($this->children[$name])) {
-            return true;
-        }
-
-        return false;
+        return isset($this->unresolvedChildren[$name]) || isset($this->children[$name]);
     }
 
     /**
@@ -232,7 +216,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
     /**
      * {@inheritdoc}
      *
-     * @return FormBuilderInterface[]
+     * @return FormBuilderInterface[]|\Traversable
      */
     public function getIterator()
     {
@@ -252,12 +236,11 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
      */
     private function resolveChild($name)
     {
-        $info = $this->unresolvedChildren[$name];
-        $child = $this->create($name, $info['type'], $info['options']);
-        $this->children[$name] = $child;
+        list($type, $options) = $this->unresolvedChildren[$name];
+
         unset($this->unresolvedChildren[$name]);
 
-        return $child;
+        return $this->children[$name] = $this->create($name, $type, $options);
     }
 
     /**
@@ -266,7 +249,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
     private function resolveChildren()
     {
         foreach ($this->unresolvedChildren as $name => $info) {
-            $this->children[$name] = $this->create($name, $info['type'], $info['options']);
+            $this->children[$name] = $this->create($name, $info[0], $info[1]);
         }
 
         $this->unresolvedChildren = [];

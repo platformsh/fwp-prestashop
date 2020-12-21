@@ -109,7 +109,7 @@ class GetSetMethodNormalizer extends AbstractObjectNormalizer
 
             $attributeName = lcfirst(substr($method->name, 0 === strpos($method->name, 'is') ? 2 : 3));
 
-            if ($this->isAllowedAttribute($object, $attributeName)) {
+            if ($this->isAllowedAttribute($object, $attributeName, $format, $context)) {
                 $attributes[] = $attributeName;
             }
         }
@@ -138,6 +138,8 @@ class GetSetMethodNormalizer extends AbstractObjectNormalizer
         if (\is_callable([$object, $haser])) {
             return $object->$haser();
         }
+
+        return null;
     }
 
     /**

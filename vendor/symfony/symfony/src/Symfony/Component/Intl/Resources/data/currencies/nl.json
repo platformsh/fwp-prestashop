@@ -1,5 +1,5 @@
 {
-    "Version": "2.1.45.14",
+    "Version": "36",
     "Names": {
         "ADP": [
             "ADP",
@@ -263,7 +263,7 @@
         ],
         "CNH": [
             "CNH",
-            "Chinese renminbi (offshore)"
+            "Chinese yuan (offshore)"
         ],
         "CNX": [
             "CNX",
@@ -1032,6 +1032,10 @@
         "UYU": [
             "UYU",
             "Uruguayaanse peso"
+        ],
+        "UYW": [
+            "UYW",
+            "Uruguayaanse nominale salarisindexeenheid"
         ],
         "UZS": [
             "UZS",

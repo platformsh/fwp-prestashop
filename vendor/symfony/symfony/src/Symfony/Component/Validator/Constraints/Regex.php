@@ -71,7 +71,7 @@ class Regex extends Constraint
 
         // Quit if delimiters not at very beginning/end (e.g. when options are passed)
         if ($this->pattern[0] !== $this->pattern[\strlen($this->pattern) - 1]) {
-            return;
+            return null;
         }
 
         $delimiter = $this->pattern[0];
@@ -79,7 +79,7 @@ class Regex extends Constraint
         // Unescape the delimiter
         $pattern = str_replace('\\'.$delimiter, $delimiter, substr($this->pattern, 1, -1));
 
-        // If the pattern is inverted, we can simply wrap it in
+        // If the pattern is inverted, we can wrap it in
         // ((?!pattern).)*
         if (!$this->match) {
             return '((?!'.$pattern.').)*';
