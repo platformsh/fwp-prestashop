@@ -1,94 +1,134 @@
 <?php
-/*
-* 2007-2016 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2016 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
-
-if (!defined('_PS_VERSION_'))
-	exit;
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class GridHtml extends ModuleGridEngine
 {
-	private $_values;
-	private static $_columns;
+    /**
+     * @var array
+     */
+    private $_values;
+    /**
+     * @var array
+     */
+    private static $_columns;
+    /**
+     * @var string
+     */
+    public $_title;
+    /**
+     * @var int
+     */
+    public $_width;
+    /**
+     * @var int
+     */
+    public $_height;
+    /**
+     * @var int
+     */
+    public $_totalCount;
+    /**
+     * @var int
+     */
+    public $_start;
+    /**
+     * @var int
+     */
+    public $_limit;
 
-	function __construct($type = null)
-	{
-		if ($type != null)
-			parent::__construct($type);
-		else
-		{
-			$this->name = 'gridhtml';
-			$this->tab = 'administration';
-			$this->version = '2.0.0';
-			$this->author = 'PrestaShop';
-			$this->need_instance = 0;
+    /**
+     * GridHtml constructor.
+     *
+     * @param string|null $type
+     */
+    public function __construct($type = null)
+    {
+        if ($type != null) {
+            parent::__construct($type);
+        } else {
+            $this->name = 'gridhtml';
+            $this->tab = 'administration';
+            $this->version = '2.0.1';
+            $this->author = 'PrestaShop';
+            $this->need_instance = 0;
 
-			Module::__construct();
+            Module::__construct();
 
-			$this->displayName = $this->trans('Simple HTML table display', array(), 'Modules.Gridhtml.Admin');
-			$this->description = $this->trans('Allows the statistics system to display data in a grid.', array(), 'Modules.Gridhtml.Admin');
-			$this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
-		}
-	}
+            $this->displayName = $this->trans('Simple HTML table display', [], 'Modules.Gridhtml.Admin');
+            $this->description = $this->trans('Just allow statistics to be displayed (and therefore analyzed) on your back office.', [], 'Modules.Gridhtml.Admin');
+            $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
+        }
+    }
 
-	function install()
-	{
-		return (parent::install() AND $this->registerHook('GridEngine'));
-	}
+    public function install()
+    {
+        return parent::install() and $this->registerHook('GridEngine');
+    }
 
-	public static function hookGridEngine($params, $grider)
-	{
-		self::$_columns = $params['columns'];
-		if (!isset($params['emptyMsg']))
-			$params['emptyMsg'] = 'Empty';
+    /**
+     * @param array $params
+     * @param string $grider
+     */
+    public static function hookGridEngine($params, $grider)
+    {
+        self::$_columns = $params['columns'];
+        if (!isset($params['emptyMsg'])) {
+            $params['emptyMsg'] = 'Empty';
+        }
 
-		$customParams = '';
-		if (isset($params['customParams'])) {
-			foreach ($params['customParams'] as $name => $value) {
-				$customParams .= '&'.$name.'='.urlencode($value);
-			}
-		}
+        $customParams = '';
+        if (isset($params['customParams'])) {
+            foreach ($params['customParams'] as $name => $value) {
+                $customParams .= '&' . $name . '=' . urlencode($value);
+            }
+        }
 
-		$html = '
+        $html = '
 		<table class="table" id="grid_1">
 			<thead>
 				<tr>';
-		foreach ($params['columns'] as $column)
-			$html .= '<th class="center"><span class="title_box active">'.$column['header'].'</span></th>';
-		$html .= '</tr>
+        foreach ($params['columns'] as $column) {
+            $html .= '<th class="center"><span class="title_box active">' . $column['header'] . '</span></th>';
+        }
+        $html .= '</tr>
 			</thead>
 			<tbody></tbody>
-			<tfoot><tr><th colspan="'.count($params['columns']).'"></th></tr></tfoot>
+			<tfoot><tr><th colspan="' . count($params['columns']) . '"></th></tr></tfoot>
 		</table>
 		<script type="text/javascript">
 			function getGridData(url)
 			{
-				$("#grid_1 tbody").html("<tr><td style=\"text-align:center\" colspan=\"" + '.count($params['columns']).' + "\"><img src=\"../img/loadingAnimation.gif\" /></td></tr>");
+				$("#grid_1 tbody").html("<tr><td style=\"text-align:center\" colspan=\"" + ' . count($params['columns']) . ' + "\"><img src=\"../img/loadingAnimation.gif\" /></td></tr>");
 				$.get(url, "", function(json) {
 					$("#grid_1 tbody").html("");
 					var array = $.parseJSON(json);
-					$("#grid_1 tfoot tr th").html("'.addslashes($params['pagingMessage']).'");
+					$("#grid_1 tfoot tr th").html("' . addslashes($params['pagingMessage']) . '");
 					$("#grid_1 tfoot tr th").html($("#grid_1 tfoot tr th").html().replace("{0}", array["from"]));
 					$("#grid_1 tfoot tr th").html($("#grid_1 tfoot tr th").html().replace("{1}", array["to"]));
 					$("#grid_1 tfoot tr th").html($("#grid_1 tfoot tr th").html().replace("{2}", array["total"]));
@@ -101,19 +141,22 @@ class GridHtml extends ModuleGridEngine
 					if (values.length > 0)
 						$.each(values, function(index, row){
 							var newLine = "<tr>";';
-			foreach ($params['columns'] as $column)
-				$html .= '	newLine += "<td'.(isset($column['align']) ? ' align=\"'.$column['align'].'\"' : '').'>" + row["'.$column['dataIndex'].'"] + "</td>";';
-			if (!isset($params['defaultSortColumn']))
-				$params['defaultSortColumn'] = false;
-			if (!isset($params['defaultSortDirection']))
-				$params['defaultSortDirection'] = false;
-			$html .= '		$("#grid_1 tbody").append(newLine);
+        foreach ($params['columns'] as $column) {
+            $html .= '	newLine += "<td' . (isset($column['align']) ? ' align=\"' . $column['align'] . '\"' : '') . '>" + row["' . $column['dataIndex'] . '"] + "</td>";';
+        }
+        if (!isset($params['defaultSortColumn'])) {
+            $params['defaultSortColumn'] = false;
+        }
+        if (!isset($params['defaultSortDirection'])) {
+            $params['defaultSortDirection'] = false;
+        }
+        $html .= '		$("#grid_1 tbody").append(newLine);
 						});
 					else
-						$("#grid_1 tbody").append("<tr><td class=\"center\" colspan=\"" + '.count($params['columns']).' + "\">'.$params['emptyMsg'].'</td></tr>");
+						$("#grid_1 tbody").append("<tr><td class=\"center\" colspan=\"" + ' . count($params['columns']) . ' + "\">' . $params['emptyMsg'] . '</td></tr>");
 				});
 			}
-			
+
 			function gridNextPage(url)
 			{
 				var from = url.match(/&start=[0-9]+/i);
@@ -124,7 +167,7 @@ class GridHtml extends ModuleGridEngine
 				url = url.replace(/&start=[0-9]+/i, "") + from;
 				getGridData(url);
 			}
-			
+
 			function gridPrevPage(url)
 			{
 				var from = url.match(/&start=[0-9]+/i);
@@ -142,50 +185,67 @@ class GridHtml extends ModuleGridEngine
 				getGridData(url);
 			}
 
-			$(document).ready(function(){getGridData("'.$grider.'&sort='.urlencode($params['defaultSortColumn']).'&dir='.urlencode($params['defaultSortDirection']).$customParams.'");});
+			$(document).ready(function(){getGridData("' . $grider . '&sort=' . urlencode($params['defaultSortColumn']) . '&dir=' . urlencode($params['defaultSortDirection']) . $customParams . '");});
 		</script>';
-		return $html;
-	}
 
-	public function setColumnsInfos(&$infos)
-	{
-	}
+        return $html;
+    }
 
-	public function setValues($values)
-	{
-		$this->_values = $values;
-	}
+    public function setColumnsInfos(&$infos)
+    {
+    }
 
-	public function setTitle($title)
-	{
-		$this->_title = $title;
-	}
+    /**
+     * @param array $values
+     */
+    public function setValues($values)
+    {
+        $this->_values = $values;
+    }
 
-	public function setSize($width, $height)
-	{
-		$this->_width = $width;
-		$this->_height = $height;
-	}
+    /**
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        $this->_title = $title;
+    }
 
-	public function setTotalCount($totalCount)
-	{
-		$this->_totalCount = $totalCount;
-	}
+    /**
+     * @param int $width
+     * @param int $height
+     */
+    public function setSize($width, $height)
+    {
+        $this->_width = $width;
+        $this->_height = $height;
+    }
 
-	public function setLimit($start, $limit)
-	{
-		$this->_start = (int)$start;
-		$this->_limit = (int)$limit;
-	}
+    /**
+     * @param int $totalCount
+     */
+    public function setTotalCount($totalCount)
+    {
+        $this->_totalCount = $totalCount;
+    }
 
-	public function render()
-	{
-		echo Tools::jsonEncode(array(
-			'total' => $this->_totalCount,
-			'from' => min($this->_start + 1, $this->_totalCount),
-			'to' => min($this->_start + $this->_limit, $this->_totalCount),
-			'values' => $this->_values
-		));
-	}
+    /**
+     * @param int $start
+     * @param int $limit
+     */
+    public function setLimit($start, $limit)
+    {
+        $this->_start = (int) $start;
+        $this->_limit = (int) $limit;
+    }
+
+    public function render()
+    {
+        echo Tools::jsonEncode([
+            'total' => $this->_totalCount,
+            'from' => min($this->_start + 1, $this->_totalCount),
+            'to' => min($this->_start + $this->_limit, $this->_totalCount),
+            'values' => $this->_values,
+        ]);
+    }
 }
-
