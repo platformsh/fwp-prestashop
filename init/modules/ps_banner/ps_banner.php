@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -32,20 +32,25 @@ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 class Ps_Banner extends Module implements WidgetInterface
 {
+    /**
+     * @var string Name of the module running on PS 1.6.x. Used for data migration.
+     */
+    const PS_16_EQUIVALENT_MODULE = 'blockbanner';
+
     private $templateFile;
 
-	public function __construct()
-	{
-		$this->name = 'ps_banner';
-		$this->version = '2.1.0';
-		$this->author = 'PrestaShop';
-		$this->need_instance = 0;
+    public function __construct()
+    {
+        $this->name = 'ps_banner';
+        $this->version = '2.1.1';
+        $this->author = 'PrestaShop';
+        $this->need_instance = 0;
 
         $this->bootstrap = true;
         parent::__construct();
 
         $this->displayName = $this->trans('Banner', array(), 'Modules.Banner.Admin');
-        $this->description = $this->trans('Displays a banner on your shop.', array(), 'Modules.Banner.Admin');
+        $this->description = $this->trans('Add a banner to the homepage of your store to highlight your sales and new products in a visual and friendly way.', array(), 'Modules.Banner.Admin');
 
         $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
 
@@ -58,7 +63,29 @@ class Ps_Banner extends Module implements WidgetInterface
             $this->registerHook('displayHome') &&
             $this->registerHook('actionObjectLanguageAddAfter') &&
             $this->installFixtures() &&
+            $this->uninstallPrestaShop16Module() &&
             $this->disableDevice(Context::DEVICE_MOBILE));
+    }
+
+    /**
+     * Migrate data from 1.6 equivalent module (if applicable), then uninstall
+     */
+    public function uninstallPrestaShop16Module()
+    {
+        if (!Module::isInstalled(self::PS_16_EQUIVALENT_MODULE)) {
+            return true;
+        }
+
+        // Data migration
+        Configuration::updateValue('BANNER_IMG',Configuration::getInt('BLOCKBANNER_IMG'));
+        Configuration::updateValue('BANNER_LINK', Configuration::getInt('BLOCKBANNER_LINK'));
+        Configuration::updateValue('BANNER_DESC', Configuration::getInt('BLOCKBANNER_DESC'));
+        
+        $oldModule = Module::getInstanceByName(self::PS_16_EQUIVALENT_MODULE);
+        if ($oldModule) {
+            $oldModule->uninstall();
+        }
+        return true;
     }
 
     public function hookActionObjectLanguageAddAfter($params)
@@ -109,7 +136,7 @@ class Ps_Banner extends Module implements WidgetInterface
                     && isset($_FILES['BANNER_IMG_'.$lang['id_lang']]['tmp_name'])
                     && !empty($_FILES['BANNER_IMG_'.$lang['id_lang']]['tmp_name'])) {
                     if ($error = ImageManager::validateUpload($_FILES['BANNER_IMG_'.$lang['id_lang']], 4000000)) {
-                        return $error;
+                        return $this->displayError($error);
                     } else {
                         $ext = substr($_FILES['BANNER_IMG_'.$lang['id_lang']]['name'], strrpos($_FILES['BANNER_IMG_'.$lang['id_lang']]['name'], '.') + 1);
                         $file_name = md5($_FILES['BANNER_IMG_'.$lang['id_lang']]['name']).'.'.$ext;
