@@ -131,6 +131,9 @@ mounts:
     'themes':
         source: local
         source_path: 'themes'
+    'config-fwp':
+        source: local
+        source_path: 'config-fwp'
 
 # The configuration of the application when it is exposed to the web.
 web:
@@ -141,6 +144,18 @@ web:
             # The front-controller script which determines where to send
             # non-static requests.
             passthru: '/index.php'
+            rules:
+                '\.(yml|log|tpl|twig|sass)$':
+                    scripts: false
+                    allow: false
+                '^/(app|bin|cache|classes|config|controllers|docs|localization|override|src|tests|tools|translations|travis-scripts|vendor|var|init|config-fwp)/':
+                    scripts: false
+                    allow: false
+                '^/img/\.php$':
+                    scripts: false
+                '^/upload/\.php$':
+                    scripts: false
+
         '/admin-fwp':
             # The public directory of the application relative to its root.
             root: 'admin-fwp'
