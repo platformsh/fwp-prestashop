@@ -1288,12 +1288,12 @@
     ),
     'smarty/smarty' => 
     array (
-      'pretty_version' => 'v3.1.34',
-      'version' => '3.1.34.0',
+      'pretty_version' => 'v3.1.39',
+      'version' => '3.1.39.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'c9f0de05f41b9e52798b268ab1e625fac3b8578c',
+      'reference' => 'e27da524f7bcd7361e3ea5cdfa99c4378a7b5419',
     ),
     'soundasleep/html2text' => 
     array (
