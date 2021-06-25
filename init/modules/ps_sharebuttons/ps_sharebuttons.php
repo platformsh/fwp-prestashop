@@ -32,6 +32,11 @@ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 class Ps_Sharebuttons extends Module implements WidgetInterface
 {
+    /**
+     * @var string Name of the module running on PS 1.6.x. Used for data migration.
+     */
+    const PS_16_EQUIVALENT_MODULE = 'socialsharing';
+
     protected static $networks = ['Facebook', 'Twitter', 'Pinterest'];
 
     private $templateFile;
@@ -40,7 +45,7 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
     {
         $this->name = 'ps_sharebuttons';
         $this->author = 'PrestaShop';
-        $this->version = '2.1.0';
+        $this->version = '2.1.1';
         $this->need_instance = 0;
 
         $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
@@ -50,18 +55,43 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
         parent::__construct();
 
         $this->displayName = $this->trans('Social media share buttons', [], 'Modules.Sharebuttons.Admin');
-        $this->description = $this->trans('Displays social media sharing buttons (Twitter, Facebook and Pinterest) on every product page.', [], 'Modules.Sharebuttons.Admin');
+        $this->description = $this->trans('Instagram, YouTube, gather your community with social media sharing buttons on product pages.', [], 'Modules.Sharebuttons.Admin');
 
         $this->templateFile = 'module:ps_sharebuttons/views/templates/hook/ps_sharebuttons.tpl';
     }
 
     public function install()
     {
+        if (!$this->uninstallPrestaShop16Module()) {
+            Configuration::updateValue('PS_SC_TWITTER', 1);
+            Configuration::updateValue('PS_SC_FACEBOOK', 1);
+            Configuration::updateValue('PS_SC_PINTEREST', 1);
+        }
+
         return parent::install()
-            && Configuration::updateValue('PS_SC_TWITTER', 1)
-            && Configuration::updateValue('PS_SC_FACEBOOK', 1)
-            && Configuration::updateValue('PS_SC_PINTEREST', 1)
-            && $this->registerHook('displayProductButtons');
+            && $this->registerHook('displayProductButtons')
+        ;
+    }
+
+    /**
+     * Migrate data from 1.6 equivalent module (if applicable), then uninstall
+     */
+    public function uninstallPrestaShop16Module()
+    {
+        if (!Module::isInstalled(self::PS_16_EQUIVALENT_MODULE)) {
+            return false;
+        }
+        $oldModule = Module::getInstanceByName(self::PS_16_EQUIVALENT_MODULE);
+        if ($oldModule) {
+            // This closure calls the parent class to prevent data to be erased
+            // It allows the new module to be configured without migration
+            $parentUninstallClosure = function() {
+                return parent::uninstall();
+            };
+            $parentUninstallClosure = $parentUninstallClosure->bindTo($oldModule, get_class($oldModule));
+            $parentUninstallClosure();
+        }
+        return true;
     }
 
     public function getConfigFieldsValues()
@@ -106,12 +136,12 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
                     [
                         'id' => Tools::strtolower($network).'_active_on',
                         'value' => 1,
-                        'label' => $this->trans('Enabled', [], 'Admin.Global'),
+                        'label' => $this->trans('Yes', [], 'Admin.Global'),
                     ],
                     [
                         'id' => Tools::strtolower($network).'_active_off',
                         'value' => 0,
-                        'label' => $this->trans('Disabled', [], 'Admin.Global'),
+                        'label' => $this->trans('No', [], 'Admin.Global'),
                     ],
                 ],
             ];
@@ -135,16 +165,9 @@ class Ps_Sharebuttons extends Module implements WidgetInterface
 
     public function renderWidget($hookName, array $params)
     {
-        $key = 'ps_sharebuttons|' . $params['product']['id_product'];
-        if (!empty($params['product']['id_product_attribute'])) {
-            $key .= '|' . $params['product']['id_product_attribute'];
-        }
+        $this->smarty->assign($this->getWidgetVariables($hookName, $params));
 
-        if (!$this->isCached($this->templateFile, $this->getCacheId($key))) {
-            $this->smarty->assign($this->getWidgetVariables($hookName, $params));
-        }
-
-        return $this->fetch($this->templateFile, $this->getCacheId($key));
+        return $this->fetch($this->templateFile);
     }
 
     public function getWidgetVariables($hookName, array $params)
