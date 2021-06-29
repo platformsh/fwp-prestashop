@@ -783,21 +783,21 @@
     ),
     'prestashop/ps_emailsubscription' => 
     array (
-      'pretty_version' => 'v2.6.0',
-      'version' => '2.6.0.0',
+      'pretty_version' => 'v2.6.1',
+      'version' => '2.6.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'd4ef6d74fe3dd3f2f3a0cd7c7c6b92bf0f9277f6',
+      'reference' => '3908c6cfed00ebb4be1302a876885439d9f1ae8c',
     ),
     'prestashop/ps_facetedsearch' => 
     array (
-      'pretty_version' => 'v3.7.0',
-      'version' => '3.7.0.0',
+      'pretty_version' => 'v3.7.1',
+      'version' => '3.7.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'a889cce83d7df567e1f6d1b1ebf16915a102a5ba',
+      'reference' => '5d7b80bf767d002c37b281e3598069aa5fdbf6ff',
     ),
     'prestashop/ps_faviconnotificationbo' => 
     array (
@@ -864,12 +864,12 @@
     ),
     'prestashop/ps_sharebuttons' => 
     array (
-      'pretty_version' => 'v2.1.0',
-      'version' => '2.1.0.0',
+      'pretty_version' => 'v2.1.1',
+      'version' => '2.1.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '2a0302774b84820be38e76a34188d777de12403f',
+      'reference' => '698f3875c5040f16ff6b2a2e549efc306f9d920e',
     ),
     'prestashop/ps_shoppingcart' => 
     array (

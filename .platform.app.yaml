@@ -37,6 +37,7 @@ hooks:
             rsync -a init/themes/ themes/
             rsync -a init/admin-fwp/import/ admin-fwp/import/
             rsync -a init/admin-fwp/autoupgrade/ admin-fwp/autoupgrade/
+            rsync -a init/admin-fwp/backups/ admin-fwp/backups/
             rsync -a init/mails/ mails/
             rsync -a init/download/ download/
             rm -rf var/cache/*
@@ -53,6 +54,7 @@ hooks:
                 rsync -a init/themes/ themes/
                 rsync -a init/admin-fwp/import/ admin-fwp/import/
                 rsync -a init/admin-fwp/autoupgrade/ admin-fwp/autoupgrade/
+                rsync -a init/admin-fwp/backups/ admin-fwp/backups/
                 rsync -a init/mails/ mails/
                 rsync -a init/download/ download/
                 rm -rf var/cache/*
@@ -89,6 +91,9 @@ mounts:
     'admin-fwp/autoupgrade':
         source: local
         source_path: 'admin-fwp-autoupgrade'
+    'admin-fwp/backups':
+        source: local
+        source_path: 'admin-fwp-backups'
     'mails':
         source: local
         source_path: 'mails'
@@ -162,6 +167,10 @@ web:
             # The front-controller script which determines where to send
             # non-static requests.
             passthru: '/admin-fwp/index.php'
+            rules:
+                '^/admin-fwp/(backups|import)/':
+                    scripts: false
+                    allow: false
         '/install-fwp':
             root: 'install-fwp'
             scripts: false

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
+class ComposerStaticInitc4da22d335991d9a249589bd55adfd18
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
@@ -3776,6 +3776,7 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
         'PrestaShop\\Module\\FacetedSearch\\Constraint\\UrlSegmentValidator' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Constraint/UrlSegmentValidator.php',
         'PrestaShop\\Module\\FacetedSearch\\Filters\\Block' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Filters/Block.php',
         'PrestaShop\\Module\\FacetedSearch\\Filters\\Converter' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Filters/Converter.php',
+        'PrestaShop\\Module\\FacetedSearch\\Filters\\DataAccessor' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Filters/DataAccessor.php',
         'PrestaShop\\Module\\FacetedSearch\\Filters\\Products' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Filters/Products.php',
         'PrestaShop\\Module\\FacetedSearch\\Form\\Feature\\FormDataProvider' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Form/Feature/FormDataProvider.php',
         'PrestaShop\\Module\\FacetedSearch\\Form\\Feature\\FormModifier' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/src/Form/Feature/FormModifier.php',
@@ -3835,6 +3836,7 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
         'PrestaShop\\PrestaShop\\Adapter\\Address\\AbstractAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/AbstractAddressHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\Address\\AbstractCustomerAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/AbstractCustomerAddressHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\Address\\AbstractManufacturerAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/AbstractManufacturerAddressHandler.php',
+        'PrestaShop\\PrestaShop\\Adapter\\Address\\AddressFormatter' => __DIR__ . '/../..' . '/src/Adapter/Address/AddressFormatter.php',
         'PrestaShop\\PrestaShop\\Adapter\\Address\\CommandHandler\\AddCustomerAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/CommandHandler/AddCustomerAddressHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\Address\\CommandHandler\\AddManufacturerAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/CommandHandler/AddManufacturerAddressHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\Address\\CommandHandler\\BulkDeleteAddressHandler' => __DIR__ . '/../..' . '/src/Adapter/Address/CommandHandler/BulkDeleteAddressHandler.php',
@@ -4327,6 +4329,7 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
         'PrestaShop\\PrestaShop\\Adapter\\SpecificPrice\\AbstractSpecificPriceHandler' => __DIR__ . '/../..' . '/src/Adapter/SpecificPrice/AbstractSpecificPriceHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\SpecificPrice\\CommandHandler\\AddSpecificPriceHandler' => __DIR__ . '/../..' . '/src/Adapter/SpecificPrice/CommandHandler/AddSpecificPriceHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\SpecificPrice\\CommandHandler\\DeleteSpecificPriceByCartProductHandler' => __DIR__ . '/../..' . '/src/Adapter/SpecificPrice/CommandHandler/DeleteSpecificPriceByCartProductHandler.php',
+        'PrestaShop\\PrestaShop\\Adapter\\SqlManager\\CommandHandler\\AbstractSqlRequestHandler' => __DIR__ . '/../..' . '/src/Adapter/SqlManager/CommandHandler/AbstractSqlRequestHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\SqlManager\\CommandHandler\\AddSqlRequestHandler' => __DIR__ . '/../..' . '/src/Adapter/SqlManager/CommandHandler/AddSqlRequestHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\SqlManager\\CommandHandler\\BulkDeleteSqlRequestHandler' => __DIR__ . '/../..' . '/src/Adapter/SqlManager/CommandHandler/BulkDeleteSqlRequestHandler.php',
         'PrestaShop\\PrestaShop\\Adapter\\SqlManager\\CommandHandler\\DeleteSqlRequestHandler' => __DIR__ . '/../..' . '/src/Adapter/SqlManager/CommandHandler/DeleteSqlRequestHandler.php',
@@ -4420,6 +4423,7 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
         'PrestaShop\\PrestaShop\\Core\\Addon\\Theme\\ThemeUploaderInterface' => __DIR__ . '/../..' . '/src/Core/Addon/Theme/ThemeUploaderInterface.php',
         'PrestaShop\\PrestaShop\\Core\\Addon\\Theme\\ThemeValidator' => __DIR__ . '/../..' . '/src/Core/Addon/Theme/ThemeValidator.php',
         'PrestaShop\\PrestaShop\\Core\\Addon\\Theme\\ThemeZipUploader' => __DIR__ . '/../..' . '/src/Core/Addon/Theme/ThemeZipUploader.php',
+        'PrestaShop\\PrestaShop\\Core\\Address\\AddressFormatterInterface' => __DIR__ . '/../..' . '/src/Core/Address/AddressFormatterInterface.php',
         'PrestaShop\\PrestaShop\\Core\\AttributeGroup\\AttributeGroupViewDataProviderInterface' => __DIR__ . '/../..' . '/src/Core/AttributeGroup/AttributeGroupViewDataProviderInterface.php',
         'PrestaShop\\PrestaShop\\Core\\B2b\\B2bFeature' => __DIR__ . '/../..' . '/src/Core/B2b/B2bFeature.php',
         'PrestaShop\\PrestaShop\\Core\\Backup\\BackupCollection' => __DIR__ . '/../..' . '/src/Core/Backup/BackupCollection.php',
@@ -5090,6 +5094,7 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\Command\\EditOrderMessageCommand' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/Command/EditOrderMessageCommand.php',
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\Exception\\OrderMessageConstraintException' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/Exception/OrderMessageConstraintException.php',
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\Exception\\OrderMessageException' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/Exception/OrderMessageException.php',
+        'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\Exception\\OrderMessageNameAlreadyUsedException' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/Exception/OrderMessageNameAlreadyUsedException.php',
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\Exception\\OrderMessageNotFoundException' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/Exception/OrderMessageNotFoundException.php',
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\OrderMessageConstraint' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/OrderMessageConstraint.php',
         'PrestaShop\\PrestaShop\\Core\\Domain\\OrderMessage\\QueryHandler\\GetOrderMessageForEditingHandlerInterface' => __DIR__ . '/../..' . '/src/Core/Domain/OrderMessage/QueryHandler/GetOrderMessageForEditingHandlerInterface.php',
@@ -9211,11 +9216,11 @@ class ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit4a24cb0703c64c4d2a448bc6d7cec21f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc4da22d335991d9a249589bd55adfd18::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc4da22d335991d9a249589bd55adfd18::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc4da22d335991d9a249589bd55adfd18::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitc4da22d335991d9a249589bd55adfd18::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitc4da22d335991d9a249589bd55adfd18::$classMap;
 
         }, null, ClassLoader::class);
     }
