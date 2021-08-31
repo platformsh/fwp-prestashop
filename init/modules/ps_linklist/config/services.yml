@@ -58,6 +58,7 @@ services:
       $moduleRepository: '@prestashop.core.admin.module.repository'
       $languages: '@=service("prestashop.adapter.legacy.context").getLanguages(true, service("prestashop.adapter.shop.context").getContextShopID())'
       $shopId: '@=service("prestashop.adapter.shop.context").getContextShopID()'
+      $configuration: '@prestashop.adapter.legacy.configuration'
 
   # Form choices providers
   prestashop.module.link_block.choice_provider.hook:
@@ -68,6 +69,14 @@ services:
 
   prestashop.module.link_block.choice_provider.cms_category:
     class: PrestaShop\Module\LinkList\Form\ChoiceProvider\CMSCategoryChoiceProvider
+    arguments:
+      $connection: '@doctrine.dbal.default_connection'
+      $dbPrefix: '%database_prefix%'
+      $idLang: '@=service("prestashop.adapter.legacy.context").getLanguage().id'
+      $shopIds: '@=service("prestashop.adapter.shop.context").getContextListShopID()'
+
+  prestashop.module.link_block.choice_provider.category:
+    class: PrestaShop\Module\LinkList\Form\ChoiceProvider\CategoryChoiceProvider
     arguments:
       $connection: '@doctrine.dbal.default_connection'
       $dbPrefix: '%database_prefix%'
@@ -119,6 +128,7 @@ services:
       $cmsPageChoices: '@=service("prestashop.module.link_block.choice_provider.cms_page").getChoices()'
       $productPageChoices: '@=service("prestashop.module.link_block.choice_provider.product_page").getChoices()'
       $staticPageChoices: '@=service("prestashop.module.link_block.choice_provider.static_page").getChoices()'
+      $categoryChoices: '@=service("prestashop.module.link_block.choice_provider.category").getChoices()'
     tags:
       - { name: form.type }
 

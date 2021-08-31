@@ -1,21 +1,21 @@
 <?php
 /**
- * 2007-2020 PrestaShop and Contributors
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2020 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
- * International Registered Trademark & Property of PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
 namespace PrestaShop\Module\LinkList\Repository;
@@ -118,6 +118,7 @@ class LinkBlockRepository
                     'cms' => empty($data['cms']) ? [false] : $data['cms'],
                     'static' => empty($data['static']) ? [false] : $data['static'],
                     'product' => empty($data['product']) ? [false] : $data['product'],
+                    'category' => empty($data['category']) ? [false] : $data['category'],
                 ]),
             ]);
 
@@ -150,6 +151,7 @@ class LinkBlockRepository
                     'cms' => empty($data['cms']) ? [false] : $data['cms'],
                     'static' => empty($data['static']) ? [false] : $data['static'],
                     'product' => empty($data['product']) ? [false] : $data['product'],
+                    'category' => empty($data['category']) ? [false] : $data['category'],
                 ]),
             ])
         ;
@@ -241,8 +243,8 @@ class LinkBlockRepository
 
         $queries = [
             'INSERT INTO `' . $this->dbPrefix . 'link_block` (`id_link_block`, `id_hook`, `position`, `content`) VALUES
-                (1, ' . $id_hook . ', 0, \'{"cms":[false],"product":["prices-drop","new-products","best-sales"],"static":[false]}\'),
-                (2, ' . $id_hook . ', 1, \'{"cms":["1","2","3","4","5"],"product":[false],"static":["contact","sitemap","stores"]}\');',
+                (1, ' . $id_hook . ', 0, \'{"cms":[false],"product":["prices-drop","new-products","best-sales"],"static":[false],"category":[false]}\'),
+                (2, ' . $id_hook . ', 1, \'{"cms":["1","2","3","4","5"],"product":[false],"static":["contact","sitemap","stores"],"category":[false]}\');',
         ];
 
         foreach ($this->languages as $lang) {

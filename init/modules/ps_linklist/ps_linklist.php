@@ -1,21 +1,21 @@
 <?php
 /**
- * 2007-2020 PrestaShop and Contributors
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2020 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
- * International Registered Trademark & Property of PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 if (!defined('_CAN_LOAD_FILES_')) {
     exit;
@@ -26,6 +26,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 }
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+use PrestaShop\Module\LinkList\DataMigration;
 use PrestaShop\Module\LinkList\LegacyLinkBlockRepository;
 use PrestaShop\Module\LinkList\Presenter\LinkBlockPresenter;
 use PrestaShop\Module\LinkList\Model\LinkBlockLang;
@@ -39,6 +40,11 @@ use PrestaShop\PrestaShop\Adapter\Shop\Context;
  */
 class Ps_Linklist extends Module implements WidgetInterface
 {
+    /**
+     * @var string Name of the module running on PS 1.6.x. Used for data migration.
+     */
+    const PS_16_EQUIVALENT_MODULE = 'blockcms';
+
     const MODULE_NAME = 'ps_linklist';
 
     protected $_html;
@@ -58,18 +64,29 @@ class Ps_Linklist extends Module implements WidgetInterface
 
     public $templateFile;
 
+    /**
+     * @var string
+     */
+    public $templateFileColumn;
+
     public function __construct()
     {
         $this->name = 'ps_linklist';
         $this->author = 'PrestaShop';
-        $this->version = '3.2.0';
+        $this->version = '4.0.0';
         $this->need_instance = 0;
         $this->tab = 'front_office_features';
+
+        $tabNames = [];
+        foreach (Language::getLanguages(true) as $lang) {
+            $tabNames[$lang['locale']] = $this->trans('Link List', array(), 'Modules.Linklist.Admin', $lang['locale']);
+        }
         $this->tabs = [
             [
+                'route_name' => 'admin_link_block_list',
                 'class_name' => 'AdminLinkWidget',
                 'visible' => true,
-                'name' => 'Link Widget',
+                'name' => $tabNames,
                 'parent_class_name' => 'AdminParentThemes',
             ],
         ];
@@ -78,11 +95,12 @@ class Ps_Linklist extends Module implements WidgetInterface
         parent::__construct();
 
         $this->displayName = $this->trans('Link List', array(), 'Modules.Linklist.Admin');
-        $this->description = $this->trans('Adds a block with several links.', array(), 'Modules.Linklist.Admin');
+        $this->description = $this->trans('Give more visibility to your content/static pages (CMS, external pages, or else), where you want and when you want, to make your visitors feel like shopping on your store.', array(), 'Modules.Linklist.Admin');
         $this->secure_key = Tools::encrypt($this->name);
 
-        $this->ps_versions_compliancy = array('min' => '1.7.5.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7.7.0', 'max' => _PS_VERSION_);
         $this->templateFile = 'module:ps_linklist/views/templates/hook/linkblock.tpl';
+        $this->templateFileColumn = 'module:ps_linklist/views/templates/hook/linkblock-column.tpl';
 
         $this->linkBlockPresenter = new LinkBlockPresenter(new Link(), $this->context->language);
         $this->legacyBlockRepository = new LegacyLinkBlockRepository(Db::getInstance(), $this->context->shop, $this->context->getTranslator());
@@ -94,12 +112,26 @@ class Ps_Linklist extends Module implements WidgetInterface
             return false;
         }
 
-        $installed = $this->installFixtures();
+        $tablesInstalledWithSuccess = $this->createTables();
 
-        if ($installed
+        if (!$tablesInstalledWithSuccess) {
+            $this->uninstall();
+            return false;
+        }
+
+
+        $old16ModuleUninstalledWithSuccess = $this->uninstallPrestaShop16Module();
+
+        if ($old16ModuleUninstalledWithSuccess) {
+            (new DataMigration(Db::getInstance()))->migrateData();
+            $dataLoadedWithSuccess = true;
+        } else {
+            $dataLoadedWithSuccess = $this->installFixtures();
+        }
+
+        if ($dataLoadedWithSuccess
             && $this->registerHook('displayFooter')
-            && $this->registerHook('actionUpdateLangAfter')
-            && $this->installTab()) {
+            && $this->registerHook('actionUpdateLangAfter')) {
             return true;
         }
 
@@ -108,13 +140,23 @@ class Ps_Linklist extends Module implements WidgetInterface
         return false;
     }
 
-    public function enable($force_all = false)
+    /**
+     * @return bool
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function createTables()
     {
-        if (!$this->installTab()) {
+        $result = $this->getRepository()->createTables();
+        if (false === $result || (is_array($result) && !empty($result))) {
+            if (is_array($result)) {
+                $this->addModuleErrors($result);
+            }
+
             return false;
         }
 
-        return parent::enable($force_all);
+        return true;
     }
 
     /**
@@ -124,24 +166,16 @@ class Ps_Linklist extends Module implements WidgetInterface
      */
     private function installFixtures()
     {
-        $installed = true;
-        $result = $this->getRepository()->createTables();
-        if (false === $result || (is_array($result) && !empty($result))) {
-            if (is_array($result)) {
-                $this->addModuleErrors($result);
-            }
-            $installed = false;
-        }
-
         $result = $this->getRepository()->installFixtures();
         if (false === $result || (is_array($result) && !empty($result))) {
             if (is_array($result)) {
                 $this->addModuleErrors($result);
             }
-            $installed = false;
+
+            return false;
         }
 
-        return $installed;
+        return true;
     }
 
     public function uninstall()
@@ -159,30 +193,24 @@ class Ps_Linklist extends Module implements WidgetInterface
     }
 
     /**
-     * The Core is supposed to register the tabs automatically thanks to the getTabs() return.
-     * However in 1.7.5 it only works when the module contains a AdminLinkWidgetController file,
-     * this works fine when module has been upgraded and the former file is still present however
-     * for a fresh install we need to install it manually until the core is able to manage new modules.
-     *
-     * @return bool
+     * Migrate data from 1.6 equivalent module (if applicable), then uninstall
      */
-    public function installTab()
+    private function uninstallPrestaShop16Module()
     {
-        if (Tab::getIdFromClassName('AdminLinkWidget')) {
-            return true;
+        if (!Module::isInstalled(self::PS_16_EQUIVALENT_MODULE)) {
+            return false;
         }
-
-        $tab = new Tab();
-        $tab->active = 1;
-        $tab->class_name = 'AdminLinkWidget';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = 'Link Widget';
+        $oldModule = Module::getInstanceByName(self::PS_16_EQUIVALENT_MODULE);
+        if ($oldModule) {
+            // This closure calls the parent class to prevent data to be erased
+            // It allows the new module to be configured without migration
+            $parentUninstallClosure = function() {
+                return parent::uninstall();
+            };
+            $parentUninstallClosure = $parentUninstallClosure->bindTo($oldModule, get_class($oldModule));
+            $parentUninstallClosure();
         }
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentThemes');
-        $tab->module = $this->name;
-
-        return $tab->add();
+        return true;
     }
 
     public function hookActionUpdateLangAfter($params)
@@ -195,12 +223,16 @@ class Ps_Linklist extends Module implements WidgetInterface
     public function _clearCache($template, $cache_id = null, $compile_id = null)
     {
         parent::_clearCache($this->templateFile);
+        parent::_clearCache($this->templateFileColumn);
     }
 
     public function getContent()
     {
+        // We need to explicitely get Symfony container, because $this->get will use the admin legacy container
+        $sfContainer = SymfonyContainer::getInstance();
+        $router = $sfContainer->get('router');
         Tools::redirectAdmin(
-            $this->context->link->getAdminLink('AdminLinkWidget')
+            $router->generate('admin_link_block_list')
         );
     }
 
@@ -208,11 +240,17 @@ class Ps_Linklist extends Module implements WidgetInterface
     {
         $key = 'ps_linklist|' . $hookName;
 
-        if (!$this->isCached($this->templateFile, $this->getCacheId($key))) {
+        if ($hookName === 'displayLeftColumn' || $hookName === 'displayRightColumn') {
+            $template = $this->templateFileColumn;
+        } else {
+            $template = $this->templateFile;
+        }
+
+        if (!$this->isCached($template, $this->getCacheId($key))) {
             $this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
         }
 
-        return $this->fetch($this->templateFile, $this->getCacheId($key));
+        return $this->fetch($template, $this->getCacheId($key));
     }
 
     public function getWidgetVariables($hookName, array $configuration)
