@@ -14,6 +14,9 @@ services:
       $dbPrefix: '%database_prefix%'
       $languages: '@=service("prestashop.adapter.legacy.context").getLanguages(true, service("prestashop.adapter.shop.context").getContextShopID())'
       $translator: '@translator'
+      $isMultiStoreUsed: '@=service("prestashop.adapter.feature.multistore").isUsed()'
+      $multiStoreContext: '@prestashop.adapter.shop.context'
+      $objectModelHandler: '@prestashop.module.link_block.adapter.object_model_handler'
 
   # Grid data query builder
   prestashop.module.link_block.grid.query_builder:
@@ -39,6 +42,7 @@ services:
       $hookDispatcher: '@prestashop.core.hook.dispatcher'
       $dataFactory: '@prestashop.module.link_block.grid.data_factory'
       $filterFormFactory: '@prestashop.core.grid.filter.form_factory'
+      $shopContext: '@prestashop.adapter.shop.context'
 
   # Grid position definition
   prestashop.module.link_block.grid.position_definition:
@@ -57,7 +61,7 @@ services:
       $cache: '@prestashop.module.link_block.cache'
       $moduleRepository: '@prestashop.core.admin.module.repository'
       $languages: '@=service("prestashop.adapter.legacy.context").getLanguages(true, service("prestashop.adapter.shop.context").getContextShopID())'
-      $shopId: '@=service("prestashop.adapter.shop.context").getContextShopID()'
+      $shopContext: '@prestashop.adapter.shop.context'
       $configuration: '@prestashop.adapter.legacy.configuration'
 
   # Form choices providers
@@ -129,6 +133,7 @@ services:
       $productPageChoices: '@=service("prestashop.module.link_block.choice_provider.product_page").getChoices()'
       $staticPageChoices: '@=service("prestashop.module.link_block.choice_provider.static_page").getChoices()'
       $categoryChoices: '@=service("prestashop.module.link_block.choice_provider.category").getChoices()'
+      $isMultiStoreUsed: '@=service("prestashop.adapter.feature.multistore").isUsed()'
     tags:
       - { name: form.type }
 
@@ -149,3 +154,6 @@ services:
       $formTypes:
         'link_block': 'PrestaShop\Module\LinkList\Form\Type\LinkBlockType'
       $hookName: 'AdminLinkWidget'
+
+  prestashop.module.link_block.adapter.object_model_handler:
+    class: 'PrestaShop\Module\LinkList\Adapter\ObjectModelHandler'

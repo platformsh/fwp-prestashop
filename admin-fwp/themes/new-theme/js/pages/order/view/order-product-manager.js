@@ -27,7 +27,7 @@ import Router from '@components/router';
 import {EventEmitter} from '@components/event-emitter';
 import OrderViewEventMap from '@pages/order/view/order-view-event-map';
 
-const $ = window.$;
+const {$} = window;
 
 export default class OrderProductManager {
   constructor() {
@@ -39,6 +39,7 @@ export default class OrderProductManager {
 
     const $btn = $(event.currentTarget);
     const confirmed = window.confirm($btn.data('deleteMessage'));
+
     if (!confirmed) {
       return;
     }
@@ -57,8 +58,8 @@ export default class OrderProductManager {
         orderId,
       });
     }, (response) => {
-      if (response.message) {
-        $.growl.error({message: response.message});
+      if (response.responseJSON && response.responseJSON.message) {
+        $.growl.error({message: response.responseJSON.message});
       }
     });
   }

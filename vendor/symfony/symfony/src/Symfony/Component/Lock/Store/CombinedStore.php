@@ -28,8 +28,8 @@ use Symfony\Component\Lock\Strategy\StrategyInterface;
  */
 class CombinedStore implements StoreInterface, LoggerAwareInterface
 {
-    use LoggerAwareTrait;
     use ExpiringStoreTrait;
+    use LoggerAwareTrait;
 
     /** @var StoreInterface[] */
     private $stores;
@@ -93,7 +93,7 @@ class CombinedStore implements StoreInterface, LoggerAwareInterface
 
     public function waitAndSave(Key $key)
     {
-        throw new NotSupportedException(sprintf('The store "%s" does not support blocking locks.', \get_class($this)));
+        throw new NotSupportedException(sprintf('The store "%s" does not support blocking locks.', static::class));
     }
 
     /**

@@ -1,0 +1,351 @@
+/*
+ * jwerty - Awesome handling of keyboard events
+ *
+ * jwerty is a JS lib which allows you to bind, fire and assert key combination
+ * strings against elements and events. It normalises the poor std api into
+ * something easy to use and clear.
+ *
+ * This code is licensed under the MIT
+ * For the full license see: http://keithamus.mit-license.org/
+ * For more information see: http://keithamus.github.com/jwerty
+ *
+ * @author Keith Cirkel ('keithamus') <jwerty@keithcirkel.co.uk>
+ * @license http://keithamus.mit-license.org/
+ * @copyright Copyright © 2011, Keith Cirkel
+ *
+ */
+
+/*!
+  SerializeJSON jQuery plugin.
+  https://github.com/marioizquierdo/jquery.serializeJSON
+  version 3.2.0 (Dec, 2020)
+
+  Copyright (c) 2012-2021 Mario Izquierdo
+  Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+  and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+*/
+
+/*!
+ * bootstrap-tokenfield
+ * https://github.com/sliptree/bootstrap-tokenfield
+ * Copyright 2013-2014 Sliptree and other contributors; Licensed MIT
+ */
+
+/*!
+ * jQuery Color Animations v2.1.2
+ * https://github.com/jquery/jquery-color
+ *
+ * Copyright 2014 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * Date: Wed Jan 16 08:47:09 2013 -0600
+ */
+
+/*!
+ * jQuery UI :data 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Autocomplete 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Button 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Checkboxradio 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Controlgroup 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Datepicker 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Dialog 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Draggable 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Droppable 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Focusable 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Position 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://api.jqueryui.com/position/
+ */
+
+/*!
+ * jQuery UI Resizable 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Spinner 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Support for jQuery core 1.7.x 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ */
+
+/*!
+ * jQuery UI Tabs 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Tooltip 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * jQuery UI Widget 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+/*!
+ * perfect-scrollbar v1.5.0
+ * Copyright 2020 Hyunje Jun, MDBootstrap and Contributors
+ * Licensed under MIT
+ */
+
+/*!
+ * typeahead.js 0.11.1
+ * https://github.com/twitter/typeahead.js
+ * Copyright 2013-2015 Twitter, Inc. and other contributors; Licensed MIT
+ */
+
+/*! jQuery UI - v1.12.1 - 2016-09-14
+* http://jqueryui.com
+* Includes: widget.js, position.js, data.js, disable-selection.js, effect.js, effects/effect-blind.js, effects/effect-bounce.js, effects/effect-clip.js, effects/effect-drop.js, effects/effect-explode.js, effects/effect-fade.js, effects/effect-fold.js, effects/effect-highlight.js, effects/effect-puff.js, effects/effect-pulsate.js, effects/effect-scale.js, effects/effect-shake.js, effects/effect-size.js, effects/effect-slide.js, effects/effect-transfer.js, focusable.js, form-reset-mixin.js, jquery-1-7.js, keycode.js, labels.js, scroll-parent.js, tabbable.js, unique-id.js, widgets/accordion.js, widgets/autocomplete.js, widgets/button.js, widgets/checkboxradio.js, widgets/controlgroup.js, widgets/datepicker.js, widgets/dialog.js, widgets/draggable.js, widgets/droppable.js, widgets/menu.js, widgets/mouse.js, widgets/progressbar.js, widgets/resizable.js, widgets/selectable.js, widgets/selectmenu.js, widgets/slider.js, widgets/sortable.js, widgets/spinner.js, widgets/tabs.js, widgets/tooltip.js
+* Copyright jQuery Foundation and other contributors; Licensed MIT */
+
+/*! jquery.tablednd.js 30-12-2017 */
+
+/*! version : 4.17.47
+ =========================================================
+ bootstrap-datetimejs
+ https://github.com/Eonasdan/bootstrap-datetimepicker
+ Copyright (c) 2015 Jonathan Peterson
+ =========================================================
+ */
+
+/**
+                                                                   * Copyright since 2007 PrestaShop SA and Contributors
+                                                                   * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+                                                                   *
+                                                                   * NOTICE OF LICENSE
+                                                                   *
+                                                                   * This source file is subject to the Open Software License (OSL 3.0)
+                                                                   * that is bundled with this package in the file LICENSE.md.
+                                                                   * It is also available through the world-wide-web at this URL:
+                                                                   * https://opensource.org/licenses/OSL-3.0
+                                                                   * If you did not receive a copy of the license and are unable to
+                                                                   * obtain it through the world-wide-web, please send an email
+                                                                   * to license@prestashop.com so we can send you a copy immediately.
+                                                                   *
+                                                                   * DISCLAIMER
+                                                                   *
+                                                                   * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+                                                                   * versions in the future. If you wish to customize PrestaShop for your
+                                                                   * needs please refer to https://devdocs.prestashop.com/ for more information.
+                                                                   *
+                                                                   * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+                                                                   * @copyright Since 2007 PrestaShop SA and Contributors
+                                                                   * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+                                                                   */
+
+/**
+                    * Copyright since 2007 PrestaShop SA and Contributors
+                    * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+                    *
+                    * NOTICE OF LICENSE
+                    *
+                    * This source file is subject to the Open Software License (OSL 3.0)
+                    * that is bundled with this package in the file LICENSE.md.
+                    * It is also available through the world-wide-web at this URL:
+                    * https://opensource.org/licenses/OSL-3.0
+                    * If you did not receive a copy of the license and are unable to
+                    * obtain it through the world-wide-web, please send an email
+                    * to license@prestashop.com so we can send you a copy immediately.
+                    *
+                    * DISCLAIMER
+                    *
+                    * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+                    * versions in the future. If you wish to customize PrestaShop for your
+                    * needs please refer to https://devdocs.prestashop.com/ for more information.
+                    *
+                    * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+                    * @copyright Since 2007 PrestaShop SA and Contributors
+                    * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+                    */
+
+/**
+      * Copyright since 2007 PrestaShop SA and Contributors
+      * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+      *
+      * NOTICE OF LICENSE
+      *
+      * This source file is subject to the Open Software License (OSL 3.0)
+      * that is bundled with this package in the file LICENSE.md.
+      * It is also available through the world-wide-web at this URL:
+      * https://opensource.org/licenses/OSL-3.0
+      * If you did not receive a copy of the license and are unable to
+      * obtain it through the world-wide-web, please send an email
+      * to license@prestashop.com so we can send you a copy immediately.
+      *
+      * DISCLAIMER
+      *
+      * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+      * versions in the future. If you wish to customize PrestaShop for your
+      * needs please refer to https://devdocs.prestashop.com/ for more information.
+      *
+      * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+      * @copyright Since 2007 PrestaShop SA and Contributors
+      * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+      */
+
+/**
+     * Copyright since 2007 PrestaShop SA and Contributors
+     * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+     *
+     * NOTICE OF LICENSE
+     *
+     * This source file is subject to the Open Software License (OSL 3.0)
+     * that is bundled with this package in the file LICENSE.md.
+     * It is also available through the world-wide-web at this URL:
+     * https://opensource.org/licenses/OSL-3.0
+     * If you did not receive a copy of the license and are unable to
+     * obtain it through the world-wide-web, please send an email
+     * to license@prestashop.com so we can send you a copy immediately.
+     *
+     * DISCLAIMER
+     *
+     * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+     * versions in the future. If you wish to customize PrestaShop for your
+     * needs please refer to https://devdocs.prestashop.com/ for more information.
+     *
+     * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+     * @copyright Since 2007 PrestaShop SA and Contributors
+     * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+     */
+
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/OSL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ */

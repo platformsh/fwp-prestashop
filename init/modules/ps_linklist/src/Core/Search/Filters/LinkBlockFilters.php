@@ -33,6 +33,7 @@ final class LinkBlockFilters extends Filters
     public static function getDefaults()
     {
         return [
+            'id_shop' => null,
             'limit' => 0,
             'offset' => 0,
             'orderBy' => 'position',

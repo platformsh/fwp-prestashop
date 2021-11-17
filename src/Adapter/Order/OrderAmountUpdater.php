@@ -523,7 +523,7 @@ class OrderAmountUpdater
 
             // Shipping are computed on first invoice only
             $carrierId = $order->id_carrier;
-            $totalMethod = ($firstInvoice === null || $firstInvoice->id == $invoice->id) ? Cart::BOTH : Cart::BOTH_WITHOUT_SHIPPING;
+            $totalMethod = ($firstInvoice === false || $firstInvoice->id == $invoice->id) ? Cart::BOTH : Cart::BOTH_WITHOUT_SHIPPING;
             $invoice->total_paid_tax_excl = Tools::ps_round(
                 (float) $cart->getOrderTotal(false, $totalMethod, $currentInvoiceProducts, $carrierId, false, $this->keepOrderPrices),
                 $computingPrecision
@@ -631,10 +631,7 @@ class OrderAmountUpdater
     {
         $constraintKey = $order->id_shop . '-' . $order->id_shop_group;
         if (!isset($this->orderConstraints[$constraintKey])) {
-            $this->orderConstraints[$constraintKey] = new ShopConstraint(
-                (int) $order->id_shop,
-                (int) $order->id_shop_group
-            );
+            $this->orderConstraints[$constraintKey] = ShopConstraint::shop((int) $order->id_shop);
         }
 
         return $this->orderConstraints[$constraintKey];

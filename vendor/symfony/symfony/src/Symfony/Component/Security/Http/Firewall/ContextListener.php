@@ -196,7 +196,7 @@ class ContextListener implements ListenerInterface
                         continue;
                     }
 
-                    @trigger_error('Refreshing a deauthenticated user is deprecated as of 3.4 and will trigger a logout in 4.0.', E_USER_DEPRECATED);
+                    @trigger_error('Refreshing a deauthenticated user is deprecated as of 3.4 and will trigger a logout in 4.0.', \E_USER_DEPRECATED);
                 }
 
                 $token->setUser($refreshedUser);
@@ -238,7 +238,7 @@ class ContextListener implements ListenerInterface
             return null;
         }
 
-        throw new \RuntimeException(sprintf('There is no user provider for user "%s".', $userClass));
+        throw new \RuntimeException(sprintf('There is no user provider for user "%s". Shouldn\'t the "supportsClass()" method of your user provider return true for this classname?', $userClass));
     }
 
     private function safelyUnserialize($serializedToken)
