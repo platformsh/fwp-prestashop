@@ -131,6 +131,39 @@ class EntityTypeTest extends BaseTypeTest
         ]);
     }
 
+    /**
+     * @dataProvider choiceTranslationDomainProvider
+     */
+    public function testChoiceTranslationDomainIsDisabledByDefault($expanded)
+    {
+        $entity1 = new SingleIntIdEntity(1, 'Foo');
+
+        $this->persist([$entity1]);
+
+        $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
+            'choices' => [
+                $entity1,
+            ],
+            'class' => SingleIntIdEntity::class,
+            'em' => 'default',
+            'expanded' => $expanded,
+        ]);
+
+        if ($expanded) {
+            $this->assertFalse($field->get('1')->getConfig()->getOption('translation_domain'));
+        } else {
+            $this->assertFalse($field->getConfig()->getOption('choice_translation_domain'));
+        }
+    }
+
+    public function choiceTranslationDomainProvider()
+    {
+        return [
+            [false],
+            [true],
+        ];
+    }
+
     public function testSetDataToUninitializedEntityWithNonRequired()
     {
         $entity1 = new SingleIntIdEntity(1, 'Foo');
@@ -956,7 +989,32 @@ class EntityTypeTest extends BaseTypeTest
         $this->assertNull($field->getData());
     }
 
-    public function testDisallowChoicesThatAreNotIncludedQueryBuilderSingleIdentifierWithLimit()
+    public function testSingleIdentifierWithLimit()
+    {
+        $entity1 = new SingleIntIdEntity(1, 'Foo');
+        $entity2 = new SingleIntIdEntity(2, 'Bar');
+        $entity3 = new SingleIntIdEntity(3, 'Baz');
+
+        $this->persist([$entity1, $entity2, $entity3]);
+
+        $repository = $this->em->getRepository(self::SINGLE_IDENT_CLASS);
+
+        $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
+            'em' => 'default',
+            'class' => self::SINGLE_IDENT_CLASS,
+            'query_builder' => $repository->createQueryBuilder('e')
+                ->where('e.id IN (1, 2, 3)')
+                ->setMaxResults(1),
+            'choice_label' => 'name',
+        ]);
+
+        $field->submit('1');
+
+        $this->assertTrue($field->isSynchronized());
+        $this->assertSame($entity1, $field->getData());
+    }
+
+    public function testDisallowChoicesThatAreNotIncludedByQueryBuilderSingleIdentifierWithLimit()
     {
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');

@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\HttpClient\Internal;
 
-use Symfony\Component\HttpClient\Response\NativeResponse;
-
 /**
  * Internal representation of the native client's state.
  *
@@ -24,16 +22,12 @@ final class NativeClientState extends ClientState
 {
     /** @var int */
     public $id;
-    /** @var NativeResponse[] */
-    public $pendingResponses = [];
     /** @var int */
     public $maxHostConnections = PHP_INT_MAX;
     /** @var int */
     public $responseCount = 0;
     /** @var string[] */
     public $dnsCache = [];
-    /** @var resource[] */
-    public $handles = [];
     /** @var bool */
     public $sleep = false;
 

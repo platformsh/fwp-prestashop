@@ -20,6 +20,7 @@
 
 namespace PrestaShop\Module\LinkList\Core\Grid\Query;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Query\AbstractDoctrineQueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
@@ -30,7 +31,7 @@ use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 final class LinkBlockQueryBuilder extends AbstractDoctrineQueryBuilder
 {
     /**
-     * @param null|SearchCriteriaInterface $searchCriteria
+     * @param SearchCriteriaInterface|null $searchCriteria
      *
      * @return QueryBuilder
      */
@@ -44,8 +45,10 @@ final class LinkBlockQueryBuilder extends AbstractDoctrineQueryBuilder
             h.name as hook_name,
             h.title as hook_title,
             h.description as hook_description,
-            lb.position
+            lbs.position as position,
+            GROUP_CONCAT(s.name SEPARATOR ", ") as shop_name
             ')
+            ->groupBy('lb.id_link_block')
             ->orderBy(
                 $searchCriteria->getOrderBy(),
                 $searchCriteria->getOrderWay()
@@ -63,7 +66,7 @@ final class LinkBlockQueryBuilder extends AbstractDoctrineQueryBuilder
     }
 
     /**
-     * @param null|SearchCriteriaInterface $searchCriteria
+     * @param SearchCriteriaInterface|null $searchCriteria
      *
      * @return QueryBuilder
      */
@@ -88,7 +91,9 @@ final class LinkBlockQueryBuilder extends AbstractDoctrineQueryBuilder
             ->createQueryBuilder()
             ->from($this->dbPrefix . 'link_block', 'lb')
             ->innerJoin('lb', $this->dbPrefix . 'link_block_lang', 'lbl', 'lb.id_link_block = lbl.id_link_block')
-            ->leftJoin('lb', $this->dbPrefix . 'hook', 'h', 'lb.id_hook = h.id_hook');
+            ->leftJoin('lb', $this->dbPrefix . 'link_block_shop', 'lbs', 'lb.id_link_block = lbs.id_link_block')
+            ->leftJoin('lb', $this->dbPrefix . 'hook', 'h', 'lb.id_hook = h.id_hook')
+            ->leftJoin('lb', $this->dbPrefix . 'shop', 's', 's.id_shop = lbs.id_shop');
 
         foreach ($filters as $name => $value) {
             if ('id_lang' === $name) {
@@ -105,6 +110,14 @@ final class LinkBlockQueryBuilder extends AbstractDoctrineQueryBuilder
                     ->andWhere("h.id_hook = :$name")
                     ->setParameter($name, $value)
                 ;
+
+                continue;
+            }
+
+            if ('id_shop' === $name) {
+                $qb
+                    ->andWhere("lbs.id_shop IN (:$name)")
+                    ->setParameter($name, $value, Connection::PARAM_STR_ARRAY);
 
                 continue;
             }

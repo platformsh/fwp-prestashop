@@ -27,6 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter\Shop;
 
 use Context as LegacyContext;
+use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Multistore\MultistoreContextCheckerInterface;
 use PrestaShop\PrestaShop\Core\Shop\ShopContextInterface;
 use Shop;
@@ -82,7 +83,7 @@ class Context implements MultistoreContextCheckerInterface, ShopContextInterface
     {
         $groupSettings = Shop::getGroupFromShop(Shop::getContextShopID(), false);
 
-        if ($groupSettings['share_customer']) {
+        if (!empty($groupSettings['share_customer'])) {
             return Shop::getContextListShopID(Shop::SHARE_CUSTOMER);
         } else {
             return Shop::getContextListShopID();
@@ -175,7 +176,7 @@ class Context implements MultistoreContextCheckerInterface, ShopContextInterface
     /**
      * Retrieve group ID of a shop.
      *
-     * @param $shopId
+     * @param int $shopId
      * @param bool $asId
      *
      * @return int
@@ -186,7 +187,7 @@ class Context implements MultistoreContextCheckerInterface, ShopContextInterface
     }
 
     /**
-     * @param $shopGroupId
+     * @param int $shopGroupId
      *
      * @return ShopGroup
      */
@@ -227,5 +228,21 @@ class Context implements MultistoreContextCheckerInterface, ShopContextInterface
     public function getShopName()
     {
         return LegacyContext::getContext()->shop->name;
+    }
+
+    /**
+     * @param bool $strict
+     *
+     * @return ShopConstraint
+     */
+    public function getShopConstraint(bool $strict = false): ShopConstraint
+    {
+        if ($this->isShopContext()) {
+            return ShopConstraint::shop((int) $this->getContextShopID(), $strict);
+        } elseif ($this->isGroupShopContext()) {
+            return ShopConstraint::shopGroup((int) $this->getContextShopGroup()->id, $strict);
+        }
+
+        return ShopConstraint::allShops();
     }
 }

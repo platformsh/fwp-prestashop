@@ -463,6 +463,7 @@ abstract class FrameworkExtensionTest extends TestCase
         $this->assertTrue($container->hasDefinition('session'), '->registerSessionConfiguration() loads session.xml');
         $this->assertNull($container->getDefinition('session.storage.native')->getArgument(1));
         $this->assertNull($container->getDefinition('session.storage.php_bridge')->getArgument(0));
+        $this->assertSame('session.handler.native_file', (string) $container->getAlias('session.handler'));
     }
 
     public function testRequest()
@@ -1141,7 +1142,7 @@ abstract class FrameworkExtensionTest extends TestCase
 
     protected function createContainerFromFile($file, $data = [], $resetCompilerPasses = true, $compile = true)
     {
-        $cacheKey = md5(\get_class($this).$file.serialize($data));
+        $cacheKey = md5(static::class.$file.serialize($data));
         if ($compile && isset(self::$containerCache[$cacheKey])) {
             return self::$containerCache[$cacheKey];
         }

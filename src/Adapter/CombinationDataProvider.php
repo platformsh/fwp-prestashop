@@ -27,7 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter;
 
 use Combination;
-use PrestaShop\Decimal\Number;
+use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Product\ProductDataProvider;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use PrestaShopBundle\Form\Admin\Type\CommonAbstractType;
@@ -150,16 +150,16 @@ class CombinationDataProvider
         $productTaxRate = $product->getTaxesRate();
 
         // Get product basic prices
-        $productPrice = new Number((string) $product->price);
-        $productPriceIncluded = $productPrice->times(new Number((string) (1 + ($productTaxRate / 100))));
-        $productEcotax = new Number((string) $product->ecotax);
-        $productEcotaxIncluded = $productEcotax->times(new Number((string) (1 + (Tax::getProductEcotaxRate() / 100))));
+        $productPrice = new DecimalNumber((string) $product->price);
+        $productPriceIncluded = $productPrice->times(new DecimalNumber((string) (1 + ($productTaxRate / 100))));
+        $productEcotax = new DecimalNumber((string) $product->ecotax);
+        $productEcotaxIncluded = $productEcotax->times(new DecimalNumber((string) (1 + (Tax::getProductEcotaxRate() / 100))));
 
         // Get combination prices and impacts
-        $combinationEcotax = new Number((string) $combination['ecotax_tax_excluded']);
-        $combinationEcotaxIncluded = new Number((string) $combination['ecotax_tax_included']);
-        $combinationImpactTaxExcluded = new Number((string) $combination['price']);
-        $combinationImpactTaxIncluded = $combinationImpactTaxExcluded->times(new Number((string) (1 + ($productTaxRate / 100))));
+        $combinationEcotax = new DecimalNumber((string) $combination['ecotax_tax_excluded']);
+        $combinationEcotaxIncluded = new DecimalNumber((string) $combination['ecotax_tax_included']);
+        $combinationImpactTaxExcluded = new DecimalNumber((string) $combination['price']);
+        $combinationImpactTaxIncluded = $combinationImpactTaxExcluded->times(new DecimalNumber((string) (1 + ($productTaxRate / 100))));
 
         $ecotax = $combinationEcotax->equalsZero() ? $productEcotax : $combinationEcotax;
         $finalPrice = $productPrice

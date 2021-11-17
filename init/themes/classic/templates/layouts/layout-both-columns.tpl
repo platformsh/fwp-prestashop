@@ -22,8 +22,11 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
+
+{include file='_partials/helpers.tpl'}
+
 <!doctype html>
-<html lang="{$language.iso_code}">
+<html lang="{$language.locale}">
 
   <head>
     {block name='head'}
@@ -48,11 +51,11 @@
         {/block}
       </header>
 
-      {block name='notifications'}
-        {include file='_partials/notifications.tpl'}
-      {/block}
-
       <section id="wrapper">
+        {block name='notifications'}
+          {include file='_partials/notifications.tpl'}
+        {/block}
+
         {hook h="displayWrapperTop"}
         <div class="container">
           {block name='breadcrumb'}
@@ -70,7 +73,7 @@
           {/block}
 
           {block name="content_wrapper"}
-            <div id="content-wrapper" class="left-column right-column col-sm-4 col-md-6">
+            <div id="content-wrapper" class="js-content-wrapper left-column right-column col-sm-4 col-md-6">
               {hook h="displayContentWrapperTop"}
               {block name="content"}
                 <p>Hello world! This is HTML5 Boilerplate.</p>
@@ -92,7 +95,7 @@
         {hook h="displayWrapperBottom"}
       </section>
 
-      <footer id="footer">
+      <footer id="footer" class="js-footer">
         {block name="footer"}
           {include file="_partials/footer.tpl"}
         {/block}

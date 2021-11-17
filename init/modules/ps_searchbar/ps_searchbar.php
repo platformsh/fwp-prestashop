@@ -47,7 +47,7 @@ class Ps_Searchbar extends Module implements WidgetInterface
     {
         $this->name = 'ps_searchbar';
         $this->author = 'PrestaShop';
-        $this->version = '2.0.2';
+        $this->version = '2.1.2';
         $this->need_instance = 0;
 
         parent::__construct();
@@ -55,7 +55,7 @@ class Ps_Searchbar extends Module implements WidgetInterface
         $this->displayName = $this->trans('Search bar', [], 'Modules.Searchbar.Admin');
         $this->description = $this->trans('Help your visitors find what they are looking for, add a quick search field to your store.', [], 'Modules.Searchbar.Admin');
 
-        $this->ps_versions_compliancy = ['min' => '1.7.1.0', 'max' => _PS_VERSION_];
+        $this->ps_versions_compliancy = ['min' => '1.7.8.0', 'max' => _PS_VERSION_];
 
         $this->templateFile = 'module:ps_searchbar/ps_searchbar.tpl';
     }
@@ -71,15 +71,16 @@ class Ps_Searchbar extends Module implements WidgetInterface
         }
 
         return parent::install()
-            && $this->registerHook('top')
+            && $this->registerHook('displayTop')
             && $this->registerHook('displaySearch')
-            && $this->registerHook('header')
+            && $this->registerHook('displayHeader')
         ;
     }
 
-    public function hookHeader()
+    public function hookDisplayHeader()
     {
         $this->context->controller->addJqueryUI('ui.autocomplete');
+        $this->context->controller->registerStylesheet('modules-searchbar', 'modules/' . $this->name . '/ps_searchbar.css');
         $this->context->controller->registerJavascript('modules-searchbar', 'modules/' . $this->name . '/ps_searchbar.js', ['position' => 'bottom', 'priority' => 150]);
     }
 

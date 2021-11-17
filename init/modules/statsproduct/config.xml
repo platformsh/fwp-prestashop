@@ -2,7 +2,7 @@
 <module>
 	<name>statsproduct</name>
 	<displayName><![CDATA[Product details]]></displayName>
-	<version><![CDATA[2.0.3]]></version>
+	<version><![CDATA[2.1.0]]></version>
 	<description><![CDATA[Adds detailed statistics for each product to the Stats dashboard.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>

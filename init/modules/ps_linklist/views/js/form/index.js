@@ -18,6 +18,7 @@
  */
 
 import TranslatableInput from '@components/translatable-input';
+import ChoiceTree from '@components/form/choice-tree';
 
 const $ = window.$;
 
@@ -81,4 +82,6 @@ $(() => {
     });
     customBlock.find('.locale-input-group').first().closest('.col-sm-12').append($button);
   }
+
+  new ChoiceTree('#form_link_block_shop_association').enableAutoCheckChildren();
 });

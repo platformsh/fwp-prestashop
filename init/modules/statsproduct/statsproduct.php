@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -31,7 +31,7 @@ if (!defined('_PS_VERSION_')) {
 class statsproduct extends ModuleGraph
 {
     private $html = '';
-    private $query = '';
+    private $query = [];
     private $option = 0;
     private $id_product = 0;
 
@@ -39,15 +39,15 @@ class statsproduct extends ModuleGraph
     {
         $this->name = 'statsproduct';
         $this->tab = 'analytics_stats';
-        $this->version = '2.0.3';
+        $this->version = '2.1.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
         parent::__construct();
 
         $this->displayName = $this->trans('Product details', array(), 'Modules.Statsproduct.Admin');
-        $this->description = $this->trans('Adds detailed statistics for each product to the Stats dashboard.', array(), 'Modules.Statsproduct.Admin');
-        $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
+        $this->description = $this->trans('Enrich your stats, add detailed statistics for each product of your catalog.', array(), 'Modules.Statsproduct.Admin');
+        $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
     }
 
     public function install()
@@ -121,7 +121,7 @@ class statsproduct extends ModuleGraph
 
 	private function getSales($id_product)
 	{
-		$sql = 'SELECT o.date_add, o.id_order, o.id_customer, od.product_quantity, (od.product_price * od.product_quantity) as total, od.tax_name, od.product_name
+		$sql = 'SELECT o.date_add, o.id_order, o.id_customer, od.product_quantity, (od.unit_price_tax_excl * od.product_quantity) as total, od.tax_name, od.product_name
 				FROM `'._DB_PREFIX_.'orders` o
 				LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON o.id_order = od.id_order
 				WHERE o.date_add BETWEEN '.$this->getDate().'
@@ -134,7 +134,7 @@ class statsproduct extends ModuleGraph
 
     private function getCrossSales($id_product, $id_lang)
     {
-        $sql = 'SELECT pl.name as pname, pl.id_product, SUM(od.product_quantity) as pqty, AVG(od.product_price) as pprice
+        $sql = 'SELECT pl.name as pname, pl.id_product, SUM(od.product_quantity) as pqty, AVG(od.unit_price_tax_excl) as pprice
 				FROM `'._DB_PREFIX_.'orders` o
 				LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON o.id_order = od.id_order
 				LEFT JOIN `'._DB_PREFIX_.'product_lang` pl ON (pl.id_product = od.product_id AND pl.id_lang = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('pl').')
@@ -217,7 +217,7 @@ class statsproduct extends ModuleGraph
 					<div class="col-lg-4">
 						<ul class="list-unstyled">
 							<li>'.$this->trans('Total bought', array(), 'Modules.Statsproduct.Admin').' '.$total_bought.'</li>
-							<li>'.$this->trans('Sales (tax excluded)', array(), 'Modules.Statsproduct.Admin').' '.Tools::displayprice($total_sales, $currency).'</li>
+							<li>' . $this->trans('Sales (tax excluded)', array(), 'Modules.Statsproduct.Admin'). ' '. $this->context->getCurrentLocale()->formatPrice($total_sales, $currency->iso_code) . '</li>
 							<li>'.$this->trans('Total Viewed', array(), 'Modules.Statsproduct.Admin').' '.$total_viewed.'</li>
 							<li>'.$this->trans('Conversion rate', array(), 'Modules.Statsproduct.Admin').' '.number_format($total_viewed ? $total_bought / $total_viewed : 0, 2).'</li>
 						</ul>
@@ -270,7 +270,7 @@ class statsproduct extends ModuleGraph
 							<td class="text-center"><a href="?tab=AdminCustomers&id_customer='.$sale['id_customer'].'&viewcustomer&token='.$token_customer.'">'.(int)$sale['id_customer'].'</a></td>
 							'.($has_attribute ? '<td>'.$sale['product_name'].'</td>' : '').'
 							<td>'.(int)$sale['product_quantity'].'</td>
-							<td>'.Tools::displayprice($sale['total'], $currency).'</td>
+							<td>' . $this->context->getCurrentLocale()->formatPrice($sale['total'], $currency->iso_code) . '</td>
 						</tr>';
                 }
                 $this->html .= '
@@ -304,7 +304,7 @@ class statsproduct extends ModuleGraph
 							<tr>
 								<td><a href="?tab=AdminProducts&id_product='.(int)$selling['id_product'].'&addproduct&token='.$token_products.'">'.$selling['pname'].'</a></td>
 								<td class="text-center">'.(int)$selling['pqty'].'</td>
-								<td class="text-right">'.Tools::displayprice($selling['pprice'], $currency).'</td>
+								<td class="text-right">' . $this->context->getCurrentLocale()->formatPrice($selling['pprice'], $currency->iso_code) . '</td>
 							</tr>';
                     }
                     $this->html .= '
@@ -387,6 +387,7 @@ class statsproduct extends ModuleGraph
                 $this->_titles['main'][0] = $this->trans('Popularity', array(), 'Modules.Statsproduct.Admin');
                 $this->_titles['main'][1] = $this->trans('Sales', array(), 'Admin.Global');
                 $this->_titles['main'][2] = $this->trans('Visits (x100)', array(), 'Modules.Statsproduct.Admin');
+		  $this->query = [];
                 $this->query[0] = 'SELECT o.`date_add`, SUM(od.`product_quantity`) AS total
 						FROM `'._DB_PREFIX_.'order_detail` od
 						LEFT JOIN `'._DB_PREFIX_.'orders` o ON o.`id_order` = od.`id_order`
@@ -410,7 +411,7 @@ class statsproduct extends ModuleGraph
                 break;
 
             case 3:
-                $this->query = 'SELECT product_attribute_id, SUM(od.`product_quantity`) AS total
+                $this->query = 'SELECT product_attribute_id, SUM(od.`product_quantity`) AS total, od.product_name AS product_name
 						FROM `'._DB_PREFIX_.'orders` o
 						LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON o.`id_order` = od.`id_order`
 						WHERE od.`product_id` = '.(int)$this->id_product.'
@@ -442,30 +443,10 @@ class statsproduct extends ModuleGraph
         } elseif ($this->option != 3) {
             $this->setDateGraph($layers, true);
         } else {
-            $product = new Product($this->id_product, false, (int)$this->getLang());
-
-            $comb_array = array();
-            $assoc_names = array();
-            $combinations = $product->getAttributeCombinations((int)$this->getLang());
-            foreach ($combinations as $combination) {
-                $comb_array[$combination['id_product_attribute']][] = array(
-                    'group' => $combination['group_name'],
-                    'attr' => $combination['attribute_name']
-                );
-            }
-            foreach ($comb_array as $id_product_attribute => $product_attribute) {
-                $list = '';
-                foreach ($product_attribute as $attribute) {
-                    $list .= trim($attribute['group']).' - '.trim($attribute['attr']).', ';
-                }
-                $list = rtrim($list, ', ');
-                $assoc_names[$id_product_attribute] = $list;
-            }
-
             $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($this->query);
             foreach ($result as $row) {
                 $this->_values[] = $row['total'];
-                $this->_legend[] = @$assoc_names[$row['product_attribute_id']];
+                $this->_legend[] = $row['product_name'];
             }
         }
     }

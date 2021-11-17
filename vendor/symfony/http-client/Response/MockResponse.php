@@ -94,6 +94,7 @@ class MockResponse implements ResponseInterface
      */
     protected function close(): void
     {
+        $this->inflate = null;
         $this->body = [];
     }
 
@@ -105,22 +106,9 @@ class MockResponse implements ResponseInterface
         $response = new self([]);
         $response->requestOptions = $options;
         $response->id = ++self::$idSequence;
-
-        if (!($options['buffer'] ?? null) instanceof \Closure) {
-            $response->content = true === ($options['buffer'] ?? true) ? fopen('php://temp', 'w+') : (\is_resource($options['buffer']) ? $options['buffer'] : null);
-        }
+        $response->shouldBuffer = $options['buffer'] ?? true;
         $response->initializer = static function (self $response) {
-            if (null !== $response->info['error']) {
-                throw new TransportException($response->info['error']);
-            }
-
-            if (\is_array($response->body[0] ?? null)) {
-                foreach (self::stream([$response]) as $chunk) {
-                    if ($chunk->isFirst()) {
-                        break;
-                    }
-                }
-            }
+            return \is_array($response->body[0] ?? null);
         };
 
         $response->info['redirect_count'] = 0;
@@ -198,11 +186,6 @@ class MockResponse implements ResponseInterface
             } else {
                 // Data or timeout chunk
                 $multi->handlesActivity[$id][] = $chunk;
-
-                if (\is_string($chunk) && null !== $response->content) {
-                    // Buffer response body
-                    fwrite($response->content, $chunk);
-                }
             }
         }
     }
@@ -245,7 +228,7 @@ class MockResponse implements ResponseInterface
         } elseif ($body instanceof \Closure) {
             while ('' !== $data = $body(16372)) {
                 if (!\is_string($data)) {
-                    throw new TransportException(sprintf('Return value of the "body" option callback must be string, %s returned.', \gettype($data)));
+                    throw new TransportException(sprintf('Return value of the "body" option callback must be string, "%s" returned.', \gettype($data)));
                 }
 
                 // "notify" upload progress
@@ -312,7 +295,7 @@ class MockResponse implements ResponseInterface
         $onProgress($offset, $dlSize, $response->info);
 
         if ($dlSize && $offset !== $dlSize) {
-            throw new TransportException(sprintf('Transfer closed with %s bytes remaining to read.', $dlSize - $offset));
+            throw new TransportException(sprintf('Transfer closed with %d bytes remaining to read.', $dlSize - $offset));
         }
     }
 }

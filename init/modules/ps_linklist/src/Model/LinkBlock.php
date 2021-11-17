@@ -20,6 +20,8 @@
 
 namespace PrestaShop\Module\LinkList\Model;
 
+use Shop;
+
 /**
  * Class LinkBlock.
  */
@@ -46,7 +48,7 @@ class LinkBlock extends \ObjectModel
     public $position;
 
     /**
-     * @var array
+     * @var array|string|null
      */
     public $content;
 
@@ -58,21 +60,23 @@ class LinkBlock extends \ObjectModel
     /**
      * @see ObjectModel::$definition
      */
-    public static $definition = array(
+    public static $definition = [
         'table' => 'link_block',
         'primary' => 'id_link_block',
         'multilang' => true,
-        'fields' => array(
-            'name' => array('type' => self::TYPE_STRING, 'lang' => true, 'required' => true, 'size' => 40),
-            'id_hook' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'position' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'content' => array('type' => self::TYPE_STRING, 'validate' => 'isJson'),
-            'custom_content' => array('type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isJson'),
-        ),
-    );
+        'fields' => [
+            'name' => ['type' => self::TYPE_STRING, 'lang' => true, 'required' => true, 'size' => 40],
+            'id_hook' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true],
+            'position' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true],
+            'content' => ['type' => self::TYPE_STRING, 'validate' => 'isJson'],
+            'custom_content' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isJson'],
+        ],
+    ];
 
     public function __construct($id = null, $id_lang = null, $id_shop = null)
     {
+        Shop::addTableAssociation('link_block', ['type' => 'shop']);
+
         parent::__construct($id, $id_lang, $id_shop);
 
         if ($this->id) {
@@ -88,12 +92,12 @@ class LinkBlock extends \ObjectModel
         }
 
         if (is_null($this->content)) {
-            $this->content = array(
-                'cms' => array(),
-                'product' => array(),
-                'static' => array(),
-                'category' => array(),
-            );
+            $this->content = [
+                'cms' => [],
+                'product' => [],
+                'static' => [],
+                'category' => [],
+            ];
         }
     }
 
@@ -119,7 +123,7 @@ class LinkBlock extends \ObjectModel
             $this->content = json_encode($this->content);
         }
 
-        $return = parent::update($auto_date, $null_values);
+        $return = parent::update($null_values);
         $this->content = json_decode($this->content, true);
 
         return $return;
@@ -129,12 +133,13 @@ class LinkBlock extends \ObjectModel
     {
         return [
             'id' => $this->id,
-            'id_link_block' => $this->id_link_block,
+            'id_link_block' => $this->id,
             'name' => $this->name,
             'id_hook' => $this->id_hook,
             'position' => $this->position,
             'content' => $this->content,
             'custom_content' => $this->custom_content,
+            'shop_association' => $this->getAssociatedShops(),
         ];
     }
 }

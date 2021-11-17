@@ -21,14 +21,15 @@
 namespace PrestaShop\Module\LinkList\Form;
 
 use Hook;
-use Ps_Linklist;
 use Language;
-use PrestaShop\Module\LinkList\Model\LinkBlock;
-use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\Module\LinkList\Cache\LinkBlockCacheInterface;
-use PrestaShop\PrestaShop\Core\Addon\Module\ModuleRepository;
+use PrestaShop\Module\LinkList\Model\LinkBlock;
 use PrestaShop\Module\LinkList\Repository\LinkBlockRepository;
+use PrestaShop\PrestaShop\Adapter\Configuration;
+use PrestaShop\PrestaShop\Adapter\Shop\Context;
+use PrestaShop\PrestaShop\Core\Addon\Module\ModuleRepository;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
+use Ps_Linklist;
 
 /**
  * Class LinkBlockFormDataProvider.
@@ -61,9 +62,9 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     private $languages;
 
     /**
-     * @var int
+     * @var Context
      */
-    private $shopId;
+    private $shopContext;
 
     /**
      * @var Configuration
@@ -77,21 +78,22 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
      * @param LinkBlockCacheInterface $cache
      * @param ModuleRepository $moduleRepository
      * @param array $languages
-     * @param int $shopId
+     * @param Context $shopContext
+     * @param Configuration $configuration
      */
     public function __construct(
         LinkBlockRepository $repository,
         LinkBlockCacheInterface $cache,
         ModuleRepository $moduleRepository,
         array $languages,
-        $shopId,
+        Context $shopContext,
         Configuration $configuration
     ) {
         $this->repository = $repository;
         $this->cache = $cache;
         $this->moduleRepository = $moduleRepository;
         $this->languages = $languages;
-        $this->shopId = $shopId;
+        $this->shopContext = $shopContext;
         $this->configuration = $configuration;
     }
 
@@ -104,7 +106,11 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     public function getData()
     {
         if (null === $this->idLinkBlock) {
-            return [];
+            return [
+                'link_block' => [
+                    'shop_association' => $this->shopContext->getContextListShopID(),
+                ],
+            ];
         }
 
         $linkBlock = new LinkBlock($this->idLinkBlock);
@@ -125,7 +131,7 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
         }
 
         return ['link_block' => [
-            'id_link_block' => $arrayLinkBlock['id_link_block'],
+            'id_link_block' => $arrayLinkBlock['id'],
             'block_name' => $arrayLinkBlock['name'],
             'id_hook' => $arrayLinkBlock['id_hook'],
             'cms' => isset($arrayLinkBlock['content']['cms']) ? $arrayLinkBlock['content']['cms'] : [],
@@ -133,14 +139,15 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
             'static' => isset($arrayLinkBlock['content']['static']) ? $arrayLinkBlock['content']['static'] : [],
             'category' => isset($arrayLinkBlock['content']['category']) ? $arrayLinkBlock['content']['category'] : [],
             'custom' => $arrayCustom,
+            'shop_association' => $arrayLinkBlock['shop_association'],
         ]];
     }
 
     /**
      * Make sure to fill empty multilang fields if value for default is available
-     * 
+     *
      * @param array $linkBlock
-     * 
+     *
      * @return array
      */
     public function prepareData(array $linkBlock): array
@@ -202,10 +209,11 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
             }
         }
         $linkBlock['custom_content'] = $customContent;
+        $linkBlock['id_shop'] = $this->shopContext->getContextShopID();
 
         if (empty($linkBlock['id_link_block'])) {
             $linkBlockId = $this->repository->create($linkBlock);
-            $this->setIdLinkBlock($linkBlockId);
+            $this->setIdLinkBlock((int) $linkBlockId);
         } else {
             $linkBlockId = $linkBlock['id_link_block'];
             $this->repository->update($linkBlockId, $linkBlock);
@@ -325,7 +333,7 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     {
         $hookName = Hook::getNameById($hookId);
         $module = $this->moduleRepository->getInstanceByName(Ps_Linklist::MODULE_NAME);
-        if (!Hook::isModuleRegisteredOnHook($module, $hookName, $this->shopId)) {
+        if (!Hook::isModuleRegisteredOnHook($module, $hookName, $this->shopContext->getContextShopID())) {
             Hook::registerHook($module, $hookName);
         }
     }

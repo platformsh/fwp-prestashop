@@ -357,13 +357,17 @@ class NumberFormatter
 
         // The original NumberFormatter does not support this format type
         if (self::TYPE_CURRENCY === $type) {
+            if (\PHP_VERSION_ID >= 80000) {
+                throw new \ValueError(sprintf('The format type must be a NumberFormatter::TYPE_* constant (%s given).', $type));
+            }
+
             trigger_error(__METHOD__.'(): Unsupported format type '.$type, \E_USER_WARNING);
 
             return false;
         }
 
         if (self::CURRENCY === $this->style) {
-            throw new NotImplementedException(sprintf('%s() method does not support the formatting of currencies (instance with CURRENCY style). %s', __METHOD__, NotImplementedException::INTL_INSTALL_MESSAGE));
+            throw new NotImplementedException(sprintf('"%s()" method does not support the formatting of currencies (instance with CURRENCY style). "%s".', __METHOD__, NotImplementedException::INTL_INSTALL_MESSAGE));
         }
 
         // Only the default type is supported.
@@ -513,6 +517,10 @@ class NumberFormatter
         $type = (int) $type;
 
         if (self::TYPE_DEFAULT === $type || self::TYPE_CURRENCY === $type) {
+            if (\PHP_VERSION_ID >= 80000) {
+                throw new \ValueError(sprintf('The format type must be a NumberFormatter::TYPE_* constant (%d given).', $type));
+            }
+
             trigger_error(__METHOD__.'(): Unsupported format type '.$type, \E_USER_WARNING);
 
             return false;
@@ -847,7 +855,7 @@ class NumberFormatter
             return false;
         }
 
-        if (PHP_INT_SIZE !== 8 && ($value > self::$int32Max || $value < -self::$int32Max - 1)) {
+        if (\PHP_INT_SIZE !== 8 && ($value > self::$int32Max || $value < -self::$int32Max - 1)) {
             return (float) $value;
         }
 

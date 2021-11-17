@@ -14,7 +14,7 @@ abstract class AbstractStrfTime extends FunctionNode
 
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return "strftime('"
+        return "STRFTIME('"
                 . $this->getFormat()
                 . "', "
                 . $sqlWalker->walkArithmeticPrimary($this->date)

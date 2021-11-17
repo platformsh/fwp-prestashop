@@ -20,16 +20,18 @@
 
 namespace PrestaShop\Module\LinkList\Form\Type;
 
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface;
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
+use PrestaShopBundle\Form\Admin\Type\ShopChoiceTreeType;
 use PrestaShopBundle\Form\Admin\Type\TranslateTextType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
-use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LinkBlockType extends TranslatorAwareType
 {
@@ -64,6 +66,11 @@ class LinkBlockType extends TranslatorAwareType
     private $categoryChoices;
 
     /**
+     * @var bool
+     */
+    private $isMultiStoreUsed;
+
+    /**
      * LinkBlockType constructor.
      *
      * @param TranslatorInterface $translator
@@ -81,7 +88,8 @@ class LinkBlockType extends TranslatorAwareType
         array $cmsPageChoices,
         array $productPageChoices,
         array $staticPageChoices,
-        array $categoryChoices
+        array $categoryChoices,
+        bool $isMultiStoreUsed
     ) {
         parent::__construct($translator, $locales);
         $this->hookChoices = $hookChoices;
@@ -90,6 +98,7 @@ class LinkBlockType extends TranslatorAwareType
         $this->staticPageChoices = $staticPageChoices;
         $this->categoryChoices = $categoryChoices;
         $this->translator = $translator;
+        $this->isMultiStoreUsed = $isMultiStoreUsed;
     }
 
     /**
@@ -113,7 +122,7 @@ class LinkBlockType extends TranslatorAwareType
                             'maxMessage' => $this->translator->trans(
                                 'Name of the block cannot be longer than %limit% characters',
                                 [
-                                    '%limit%' => 40
+                                    '%limit%' => 40,
                                 ],
                                 'Modules.Linklist.Admin'
                             ),
@@ -168,6 +177,21 @@ class LinkBlockType extends TranslatorAwareType
                 'label' => $this->trans('Custom content', 'Modules.Linklist.Admin'),
             ])
         ;
+
+        if ($this->isMultiStoreUsed) {
+            $builder->add('shop_association', ShopChoiceTreeType::class, [
+                'label' => $this->trans('Shop association', 'Admin.Global'),
+                'required' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => $this->trans(
+                            'You have to select at least one shop to associate this item with',
+                            'Admin.Notifications.Error'
+                        ),
+                    ]),
+                ],
+            ]);
+        }
     }
 
     /**

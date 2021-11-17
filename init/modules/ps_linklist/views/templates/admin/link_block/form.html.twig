@@ -47,6 +47,9 @@
                             {{ form_row(linkBlockForm.link_block.product) }}
                             {{ form_row(linkBlockForm.link_block.category) }}
                             {{ form_row(linkBlockForm.link_block.static) }}
+                            {% if linkBlockForm.link_block.shop_association is defined %}
+                                {{ form_row(linkBlockForm.link_block.shop_association) }}
+                            {% endif %}
                             <div class="form-group">
                                 {{ form_row(linkBlockForm.link_block.custom) }}
                                 <div class="d-flex justify-content-end">
