@@ -98,6 +98,12 @@ mounts:
     'admin-fwp/backups':
         source: local
         source_path: 'admin-fwp-backups'
+    'admin-fwp/yaml':
+        source: local
+        source_path: 'admin-fwp-yaml'
+    'install-fwp/yaml':
+        source: local
+        source_path: 'install-fwp-yaml'
     'mails':
         source: local
         source_path: 'mails'
@@ -143,6 +149,9 @@ mounts:
     'config-fwp':
         source: local
         source_path: 'config-fwp'
+    'yaml':
+        source: local
+        source_path: 'yaml'
 
 # The configuration of the application when it is exposed to the web.
 web:
