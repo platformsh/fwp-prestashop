@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894
+class ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2
 {
     public static $files = array (
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
@@ -7197,10 +7197,12 @@ class ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894
         'Ps_Customtext' => __DIR__ . '/../..' . '/modules/ps_customtext/ps_customtext.php',
         'Ps_Emailsubscription' => __DIR__ . '/../..' . '/modules/ps_emailsubscription/ps_emailsubscription.php',
         'Ps_Facetedsearch' => __DIR__ . '/../..' . '/modules/ps_facetedsearch/ps_facetedsearch.php',
+        'Ps_FeaturedProducts' => __DIR__ . '/../..' . '/modules/ps_featuredproducts/ps_featuredproducts.php',
         'Ps_Linklist' => __DIR__ . '/../..' . '/modules/ps_linklist/ps_linklist.php',
         'Ps_MainMenu' => __DIR__ . '/../..' . '/modules/ps_mainmenu/ps_mainmenu.php',
         'Ps_Shoppingcart' => __DIR__ . '/../..' . '/modules/ps_shoppingcart/ps_shoppingcart.php',
         'Ps_ShoppingcartAjaxModuleFrontController' => __DIR__ . '/../..' . '/modules/ps_shoppingcart/controllers/front/ajax.php',
+        'Ps_Wirepayment' => __DIR__ . '/../..' . '/modules/ps_wirepayment/ps_wirepayment.php',
         'Ps_faviconnotificationbo' => __DIR__ . '/../..' . '/modules/ps_faviconnotificationbo/ps_faviconnotificationbo.php',
         'Psr\\Cache\\CacheException' => __DIR__ . '/..' . '/psr/cache/src/CacheException.php',
         'Psr\\Cache\\CacheItemInterface' => __DIR__ . '/..' . '/psr/cache/src/CacheItemInterface.php',
@@ -10149,11 +10151,11 @@ class ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit36f1573f2ebcb005cf177fe6b016d894::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$classMap;
 
         }, null, ClassLoader::class);
     }

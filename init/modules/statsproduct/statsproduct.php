@@ -39,7 +39,7 @@ class statsproduct extends ModuleGraph
     {
         $this->name = 'statsproduct';
         $this->tab = 'analytics_stats';
-        $this->version = '2.1.0';
+        $this->version = '2.1.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -52,7 +52,7 @@ class statsproduct extends ModuleGraph
 
     public function install()
     {
-        return (parent::install() && $this->registerHook('AdminStatsModules'));
+        return (parent::install() && $this->registerHook('displayAdminStatsModules'));
     }
 
     public function getTotalBought($id_product)
@@ -156,7 +156,7 @@ class statsproduct extends ModuleGraph
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
-    public function hookAdminStatsModules()
+    public function hookDisplayAdminStatsModules()
     {
         $id_category = (int)Tools::getValue('id_category');
         $currency = Context::getContext()->currency;

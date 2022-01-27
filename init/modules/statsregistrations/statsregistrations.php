@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -37,7 +37,7 @@ class statsregistrations extends ModuleGraph
     {
         $this->name = 'statsregistrations';
         $this->tab = 'analytics_stats';
-        $this->version = '2.0.0';
+        $this->version = '2.0.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -53,7 +53,7 @@ class statsregistrations extends ModuleGraph
      */
     public function install()
     {
-        return (parent::install() && $this->registerHook('AdminStatsModules'));
+        return (parent::install() && $this->registerHook('displayAdminStatsModules'));
     }
 
     /**
@@ -105,7 +105,7 @@ class statsregistrations extends ModuleGraph
         return $result['buyers'];
     }
 
-    public function hookAdminStatsModules()
+    public function hookDisplayAdminStatsModules()
     {
         $total_registrations = $this->getTotalRegistrations();
         $total_blocked = $this->getBlockedVisitors();
@@ -132,7 +132,7 @@ class statsregistrations extends ModuleGraph
 		<h4>'.$this->trans('Guide', array(), 'Admin.Global').'</h4>
 		<div class="alert alert-warning">
 			<h4>'.$this->trans('Number of customer accounts created', array(), 'Modules.Statsregistrations.Admin').'</h4>
-			<p>'.$this->trans('The total number of accounts created is not in itself important information. However, it is beneficial to analyze the number created over time. This will indicate whether or not things are on the right track. You feel me?', array(), 'Modules.Statsregistrations.Admin').'</p>
+			<p>'.$this->trans('The total number of accounts created is not in itself important information. However, it is beneficial to analyze the number created over time. This will indicate whether or not things are on the right track.', array(), 'Modules.Statsregistrations.Admin').'</p>
 		</div>
 		<h4>'.$this->trans('How to act on the registrations\' evolution?', array(), 'Modules.Statsregistrations.Admin').'</h4>
 		<div class="alert alert-warning">
