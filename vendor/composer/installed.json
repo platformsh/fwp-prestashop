@@ -4760,28 +4760,28 @@
         },
         {
             "name": "prestashop/graphnvd3",
-            "version": "v2.0.1",
-            "version_normalized": "2.0.1.0",
+            "version": "v2.0.2",
+            "version_normalized": "2.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/graphnvd3.git",
-                "reference": "c4b8fa0d82d047b63be02e74e84a27f46a746065"
+                "reference": "ba9d68f6a66aca7b8750977d034e2adcceaa4167"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/graphnvd3/zipball/c4b8fa0d82d047b63be02e74e84a27f46a746065",
-                "reference": "c4b8fa0d82d047b63be02e74e84a27f46a746065",
+                "url": "https://api.github.com/repos/PrestaShop/graphnvd3/zipball/ba9d68f6a66aca7b8750977d034e2adcceaa4167",
+                "reference": "ba9d68f6a66aca7b8750977d034e2adcceaa4167",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
             },
-            "time": "2019-04-03T08:19:54+00:00",
+            "time": "2021-11-19T14:55:33+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "AFL - Academic Free License (AFL 3.0)"
+                "AFL-3.0"
             ],
             "authors": [
                 {
@@ -4792,23 +4792,23 @@
             "description": "PrestaShop module graphnvd3",
             "homepage": "https://github.com/PrestaShop/graphnvd3",
             "support": {
-                "source": "https://github.com/PrestaShop/graphnvd3/tree/v2.0.1"
+                "source": "https://github.com/PrestaShop/graphnvd3/tree/v2.0.2"
             },
             "install-path": "../../modules/graphnvd3"
         },
         {
             "name": "prestashop/gridhtml",
-            "version": "v2.0.1",
-            "version_normalized": "2.0.1.0",
+            "version": "v2.0.2",
+            "version_normalized": "2.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/gridhtml.git",
-                "reference": "bbd3985d5919a0c4dec622eb716cf157769eaab9"
+                "reference": "184ed2be93b84dea56c98a9042cafd66ac48458b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/gridhtml/zipball/bbd3985d5919a0c4dec622eb716cf157769eaab9",
-                "reference": "bbd3985d5919a0c4dec622eb716cf157769eaab9",
+                "url": "https://api.github.com/repos/PrestaShop/gridhtml/zipball/184ed2be93b84dea56c98a9042cafd66ac48458b",
+                "reference": "184ed2be93b84dea56c98a9042cafd66ac48458b",
                 "shasum": ""
             },
             "require": {
@@ -4817,7 +4817,7 @@
             "require-dev": {
                 "prestashop/php-dev-tools": "^3.4"
             },
-            "time": "2020-12-09T14:23:53+00:00",
+            "time": "2021-11-19T15:48:55+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -4833,7 +4833,7 @@
             "description": "PrestaShop module gridhtml",
             "homepage": "https://github.com/PrestaShop/gridhtml",
             "support": {
-                "source": "https://github.com/PrestaShop/gridhtml/tree/v2.0.1"
+                "source": "https://github.com/PrestaShop/gridhtml/tree/v2.0.2"
             },
             "install-path": "../../modules/gridhtml"
         },
@@ -4877,28 +4877,28 @@
         },
         {
             "name": "prestashop/pagesnotfound",
-            "version": "v2.0.0",
-            "version_normalized": "2.0.0.0",
+            "version": "v2.0.1",
+            "version_normalized": "2.0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/pagesnotfound.git",
-                "reference": "8707d8184f0c6678a95c64b957aec6053ed069ef"
+                "reference": "b0a8ebdbf733128b6cf0454c41ea2a6edfa4c0cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/pagesnotfound/zipball/8707d8184f0c6678a95c64b957aec6053ed069ef",
-                "reference": "8707d8184f0c6678a95c64b957aec6053ed069ef",
+                "url": "https://api.github.com/repos/PrestaShop/pagesnotfound/zipball/b0a8ebdbf733128b6cf0454c41ea2a6edfa4c0cc",
+                "reference": "b0a8ebdbf733128b6cf0454c41ea2a6edfa4c0cc",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
             },
-            "time": "2017-02-20T11:14:52+00:00",
+            "time": "2021-12-15T08:48:59+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "AFL - Academic Free License (AFL 3.0)"
+                "AFL-3.0"
             ],
             "authors": [
                 {
@@ -4909,7 +4909,7 @@
             "description": "PrestaShop module pagesnotfound",
             "homepage": "https://github.com/PrestaShop/pagesnotfound",
             "support": {
-                "source": "https://github.com/PrestaShop/pagesnotfound/tree/dev"
+                "source": "https://github.com/PrestaShop/pagesnotfound/tree/v2.0.1"
             },
             "install-path": "../../modules/pagesnotfound"
         },
@@ -5365,17 +5365,17 @@
         },
         {
             "name": "prestashop/ps_dataprivacy",
-            "version": "v2.0.1",
-            "version_normalized": "2.0.1.0",
+            "version": "v2.1.0",
+            "version_normalized": "2.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_dataprivacy.git",
-                "reference": "70f08623c99466fc2f93d4aa37476978fa910dc7"
+                "reference": "0a1380ea25c2b1285788cb2d5d6246b374500bd2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_dataprivacy/zipball/70f08623c99466fc2f93d4aa37476978fa910dc7",
-                "reference": "70f08623c99466fc2f93d4aa37476978fa910dc7",
+                "url": "https://api.github.com/repos/PrestaShop/ps_dataprivacy/zipball/0a1380ea25c2b1285788cb2d5d6246b374500bd2",
+                "reference": "0a1380ea25c2b1285788cb2d5d6246b374500bd2",
                 "shasum": ""
             },
             "require": {
@@ -5384,7 +5384,7 @@
             "require-dev": {
                 "prestashop/php-dev-tools": "^3.4"
             },
-            "time": "2021-02-01T10:23:06+00:00",
+            "time": "2021-12-31T10:42:45+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -5400,7 +5400,7 @@
             "description": "PrestaShop - Data privacy",
             "homepage": "https://github.com/PrestaShop/ps_dataprivacy",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_dataprivacy/tree/v2.0.1"
+                "source": "https://github.com/PrestaShop/ps_dataprivacy/tree/v2.1.0"
             },
             "install-path": "../../modules/ps_dataprivacy"
         },
@@ -5553,25 +5553,34 @@
         },
         {
             "name": "prestashop/ps_featuredproducts",
-            "version": "v2.1.0",
-            "version_normalized": "2.1.0.0",
+            "version": "v2.1.2",
+            "version_normalized": "2.1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_featuredproducts.git",
-                "reference": "a175279ce8fce9669fa1b22c5a13be86c4c1c334"
+                "reference": "44e6567bd0419537d61389741c7e68ef90d8caf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_featuredproducts/zipball/a175279ce8fce9669fa1b22c5a13be86c4c1c334",
-                "reference": "a175279ce8fce9669fa1b22c5a13be86c4c1c334",
+                "url": "https://api.github.com/repos/PrestaShop/ps_featuredproducts/zipball/44e6567bd0419537d61389741c7e68ef90d8caf3",
+                "reference": "44e6567bd0419537d61389741c7e68ef90d8caf3",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4.0"
             },
-            "time": "2020-07-22T16:21:40+00:00",
+            "require-dev": {
+                "prestashop/php-dev-tools": "^3.4"
+            },
+            "time": "2021-12-14T09:04:39+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "ps_featuredproducts.php"
+                ],
+                "exclude-from-classmap": []
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "AFL-3.0"
@@ -5585,7 +5594,7 @@
             "description": "PrestaShop - Featured products",
             "homepage": "https://github.com/PrestaShop/ps_featuredproducts",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_featuredproducts/tree/v2.1.0"
+                "source": "https://github.com/PrestaShop/ps_featuredproducts/tree/v2.1.2"
             },
             "install-path": "../../modules/ps_featuredproducts"
         },
@@ -5842,17 +5851,17 @@
         },
         {
             "name": "prestashop/ps_shoppingcart",
-            "version": "v2.0.4",
-            "version_normalized": "2.0.4.0",
+            "version": "v2.0.5",
+            "version_normalized": "2.0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_shoppingcart.git",
-                "reference": "b168cfcaf15724a17d7bbc862b2347730f79daa4"
+                "reference": "114e39589e84536af46cc344e05c0e8bc37355e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_shoppingcart/zipball/b168cfcaf15724a17d7bbc862b2347730f79daa4",
-                "reference": "b168cfcaf15724a17d7bbc862b2347730f79daa4",
+                "url": "https://api.github.com/repos/PrestaShop/ps_shoppingcart/zipball/114e39589e84536af46cc344e05c0e8bc37355e3",
+                "reference": "114e39589e84536af46cc344e05c0e8bc37355e3",
                 "shasum": ""
             },
             "require": {
@@ -5861,7 +5870,7 @@
             "require-dev": {
                 "prestashop/php-dev-tools": "~3.0"
             },
-            "time": "2021-01-07T15:52:21+00:00",
+            "time": "2021-12-15T08:46:24+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "autoload": {
@@ -5883,7 +5892,7 @@
             "description": "PrestaShop module ps_shoppingcart",
             "homepage": "https://github.com/PrestaShop/ps_shoppingcart",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_shoppingcart/tree/v2.0.4"
+                "source": "https://github.com/PrestaShop/ps_shoppingcart/tree/v2.0.5"
             },
             "install-path": "../../modules/ps_shoppingcart"
         },
@@ -5976,17 +5985,17 @@
         },
         {
             "name": "prestashop/ps_wirepayment",
-            "version": "v2.1.0",
-            "version_normalized": "2.1.0.0",
+            "version": "v2.1.1",
+            "version_normalized": "2.1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_wirepayment.git",
-                "reference": "99e8fbb3c66bad0217cf6f19a987d4f175aa2740"
+                "reference": "2c228b7050674d673d515baaedfaf469232a5e9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_wirepayment/zipball/99e8fbb3c66bad0217cf6f19a987d4f175aa2740",
-                "reference": "99e8fbb3c66bad0217cf6f19a987d4f175aa2740",
+                "url": "https://api.github.com/repos/PrestaShop/ps_wirepayment/zipball/2c228b7050674d673d515baaedfaf469232a5e9e",
+                "reference": "2c228b7050674d673d515baaedfaf469232a5e9e",
                 "shasum": ""
             },
             "require": {
@@ -5995,9 +6004,15 @@
             "require-dev": {
                 "prestashop/php-dev-tools": "^3.4"
             },
-            "time": "2020-06-24T19:32:51+00:00",
+            "time": "2021-12-28T16:47:05+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "ps_wirepayment.php"
+                ],
+                "exclude-from-classmap": []
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "AFL-3.0"
@@ -6011,7 +6026,7 @@
             "description": "PrestaShop module ps_wirepayment",
             "homepage": "https://github.com/PrestaShop/ps_wirepayment",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_wirepayment/tree/master"
+                "source": "https://github.com/PrestaShop/ps_wirepayment/tree/v2.1.1"
             },
             "install-path": "../../modules/ps_wirepayment"
         },
@@ -6055,28 +6070,31 @@
         },
         {
             "name": "prestashop/statsbestcustomers",
-            "version": "v2.0.2",
-            "version_normalized": "2.0.2.0",
+            "version": "v2.0.3",
+            "version_normalized": "2.0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/statsbestcustomers.git",
-                "reference": "b0250e88e9144ca373d8006c922d3e84ea4987b9"
+                "reference": "979518b00f321f1429ca8e251416bf2d2281a931"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/statsbestcustomers/zipball/b0250e88e9144ca373d8006c922d3e84ea4987b9",
-                "reference": "b0250e88e9144ca373d8006c922d3e84ea4987b9",
+                "url": "https://api.github.com/repos/PrestaShop/statsbestcustomers/zipball/979518b00f321f1429ca8e251416bf2d2281a931",
+                "reference": "979518b00f321f1429ca8e251416bf2d2281a931",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2018-01-29T17:21:50+00:00",
+            "require-dev": {
+                "prestashop/php-dev-tools": "^3.4"
+            },
+            "time": "2021-11-26T08:43:37+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "AFL - Academic Free License (AFL 3.0)"
+                "AFL-3.0"
             ],
             "authors": [
                 {
@@ -6087,7 +6105,7 @@
             "description": "PrestaShop module statsbestcustomers",
             "homepage": "https://github.com/PrestaShop/statsbestcustomers",
             "support": {
-                "source": "https://github.com/PrestaShop/statsbestcustomers/tree/v2.0.2"
+                "source": "https://github.com/PrestaShop/statsbestcustomers/tree/v2.0.3"
             },
             "install-path": "../../modules/statsbestcustomers"
         },
@@ -6321,28 +6339,28 @@
         },
         {
             "name": "prestashop/statscheckup",
-            "version": "v2.0.1",
-            "version_normalized": "2.0.1.0",
+            "version": "v2.0.2",
+            "version_normalized": "2.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/statscheckup.git",
-                "reference": "7acd7702ab8ecb2b88e529e1eab8d4b7fafbca07"
+                "reference": "ef485adc627745c7e0fa25ad8082c6f4b96dc3cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/statscheckup/zipball/7acd7702ab8ecb2b88e529e1eab8d4b7fafbca07",
-                "reference": "7acd7702ab8ecb2b88e529e1eab8d4b7fafbca07",
+                "url": "https://api.github.com/repos/PrestaShop/statscheckup/zipball/ef485adc627745c7e0fa25ad8082c6f4b96dc3cf",
+                "reference": "ef485adc627745c7e0fa25ad8082c6f4b96dc3cf",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2018-12-17T09:59:57+00:00",
+            "time": "2022-01-04T15:20:35+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "AFL - Academic Free License (AFL 3.0)"
+                "AFL-3.0"
             ],
             "authors": [
                 {
@@ -6353,7 +6371,7 @@
             "description": "PrestaShop module statscheckup",
             "homepage": "https://github.com/PrestaShop/statscheckup",
             "support": {
-                "source": "https://github.com/PrestaShop/statscheckup/tree/master"
+                "source": "https://github.com/PrestaShop/statscheckup/tree/v2.0.2"
             },
             "install-path": "../../modules/statscheckup"
         },
@@ -6511,23 +6529,23 @@
         },
         {
             "name": "prestashop/statsproduct",
-            "version": "v2.1.0",
-            "version_normalized": "2.1.0.0",
+            "version": "v2.1.1",
+            "version_normalized": "2.1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/statsproduct.git",
-                "reference": "d9d01b83abee4887a0981e6c54cd9560a34d556e"
+                "reference": "804f5a33ac45e41525613a1c87ff73928a2a4126"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/statsproduct/zipball/d9d01b83abee4887a0981e6c54cd9560a34d556e",
-                "reference": "d9d01b83abee4887a0981e6c54cd9560a34d556e",
+                "url": "https://api.github.com/repos/PrestaShop/statsproduct/zipball/804f5a33ac45e41525613a1c87ff73928a2a4126",
+                "reference": "804f5a33ac45e41525613a1c87ff73928a2a4126",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2021-10-26T14:18:29+00:00",
+            "time": "2022-01-04T12:54:39+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -6543,34 +6561,34 @@
             "description": "PrestaShop module statsproduct",
             "homepage": "https://github.com/PrestaShop/statsproduct",
             "support": {
-                "source": "https://github.com/PrestaShop/statsproduct/tree/v2.1.0"
+                "source": "https://github.com/PrestaShop/statsproduct/tree/v2.1.1"
             },
             "install-path": "../../modules/statsproduct"
         },
         {
             "name": "prestashop/statsregistrations",
-            "version": "v2.0.0",
-            "version_normalized": "2.0.0.0",
+            "version": "v2.0.1",
+            "version_normalized": "2.0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/statsregistrations.git",
-                "reference": "51d79fb12770919f1b1f9d9d9f931148d60149c2"
+                "reference": "efdc328afa96ffed859fb8333a3a18b9a86e1c4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/statsregistrations/zipball/51d79fb12770919f1b1f9d9d9f931148d60149c2",
-                "reference": "51d79fb12770919f1b1f9d9d9f931148d60149c2",
+                "url": "https://api.github.com/repos/PrestaShop/statsregistrations/zipball/efdc328afa96ffed859fb8333a3a18b9a86e1c4a",
+                "reference": "efdc328afa96ffed859fb8333a3a18b9a86e1c4a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2017-01-31T17:22:19+00:00",
+            "time": "2022-01-04T13:38:03+00:00",
             "type": "prestashop-module",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "AFL - Academic Free License (AFL 3.0)"
+                "AFL-3.0"
             ],
             "authors": [
                 {
@@ -6581,7 +6599,7 @@
             "description": "PrestaShop module statsregistrations",
             "homepage": "https://github.com/PrestaShop/statsregistrations",
             "support": {
-                "source": "https://github.com/PrestaShop/statsregistrations/tree/master"
+                "source": "https://github.com/PrestaShop/statsregistrations/tree/v2.0.1"
             },
             "install-path": "../../modules/statsregistrations"
         },
@@ -6701,17 +6719,17 @@
         },
         {
             "name": "prestashop/translationtools-bundle",
-            "version": "v4.0.4",
-            "version_normalized": "4.0.4.0",
+            "version": "v4.1.1",
+            "version_normalized": "4.1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/TranslationToolsBundle.git",
-                "reference": "9da37780f6004271616579365238d9421a2d1b97"
+                "reference": "86a356f9cd7d063643d7e027ec75077c098b9c88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/TranslationToolsBundle/zipball/9da37780f6004271616579365238d9421a2d1b97",
-                "reference": "9da37780f6004271616579365238d9421a2d1b97",
+                "url": "https://api.github.com/repos/PrestaShop/TranslationToolsBundle/zipball/86a356f9cd7d063643d7e027ec75077c098b9c88",
+                "reference": "86a356f9cd7d063643d7e027ec75077c098b9c88",
                 "shasum": ""
             },
             "require": {
@@ -6723,11 +6741,12 @@
             },
             "require-dev": {
                 "doctrine/common": "~2.10.0",
+                "friendsofphp/php-cs-fixer": "^2.18",
                 "phpunit/phpunit": "^7.5 || ^8.5",
                 "symfony/framework-bundle": "^3.4 || ^4.4 || ^5.0",
                 "symfony/translation": "^3.4 || ^4.4 || ^5.0"
             },
-            "time": "2020-11-13T08:11:44+00:00",
+            "time": "2021-12-03T16:01:50+00:00",
             "type": "bundle",
             "installation-source": "dist",
             "autoload": {
@@ -6757,7 +6776,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PrestaShop/TranslationToolsBundle/issues",
-                "source": "https://github.com/PrestaShop/TranslationToolsBundle/tree/v4.0.4"
+                "source": "https://github.com/PrestaShop/TranslationToolsBundle/tree/v4.1.1"
             },
             "install-path": "../prestashop/translationtools-bundle"
         },

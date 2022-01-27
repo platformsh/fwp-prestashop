@@ -74,7 +74,7 @@ class GridHtml extends ModuleGridEngine
         } else {
             $this->name = 'gridhtml';
             $this->tab = 'administration';
-            $this->version = '2.0.1';
+            $this->version = '2.0.2';
             $this->author = 'PrestaShop';
             $this->need_instance = 0;
 
@@ -241,7 +241,7 @@ class GridHtml extends ModuleGridEngine
 
     public function render()
     {
-        echo Tools::jsonEncode([
+        echo json_encode([
             'total' => $this->_totalCount,
             'from' => min($this->_start + 1, $this->_totalCount),
             'to' => min($this->_start + $this->_limit, $this->_totalCount),
