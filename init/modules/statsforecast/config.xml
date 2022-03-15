@@ -2,7 +2,7 @@
 <module>
 	<name>statsforecast</name>
 	<displayName><![CDATA[Stats Dashboard]]></displayName>
-	<version><![CDATA[2.0.3]]></version>
+	<version><![CDATA[2.0.4]]></version>
 	<description><![CDATA[This is the main module for the Stats dashboard. It displays a summary of all your current statistics.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>
