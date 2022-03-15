@@ -30,7 +30,7 @@
 <div class="row">
   <div class="col-md-12 col-sm-12" id="product-comments-list-header">
     <div class="comments-nb">
-      <i class="material-icons shopping-cart">chat</i>
+      <i class="material-icons" data-icon="chat"></i>
       {l s='Comments' d='Modules.Productcomments.Shop'} ({$nb_comments})
     </div>
     {include file='module:productcomments/views/templates/hook/average-grade-stars.tpl' grade=$average_grade}
@@ -45,7 +45,7 @@
        data-list-comments-url="{$list_comments_url nofilter}"
        data-update-comment-usefulness-url="{$update_comment_usefulness_url nofilter}"
        data-report-comment-url="{$report_comment_url nofilter}"
-       data-comment-item-prototype="{$comment_prototype|escape:'html_attr'}">
+       data-comment-item-prototype="{$comment_prototype|escape:'html'}">
   </div>
 </div>
 <div class="row">
@@ -53,7 +53,7 @@
     <div id="product-comments-list-pagination"></div>
     {if $post_allowed && $nb_comments != 0}
       <button class="btn btn-comment btn-comment-big post-product-comment">
-        <i class="material-icons shopping-cart">edit</i>
+        <i class="material-icons" data-icon="edit"></i>
         {l s='Write your review' d='Modules.Productcomments.Shop'}
       </button>
     {/if}
@@ -84,7 +84,7 @@
 
 {* Report abuse error modal *}
 {include file='module:productcomments/views/templates/hook/alert-modal.tpl'
-modal_id='report-comment-post-error'
-modal_title={l s='Your report cannot be sent' d='Modules.Productcomments.Shop'}
-icon='error'
+  modal_id='report-comment-post-error'
+  modal_title={l s='Your report cannot be sent' d='Modules.Productcomments.Shop'}
+  icon='error'
 }

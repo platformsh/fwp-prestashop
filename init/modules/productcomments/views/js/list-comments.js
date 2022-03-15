@@ -69,8 +69,8 @@ jQuery(document).ready(function () {
             items: jsonResponse.comments_nb,
             itemsOnPage: jsonResponse.comments_per_page,
             cssStyle: '',
-            prevText: '<i class="material-icons">chevron_left</i>',
-            nextText: '<i class="material-icons">chevron_right</i>',
+            prevText: '<i class="material-icons" data-icon="chevron_left"></i>',
+            nextText: '<i class="material-icons" data-icon="chevron_right"></i>',
             useAnchors: false,
             displayedPages: 2,
             onPageClick: paginateComments
@@ -104,6 +104,7 @@ jQuery(document).ready(function () {
     commentTemplate = commentTemplate.replace(/@COMMENT_TITLE@/, comment.title);
     commentTemplate = commentTemplate.replace(/@COMMENT_COMMENT@/, comment.content);
     commentTemplate = commentTemplate.replace(/@COMMENT_USEFUL_ADVICES@/, comment.usefulness);
+    commentTemplate = commentTemplate.replace(/@COMMENT_GRADE@/, comment.grade);
     commentTemplate = commentTemplate.replace(/@COMMENT_NOT_USEFUL_ADVICES@/, (comment.total_usefulness - comment.usefulness));
     commentTemplate = commentTemplate.replace(/@COMMENT_TOTAL_ADVICES@/, comment.total_usefulness);
 

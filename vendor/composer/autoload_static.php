@@ -4,15 +4,15 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2
+class ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a
 {
     public static $files = array (
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
         '023d27dca8066ef29e6739335ea73bad' => __DIR__ . '/..' . '/symfony/polyfill-php70/bootstrap.php',
-        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
@@ -3937,7 +3937,6 @@ class ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2
         'PrestaShop\\Decimal\\Operation\\Multiplication' => __DIR__ . '/..' . '/prestashop/decimal/src/Operation/Multiplication.php',
         'PrestaShop\\Decimal\\Operation\\Rounding' => __DIR__ . '/..' . '/prestashop/decimal/src/Operation/Rounding.php',
         'PrestaShop\\Decimal\\Operation\\Subtraction' => __DIR__ . '/..' . '/prestashop/decimal/src/Operation/Subtraction.php',
-        'PrestaShop\\Module\\BlockReassurance\\Addons\\CategoryFetcher' => __DIR__ . '/../..' . '/modules/blockreassurance/src/Addons/CategoryFetcher.php',
         'PrestaShop\\Module\\BlockWishList\\Access\\CustomerAccess' => __DIR__ . '/../..' . '/modules/blockwishlist/src/Access/CustomerAccess.php',
         'PrestaShop\\Module\\BlockWishList\\Calculator\\StatisticsCalculator' => __DIR__ . '/../..' . '/modules/blockwishlist/src/Calculator/StatisticsCalculator.php',
         'PrestaShop\\Module\\BlockWishList\\Controller\\WishlistConfigurationAdminController' => __DIR__ . '/../..' . '/modules/blockwishlist/src/Controller/WishlistConfigurationAdminController.php',
@@ -4012,7 +4011,6 @@ class ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2
         'PrestaShop\\Module\\LinkList\\Model\\LinkBlockLang' => __DIR__ . '/../..' . '/modules/ps_linklist/src/Model/LinkBlockLang.php',
         'PrestaShop\\Module\\LinkList\\Presenter\\LinkBlockPresenter' => __DIR__ . '/../..' . '/modules/ps_linklist/src/Presenter/LinkBlockPresenter.php',
         'PrestaShop\\Module\\LinkList\\Repository\\LinkBlockRepository' => __DIR__ . '/../..' . '/modules/ps_linklist/src/Repository/LinkBlockRepository.php',
-        'PrestaShop\\Module\\ProductComment\\Addons\\CategoryFetcher' => __DIR__ . '/../..' . '/modules/productcomments/src/Addons/CategoryFetcher.php',
         'PrestaShop\\Module\\ProductComment\\Entity\\ProductComment' => __DIR__ . '/../..' . '/modules/productcomments/src/Entity/ProductComment.php',
         'PrestaShop\\Module\\ProductComment\\Entity\\ProductCommentCriterion' => __DIR__ . '/../..' . '/modules/productcomments/src/Entity/ProductCommentCriterion.php',
         'PrestaShop\\Module\\ProductComment\\Entity\\ProductCommentGrade' => __DIR__ . '/../..' . '/modules/productcomments/src/Entity/ProductCommentGrade.php',
@@ -10151,11 +10149,11 @@ class ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit8d981fb0e3c83553e712cea0b1387cd2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInite3e25abca09ea7c4a84ea00801e0353a::$classMap;
 
         }, null, ClassLoader::class);
     }

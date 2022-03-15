@@ -1,28 +1,28 @@
 <?php
-/*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -42,7 +42,7 @@ class statsbestcategories extends ModuleGrid
     {
         $this->name = 'statsbestcategories';
         $this->tab = 'analytics_stats';
-        $this->version = '2.0.0';
+        $this->version = '2.0.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -87,16 +87,16 @@ class statsbestcategories extends ModuleGrid
         );
 
         $this->displayName = $this->trans('Best categories', array(), 'Modules.Statsbestcategories.Admin');
-        $this->description = $this->trans('Adds a list of the best categories to the Stats dashboard.', array(), 'Modules.Statsbestcategories.Admin');
-        $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
+        $this->description = $this->trans('Enrich your stats, add a list of the best selling categories to the dashboard.', array(), 'Modules.Statsbestcategories.Admin');
+        $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
     }
 
     public function install()
     {
-        return (parent::install() && $this->registerHook('AdminStatsModules'));
+        return (parent::install() && $this->registerHook('displayAdminStatsModules'));
     }
 
-    public function hookAdminStatsModules($params)
+    public function hookDisplayAdminStatsModules($params)
     {
         $onlyChildren = (int)Tools::getValue('onlyChildren');
 
@@ -118,10 +118,10 @@ class statsbestcategories extends ModuleGrid
         }
 
         $this->html = '
-			<div class="panel-heading">
-				<i class="icon-sitemap"></i> '.$this->displayName.'
-			</div>
-			'.$this->engine($engine_params).'
+            <div class="panel-heading">
+                <i class="icon-sitemap"></i> '.$this->displayName.'
+            </div>
+            '.$this->engine($engine_params).'
             <div class="row form-horizontal">
                 <div class="col-md-3">
                     <a class="btn btn-default export-csv" href="'.Tools::safeOutput($_SERVER['REQUEST_URI'].'&export=1').'">
@@ -165,12 +165,12 @@ class statsbestcategories extends ModuleGrid
         $categories = array();
         if (Shop::getContext() != Shop::CONTEXT_ALL) {
             $sql = 'SELECT c.nleft, c.nright
-					FROM '._DB_PREFIX_.'category c
-					WHERE c.id_category IN (
-						SELECT s.id_category
-						FROM '._DB_PREFIX_.'shop s
-						WHERE s.id_shop IN ('.implode(', ', Shop::getContextListShopID()).')
-					)';
+                    FROM '._DB_PREFIX_.'category c
+                    WHERE c.id_category IN (
+                        SELECT s.id_category
+                        FROM '._DB_PREFIX_.'shop s
+                        WHERE s.id_shop IN ('.implode(', ', Shop::getContextListShopID()).')
+                    )';
             if ($result = Db::getInstance()->executeS($sql)) {
                 $ntree_restriction = array();
                 foreach ($result as $row) {
@@ -179,8 +179,8 @@ class statsbestcategories extends ModuleGrid
 
                 if ($ntree_restriction) {
                     $sql = 'SELECT id_category
-							FROM '._DB_PREFIX_.'category
-							WHERE '.implode(' OR ', $ntree_restriction);
+                            FROM '._DB_PREFIX_.'category
+                            WHERE '.implode(' OR ', $ntree_restriction);
                     if ($result = Db::getInstance()->executeS($sql)) {
                         foreach ($result as $row) {
                             $categories[] = $row['id_category'];
@@ -196,107 +196,63 @@ class statsbestcategories extends ModuleGrid
         }
 
         // Get best categories
-        if (version_compare(_PS_VERSION_, '1.6.1.1', '>=')) {
-            $this->query = '
-				SELECT SQL_CALC_FOUND_ROWS ca.`id_category`, CONCAT(parent.name, \' > \', calang.`name`) as name,
-				IFNULL(SUM(t.`totalQuantitySold`), 0) AS totalQuantitySold,
-				ROUND(IFNULL(SUM(t.`totalPriceSold`), 0), 2) AS totalPriceSold,
-				ROUND(IFNULL(SUM(t.`totalWholeSalePriceSold`), 0), 2) AS totalWholeSalePriceSold,
-				(
-					SELECT IFNULL(SUM(pv.`counter`), 0)
-					FROM `'._DB_PREFIX_.'page` p
-					LEFT JOIN `'._DB_PREFIX_.'page_viewed` pv ON p.`id_page` = pv.`id_page`
-					LEFT JOIN `'._DB_PREFIX_.'date_range` dr ON pv.`id_date_range` = dr.`id_date_range`
-					LEFT JOIN `'._DB_PREFIX_.'product` pr ON CAST(p.`id_object` AS UNSIGNED INTEGER) = pr.`id_product`
-					LEFT JOIN `'._DB_PREFIX_.'category_product` capr2 ON capr2.`id_product` = pr.`id_product`
-					WHERE capr.`id_category` = capr2.`id_category`
-					AND p.`id_page_type` = 1
-					AND dr.`time_start` BETWEEN '.$date_between.'
-					AND dr.`time_end` BETWEEN '.$date_between.'
-				) AS totalPageViewed,
-				(
-                    SELECT COUNT(id_category) FROM '._DB_PREFIX_.'category WHERE `id_parent` = ca.`id_category`
-			    ) AS hasChildren
-			FROM `'._DB_PREFIX_.'category` ca
-			LEFT JOIN `'._DB_PREFIX_.'category_lang` calang ON (ca.`id_category` = calang.`id_category` AND calang.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('calang').')
-			LEFT JOIN `'._DB_PREFIX_.'category_lang` parent ON (ca.`id_parent` = parent.`id_category` AND parent.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('parent').')
-			LEFT JOIN `'._DB_PREFIX_.'category_product` capr ON ca.`id_category` = capr.`id_category`
-			LEFT JOIN (
-				SELECT pr.`id_product`, t.`totalQuantitySold`, t.`totalPriceSold`, t.`totalWholeSalePriceSold`
-				FROM `'._DB_PREFIX_.'product` pr
-				LEFT JOIN (
-					SELECT pr.`id_product`, pa.`wholesale_price`,
-						IFNULL(SUM(cp.`product_quantity`), 0) AS totalQuantitySold,
-						IFNULL(SUM(cp.`product_price` * cp.`product_quantity`), 0) / o.conversion_rate AS totalPriceSold,
-						IFNULL(SUM(
-							CASE
-								WHEN cp.`original_wholesale_price` <> "0.000000"
-								THEN cp.`original_wholesale_price` * cp.`product_quantity`
-								WHEN pa.`wholesale_price` <> "0.000000"
-								THEN pa.`wholesale_price` * cp.`product_quantity`
-								WHEN pr.`wholesale_price` <> "0.000000"
-								THEN pr.`wholesale_price` * cp.`product_quantity`
-							END
-						), 0) / o.conversion_rate AS totalWholeSalePriceSold
-					FROM `'._DB_PREFIX_.'product` pr
-					LEFT OUTER JOIN `'._DB_PREFIX_.'order_detail` cp ON pr.`id_product` = cp.`product_id`
-					LEFT JOIN `'._DB_PREFIX_.'orders` o ON o.`id_order` = cp.`id_order`
-					LEFT JOIN `'._DB_PREFIX_.'product_attribute` pa ON pa.`id_product_attribute` = cp.`product_attribute_id`
-					'.Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o').'
-					WHERE o.valid = 1
-					AND o.invoice_date BETWEEN '.$date_between.'
-					GROUP BY pr.`id_product`
-				) t ON t.`id_product` = pr.`id_product`
-			) t	ON t.`id_product` = capr.`id_product`
-			'.(($categories) ? 'WHERE ca.id_category IN ('.implode(', ', $categories).')' : '').'
-			'.$onlyChildren.'
-			GROUP BY ca.`id_category`
-			HAVING ca.`id_category` != 1';
-        } else {
-            $this->query = '
-			SELECT SQL_CALC_FOUND_ROWS ca.`id_category`, CONCAT(parent.name, \' > \', calang.`name`) as name,
-				IFNULL(SUM(t.`totalQuantitySold`), 0) AS totalQuantitySold,
-				ROUND(IFNULL(SUM(t.`totalPriceSold`), 0), 2) AS totalPriceSold,
-				(
-					SELECT IFNULL(SUM(pv.`counter`), 0)
-					FROM `' . _DB_PREFIX_ . 'page` p
-					LEFT JOIN `' . _DB_PREFIX_ . 'page_viewed` pv ON p.`id_page` = pv.`id_page`
-					LEFT JOIN `' . _DB_PREFIX_ . 'date_range` dr ON pv.`id_date_range` = dr.`id_date_range`
-					LEFT JOIN `' . _DB_PREFIX_ . 'product` pr ON CAST(p.`id_object` AS UNSIGNED INTEGER) = pr.`id_product`
-					LEFT JOIN `' . _DB_PREFIX_ . 'category_product` capr2 ON capr2.`id_product` = pr.`id_product`
-					WHERE capr.`id_category` = capr2.`id_category`
-					AND p.`id_page_type` = 1
-					AND dr.`time_start` BETWEEN ' . $date_between . '
-					AND dr.`time_end` BETWEEN ' . $date_between . '
-				) AS totalPageViewed,
-				(
-                    SELECT COUNT(id_category) FROM '._DB_PREFIX_.'category WHERE `id_parent` = ca.`id_category`
-			    ) AS hasChildren
-			FROM `' . _DB_PREFIX_ . 'category` ca
-			LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` calang ON (ca.`id_category` = calang.`id_category` AND calang.`id_lang` = ' . (int)$id_lang . Shop::addSqlRestrictionOnLang('calang') . ')
-			LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` parent ON (ca.`id_parent` = parent.`id_category` AND parent.`id_lang` = ' . (int)$id_lang . Shop::addSqlRestrictionOnLang('parent') . ')
-			LEFT JOIN `' . _DB_PREFIX_ . 'category_product` capr ON ca.`id_category` = capr.`id_category`
-			LEFT JOIN (
-				SELECT pr.`id_product`, t.`totalQuantitySold`, t.`totalPriceSold`
-				FROM `' . _DB_PREFIX_ . 'product` pr
-				LEFT JOIN (
-					SELECT pr.`id_product`,
-					IFNULL(SUM(cp.`product_quantity`), 0) AS totalQuantitySold,
-					IFNULL(SUM(cp.`product_price` * cp.`product_quantity`), 0) / o.conversion_rate AS totalPriceSold
-					FROM `' . _DB_PREFIX_ . 'product` pr
-					LEFT OUTER JOIN `' . _DB_PREFIX_ . 'order_detail` cp ON pr.`id_product` = cp.`product_id`
-					LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON o.`id_order` = cp.`id_order`
-					' . Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o') . '
-					WHERE o.valid = 1
-					AND o.invoice_date BETWEEN ' . $date_between . '
-					GROUP BY pr.`id_product`
-				) t ON t.`id_product` = pr.`id_product`
-			) t	ON t.`id_product` = capr.`id_product`
-			' . (($categories) ? 'WHERE ca.id_category IN (' . implode(', ', $categories) . ')' : '') . '
-			'.$onlyChildren.'
-			GROUP BY ca.`id_category`
-			HAVING ca.`id_category` != 1';
-        }
+
+        $this->query = '
+            SELECT SQL_CALC_FOUND_ROWS ca.`id_category`, CONCAT(parent.name, \' > \', calang.`name`) as name,
+            IFNULL(SUM(t.`totalQuantitySold`), 0) AS totalQuantitySold,
+            ROUND(IFNULL(SUM(t.`totalPriceSold`), 0), 2) AS totalPriceSold,
+            ROUND(IFNULL(SUM(t.`totalWholeSalePriceSold`), 0), 2) AS totalWholeSalePriceSold,
+            (
+                SELECT IFNULL(SUM(pv.`counter`), 0)
+                FROM `'._DB_PREFIX_.'page` p
+                LEFT JOIN `'._DB_PREFIX_.'page_viewed` pv ON p.`id_page` = pv.`id_page`
+                LEFT JOIN `'._DB_PREFIX_.'date_range` dr ON pv.`id_date_range` = dr.`id_date_range`
+                LEFT JOIN `'._DB_PREFIX_.'product` pr ON CAST(p.`id_object` AS UNSIGNED INTEGER) = pr.`id_product`
+                LEFT JOIN `'._DB_PREFIX_.'category_product` capr2 ON capr2.`id_product` = pr.`id_product`
+                WHERE capr.`id_category` = capr2.`id_category`
+                AND p.`id_page_type` = 1
+                AND dr.`time_start` BETWEEN '.$date_between.'
+                AND dr.`time_end` BETWEEN '.$date_between.'
+            ) AS totalPageViewed,
+            (
+                SELECT COUNT(id_category) FROM '._DB_PREFIX_.'category WHERE `id_parent` = ca.`id_category`
+            ) AS hasChildren
+        FROM `'._DB_PREFIX_.'category` ca
+        LEFT JOIN `'._DB_PREFIX_.'category_lang` calang ON (ca.`id_category` = calang.`id_category` AND calang.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('calang').')
+        LEFT JOIN `'._DB_PREFIX_.'category_lang` parent ON (ca.`id_parent` = parent.`id_category` AND parent.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('parent').')
+        LEFT JOIN `'._DB_PREFIX_.'category_product` capr ON ca.`id_category` = capr.`id_category`
+        LEFT JOIN (
+            SELECT pr.`id_product`, t.`totalQuantitySold`, t.`totalPriceSold`, t.`totalWholeSalePriceSold`
+            FROM `'._DB_PREFIX_.'product` pr
+            LEFT JOIN (
+                SELECT pr.`id_product`, pa.`wholesale_price`,
+                    IFNULL(SUM(cp.`product_quantity`), 0) AS totalQuantitySold,
+                    IFNULL(SUM(cp.`unit_price_tax_excl` * cp.`product_quantity`), 0) / o.conversion_rate AS totalPriceSold,
+                    IFNULL(SUM(
+                        CASE
+                            WHEN cp.`original_wholesale_price` <> "0.000000"
+                            THEN cp.`original_wholesale_price` * cp.`product_quantity`
+                            WHEN pa.`wholesale_price` <> "0.000000"
+                            THEN pa.`wholesale_price` * cp.`product_quantity`
+                            WHEN pr.`wholesale_price` <> "0.000000"
+                            THEN pr.`wholesale_price` * cp.`product_quantity`
+                        END
+                    ), 0) / o.conversion_rate AS totalWholeSalePriceSold
+                FROM `'._DB_PREFIX_.'product` pr
+                LEFT OUTER JOIN `'._DB_PREFIX_.'order_detail` cp ON pr.`id_product` = cp.`product_id`
+                LEFT JOIN `'._DB_PREFIX_.'orders` o ON o.`id_order` = cp.`id_order`
+                LEFT JOIN `'._DB_PREFIX_.'product_attribute` pa ON pa.`id_product_attribute` = cp.`product_attribute_id`
+                '.Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o').'
+                WHERE o.valid = 1
+                AND o.invoice_date BETWEEN '.$date_between.'
+                GROUP BY pr.`id_product`
+            ) t ON t.`id_product` = pr.`id_product`
+        ) t    ON t.`id_product` = capr.`id_product`
+        '.(($categories) ? 'WHERE ca.id_category IN ('.implode(', ', $categories).')' : '').'
+        '.$onlyChildren.'
+        GROUP BY ca.`id_category`
+        HAVING ca.`id_category` != 1';
+
 
         if (Validate::IsName($this->_sort)) {
             $this->query .= ' ORDER BY `'.bqSQL($this->_sort).'`';
@@ -323,9 +279,9 @@ class statsbestcategories extends ModuleGrid
             }
 
             if (isset($value['totalWholeSalePriceSold'])) {
-                $value['totalWholeSalePriceSold'] = Tools::displayPrice($value['totalPriceSold'] - $value['totalWholeSalePriceSold'], $currency);
+                $value['totalWholeSalePriceSold'] = $this->context->getCurrentLocale()->formatPrice($value['totalPriceSold'] - $value['totalWholeSalePriceSold'], $currency->iso_code);
             }
-            $value['totalPriceSold'] = Tools::displayPrice($value['totalPriceSold'], $currency);
+            $value['totalPriceSold'] = $this->context->getCurrentLocale()->formatPrice($value['totalPriceSold'], $currency->iso_code);
         }
 
         $this->_values = $values;
