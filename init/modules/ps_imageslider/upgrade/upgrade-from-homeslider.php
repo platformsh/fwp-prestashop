@@ -23,15 +23,15 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
-if (!defined('_PS_VERSION_'))
-	exit;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 function upgrade_module_2_0_0($object)
 {
-    return ($object->unregisterHook('displayTopColumn')
+    return $object->unregisterHook('displayTopColumn')
         && $object->registerHook('displayHome')
         && Configuration::deleteByName('HOMESLIDER_PAUSE')
         && Configuration::deleteByName('HOMESLIDER_LOOP')
-    );
+    ;
 }
