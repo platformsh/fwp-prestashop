@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit58c02c96a232560d9598131338fcd397
+class ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b
 {
     public static $files = array (
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
@@ -556,10 +556,10 @@ class ComposerStaticInit58c02c96a232560d9598131338fcd397
         ),
         'Doctrine\\Common\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
-            1 => __DIR__ . '/..' . '/doctrine/event-manager/lib/Doctrine/Common',
-            2 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Common',
-            3 => __DIR__ . '/..' . '/doctrine/common/lib/Doctrine/Common',
+            0 => __DIR__ . '/..' . '/doctrine/event-manager/lib/Doctrine/Common',
+            1 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
+            2 => __DIR__ . '/..' . '/doctrine/common/lib/Doctrine/Common',
+            3 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Common',
         ),
         'Doctrine\\Bundle\\DoctrineCacheBundle\\' => 
         array (
@@ -10151,11 +10151,11 @@ class ComposerStaticInit58c02c96a232560d9598131338fcd397
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit58c02c96a232560d9598131338fcd397::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit58c02c96a232560d9598131338fcd397::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit58c02c96a232560d9598131338fcd397::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit58c02c96a232560d9598131338fcd397::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit58c02c96a232560d9598131338fcd397::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitfc6dd1abba8c74f444430e22f494bd7b::$classMap;
 
         }, null, ClassLoader::class);
     }
