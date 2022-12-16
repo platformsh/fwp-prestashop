@@ -58,7 +58,7 @@ class ExposedRoutesExtractor implements ExposedRoutesExtractorInterface
      *
      * @throws \Exception
      */
-    public function __construct(RouterInterface $router, array $routesToExpose = array(), $cacheDir, $bundles = array())
+    public function __construct(RouterInterface $router, array $routesToExpose, $cacheDir, $bundles = array())
     {
         $this->router         = $router;
         $this->cacheDir       = $cacheDir;
@@ -83,7 +83,12 @@ class ExposedRoutesExtractor implements ExposedRoutesExtractorInterface
         foreach ($collection->all() as $name => $route) {
 
             if ($route->hasOption('expose')) {
-                $routes->add($name, $route);
+
+                $expose = $route->getOption('expose');
+
+                if ($expose !== false && $expose !== 'false') {
+                    $routes->add($name, $route);
+                }
                 continue;
             }
 
@@ -196,8 +201,12 @@ class ExposedRoutesExtractor implements ExposedRoutesExtractorInterface
      */
     public function isRouteExposed(Route $route, $name)
     {
-        return true === $route->hasOption('expose') ||
-            ('' !== $this->pattern && preg_match('#^' . $this->pattern . '$#', $name));
+        if (false === $route->hasOption('expose')) {
+            return ('' !== $this->pattern && preg_match('#^' . $this->pattern . '$#', $name));
+        }
+
+        $status = $route->getOption('expose');
+        return ($status !== false && $status !== 'false');
     }
 
     protected function getDomainByRouteMatches($matches, $name)

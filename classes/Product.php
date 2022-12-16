@@ -430,6 +430,9 @@ class ProductCore extends ObjectModel
      */
     protected static $cacheStock = [];
 
+    /** @var int|null */
+    protected static $psEcotaxTaxRulesGroupId = null;
+
     /**
      * Product can be temporary saved in database
      */
@@ -546,8 +549,8 @@ class ProductCore extends ObjectModel
             'name' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isCatalogName', 'required' => false, 'size' => ProductSettings::MAX_NAME_LENGTH],
             'description' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml'],
             'description_short' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml'],
-            'available_now' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 255],
-            'available_later' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'IsGenericName', 'size' => 255],
+            'available_now' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => ProductSettings::MAX_AVAILABLE_NOW_LABEL_LENGTH],
+            'available_later' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'IsGenericName', 'size' => ProductSettings::MAX_AVAILABLE_LATER_LABEL_LENGTH],
         ],
         'associations' => [
             'manufacturer' => ['type' => self::HAS_ONE],
@@ -1175,6 +1178,7 @@ class ProductCore extends ObjectModel
         static::$_pricesLevel2 = [];
         static::$_incat = [];
         static::$_combinations = [];
+        static::$psEcotaxTaxRulesGroupId = null;
     }
 
     /**
@@ -3022,7 +3026,7 @@ class ProductCore extends ObjectModel
                     FROM `' . _DB_PREFIX_ . 'product` p
                     ' . Shop::addSqlAssociation('product', 'p') . '
                     WHERE product_shop.`active` = 1
-                    AND product_shop.`date_add` > "' . date('Y-m-d', strtotime('-' . $nb_days_new_product . ' DAY')) . '"
+                    AND DATEDIFF(product_shop.`date_add`, DATE_SUB("' . $now . '", INTERVAL ' . $nb_days_new_product . ' DAY)) > 0
                     ' . ($front ? ' AND product_shop.`visibility` IN ("both", "catalog")' : '') . '
                     ' . $sql_groups;
 
@@ -3057,7 +3061,12 @@ class ProductCore extends ObjectModel
         if ($front) {
             $sql->where('product_shop.`visibility` IN ("both", "catalog")');
         }
-        $sql->where('product_shop.`date_add` > "' . date('Y-m-d', strtotime('-' . $nb_days_new_product . ' DAY')) . '"');
+        $sql->where('DATEDIFF(product_shop.`date_add`,
+            DATE_SUB(
+                "' . $now . '",
+                INTERVAL ' . $nb_days_new_product . ' DAY
+            )
+        ) > 0');
         if (Group::isFeatureActive()) {
             $groups = FrontController::getCurrentCustomerGroups();
             $sql->where('EXISTS(SELECT 1 FROM `' . _DB_PREFIX_ . 'category_product` cp
@@ -3901,14 +3910,13 @@ class ProductCore extends ObjectModel
                 $ecotax = Tools::convertPrice($ecotax, $id_currency);
             }
             if ($use_tax) {
-                static $psEcotaxTaxRulesGroupId = null;
-                if ($psEcotaxTaxRulesGroupId === null) {
-                    $psEcotaxTaxRulesGroupId = (int) Configuration::get('PS_ECOTAX_TAX_RULES_GROUP_ID');
+                if (self::$psEcotaxTaxRulesGroupId === null) {
+                    self::$psEcotaxTaxRulesGroupId = (int) Configuration::get('PS_ECOTAX_TAX_RULES_GROUP_ID');
                 }
                 // reinit the tax manager for ecotax handling
                 $tax_manager = TaxManagerFactory::getManager(
                     $address,
-                    $psEcotaxTaxRulesGroupId
+                    self::$psEcotaxTaxRulesGroupId
                 );
                 $ecotax_tax_calculator = $tax_manager->getTaxCalculator();
                 $price += $ecotax_tax_calculator->addTaxes($ecotax);

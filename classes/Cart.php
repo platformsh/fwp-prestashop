@@ -903,7 +903,7 @@ class CartCore extends ObjectModel
         } else {
             $address_id = (int) $row['id_address_delivery'];
         }
-        if (!Address::addressExists($address_id)) {
+        if (!Address::addressExists($address_id, true)) {
             $address_id = null;
         }
 
@@ -2404,7 +2404,7 @@ class CartCore extends ObjectModel
         }
 
         // Get delivery address of the product from the cart
-        if (!$this->addressFactory->addressExists($addressId)) {
+        if (!$this->addressFactory->addressExists($addressId, true)) {
             $addressId = null;
         }
 
@@ -3579,7 +3579,7 @@ class CartCore extends ObjectModel
         } else {
             $address_id = null;
         }
-        if (!Address::addressExists($address_id)) {
+        if (!Address::addressExists($address_id, true)) {
             $address_id = null;
         }
 

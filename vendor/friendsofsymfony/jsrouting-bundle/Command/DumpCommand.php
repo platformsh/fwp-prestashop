@@ -106,7 +106,7 @@ class DumpCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if(!in_array($input->getOption('format'), array('js', 'json'))) {
             $output->writeln('<error>Invalid format specified. Use js or json.</error>');
@@ -174,6 +174,7 @@ class DumpCommand extends Command
                 $extractor->getHost(),
                 $extractor->getPort(),
                 $extractor->getScheme(),
+                $input->getOption('locale'),
                 $domain
             ),
             'json',

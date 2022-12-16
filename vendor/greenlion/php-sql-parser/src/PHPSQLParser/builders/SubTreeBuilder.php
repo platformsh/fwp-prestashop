@@ -31,24 +31,24 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * @author    André Rothe <andre.rothe@phosco.info>
  * @copyright 2010-2014 Justin Swanhart and André Rothe
  * @license   http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
  * @version   SVN: $Id$
- * 
+ *
  */
 
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
 /**
- * This class implements the builder for [sub_tree] fields. 
+ * This class implements the builder for [sub_tree] fields.
  * You can overwrite all functions to achieve another handling.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class SubTreeBuilder implements Builder {
 
@@ -72,6 +72,11 @@ class SubTreeBuilder implements Builder {
         return $builder->build($parsed);
     }
 
+    protected function buildInList($parsed) {
+        $builder = new InListBuilder();
+        return $builder->build($parsed);
+    }
+
     protected function buildReserved($parsed) {
         $builder = new ReservedBuilder();
         return $builder->build($parsed);
@@ -92,13 +97,18 @@ class SubTreeBuilder implements Builder {
         return $builder->build($parsed);
     }
 
+    protected function buildUserVariable($parsed) {
+        $builder = new UserVariableBuilder();
+        return $builder->build($parsed);
+    }
+
     protected function buildSign($parsed) {
         $builder = new SignBuilder();
         return $builder->build($parsed);
     }
 
     public function build(array $parsed, $delim = " ") {
-        if ($parsed['sub_tree'] === '') {
+        if ($parsed['sub_tree'] === '' || $parsed['sub_tree'] === false) {
             return "";
         }
         $sql = "";
@@ -108,10 +118,12 @@ class SubTreeBuilder implements Builder {
             $sql .= $this->buildFunction($v);
             $sql .= $this->buildOperator($v);
             $sql .= $this->buildConstant($v);
+            $sql .= $this->buildInList($v);
             $sql .= $this->buildSubQuery($v);
             $sql .= $this->buildSelectBracketExpression($v);
             $sql .= $this->buildReserved($v);
             $sql .= $this->buildQuery($v);
+            $sql .= $this->buildUserVariable($v);
             $sign = $this->buildSign($v);
             $sql .= $sign;
 

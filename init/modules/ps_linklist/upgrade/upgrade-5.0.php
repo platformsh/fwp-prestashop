@@ -25,8 +25,10 @@ function upgrade_module_5_0()
 {
     $result = true;
     $result &= Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'link_block_shop`  ADD COLUMN `position` int(10) unsigned NOT NULL DEFAULT 0');
+    // Delete blockcms data that are not used in previous version of this module
+    $result &= Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'link_block_shop`');
 
-    foreach (Shop::getContextListShopID() as $shopId) {
+    foreach (Shop::getShops(true, null, true) as $shopId) {
         $result &= Db::getInstance()->execute(
             'INSERT INTO `' . _DB_PREFIX_ . 'link_block_shop` (`id_link_block`, `position`, `id_shop`)
             SELECT `id_link_block`, `position`, ' . $shopId . ' FROM `' . _DB_PREFIX_ . 'link_block`

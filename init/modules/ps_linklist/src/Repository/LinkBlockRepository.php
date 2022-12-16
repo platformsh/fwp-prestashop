@@ -458,7 +458,7 @@ class LinkBlockRepository
      *
      * @throws DatabaseException
      */
-    private function updateMaxPosition(int $linkBlockId, ?int $hookId = null, array $shopIds): void
+    private function updateMaxPosition(int $linkBlockId, ?int $hookId, array $shopIds): void
     {
         $qb = $this->connection->createQueryBuilder();
         foreach ($shopIds as $shopId) {

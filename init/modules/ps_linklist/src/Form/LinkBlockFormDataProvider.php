@@ -22,12 +22,12 @@ namespace PrestaShop\Module\LinkList\Form;
 
 use Hook;
 use Language;
+use Module;
 use PrestaShop\Module\LinkList\Cache\LinkBlockCacheInterface;
 use PrestaShop\Module\LinkList\Model\LinkBlock;
 use PrestaShop\Module\LinkList\Repository\LinkBlockRepository;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
-use PrestaShop\PrestaShop\Core\Addon\Module\ModuleRepository;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
 use Ps_Linklist;
 
@@ -52,11 +52,6 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     private $cache;
 
     /**
-     * @var ModuleRepository
-     */
-    private $moduleRepository;
-
-    /**
      * @var array
      */
     private $languages;
@@ -76,7 +71,6 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
      *
      * @param LinkBlockRepository $repository
      * @param LinkBlockCacheInterface $cache
-     * @param ModuleRepository $moduleRepository
      * @param array $languages
      * @param Context $shopContext
      * @param Configuration $configuration
@@ -84,14 +78,12 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     public function __construct(
         LinkBlockRepository $repository,
         LinkBlockCacheInterface $cache,
-        ModuleRepository $moduleRepository,
         array $languages,
         Context $shopContext,
         Configuration $configuration
     ) {
         $this->repository = $repository;
         $this->cache = $cache;
-        $this->moduleRepository = $moduleRepository;
         $this->languages = $languages;
         $this->shopContext = $shopContext;
         $this->configuration = $configuration;
@@ -332,8 +324,10 @@ class LinkBlockFormDataProvider implements FormDataProviderInterface
     private function updateHook($hookId)
     {
         $hookName = Hook::getNameById($hookId);
-        $module = $this->moduleRepository->getInstanceByName(Ps_Linklist::MODULE_NAME);
-        if (!Hook::isModuleRegisteredOnHook($module, $hookName, $this->shopContext->getContextShopID())) {
+        $module = Module::getInstanceByName(Ps_Linklist::MODULE_NAME);
+
+        if ($module instanceof Module
+            && !Hook::isModuleRegisteredOnHook($module, $hookName, $this->shopContext->getContextShopID())) {
             Hook::registerHook($module, $hookName);
         }
     }
