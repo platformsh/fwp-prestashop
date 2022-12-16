@@ -26,7 +26,7 @@
 {extends file="helpers/form/form.tpl"}
 {block name="field"}
 	{if $input.type == 'file_lang'}
-		<div class="col-lg-9">
+		<div class="col-lg-8">
 			{foreach from=$languages item=language}
 				{if $languages|count > 1}
 					<div class="translatable-field lang-{$language.id_lang}" {if $language.id_lang != $defaultFormLanguage}style="display:none"{/if}>
@@ -52,7 +52,7 @@
 							</button>
 							<ul class="dropdown-menu">
 								{foreach from=$languages item=lang}
-								<li><a href="javascript:hideOtherLanguage({$lang.id_lang});" tabindex="-1">{$lang.name}</a></li>
+								<li><a href="javascript:hideOtherLanguage({$lang.id_lang});" id="dropdown-lang-item-link-{$lang.id_lang}" tabindex="-1">{$lang.name}</a></li>
 								{/foreach}
 							</ul>
 						</div>

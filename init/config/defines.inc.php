@@ -49,6 +49,12 @@ if (!defined('_PS_DEBUG_PROFILING_')) {
 if (!defined('_PS_MODE_DEMO_')) {
     define('_PS_MODE_DEMO_', false);
 }
+if (!defined('_PS_SMARTY_CACHING_TYPE_')) {
+    define('_PS_SMARTY_CACHING_TYPE_', 'filesystem');
+}
+if (!defined('_PS_ALLOW_MULTI_STATEMENTS_QUERIES_')) {
+    define('_PS_ALLOW_MULTI_STATEMENTS_QUERIES_', false);
+}
 
 $currentDir = dirname(__FILE__);
 

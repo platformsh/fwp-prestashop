@@ -55,7 +55,7 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
         }
 
         $this->multi = new NativeClientState();
-        $this->multi->maxHostConnections = 0 < $maxHostConnections ? $maxHostConnections : PHP_INT_MAX;
+        $this->multi->maxHostConnections = 0 < $maxHostConnections ? $maxHostConnections : \PHP_INT_MAX;
     }
 
     /**
@@ -67,8 +67,16 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
     {
         [$url, $options] = self::prepareRequest($method, $url, $options, $this->defaultOptions);
 
-        if ($options['bindto'] && file_exists($options['bindto'])) {
-            throw new TransportException(__CLASS__.' cannot bind to local Unix sockets, use e.g. CurlHttpClient instead.');
+        if ($options['bindto']) {
+            if (file_exists($options['bindto'])) {
+                throw new TransportException(__CLASS__.' cannot bind to local Unix sockets, use e.g. CurlHttpClient instead.');
+            }
+            if (0 === strpos($options['bindto'], 'if!')) {
+                throw new TransportException(__CLASS__.' cannot bind to network interfaces, use e.g. CurlHttpClient instead.');
+            }
+            if (0 === strpos($options['bindto'], 'host!')) {
+                $options['bindto'] = substr($options['bindto'], 5);
+            }
         }
 
         $options['body'] = self::getBodyAsString($options['body']);
@@ -116,7 +124,7 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
         if ($onProgress = $options['on_progress']) {
             // Memoize the last progress to ease calling the callback periodically when no network transfer happens
             $lastProgress = [0, 0];
-            $maxDuration = 0 < $options['max_duration'] ? $options['max_duration'] : INF;
+            $maxDuration = 0 < $options['max_duration'] ? $options['max_duration'] : \INF;
             $onProgress = static function (...$progress) use ($onProgress, &$lastProgress, &$info, $maxDuration) {
                 if ($info['total_time'] >= $maxDuration) {
                     throw new TransportException(sprintf('Max duration was reached for "%s".', implode('', $info['url'])));
@@ -148,11 +156,11 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
         $notification = static function (int $code, int $severity, ?string $msg, int $msgCode, int $dlNow, int $dlSize) use ($onProgress, &$info) {
             $info['total_time'] = microtime(true) - $info['start_time'];
 
-            if (STREAM_NOTIFY_PROGRESS === $code) {
+            if (\STREAM_NOTIFY_PROGRESS === $code) {
                 $info['starttransfer_time'] = $info['starttransfer_time'] ?: $info['total_time'];
                 $info['size_upload'] += $dlNow ? 0 : $info['size_body'];
                 $info['size_download'] = $dlNow;
-            } elseif (STREAM_NOTIFY_CONNECT === $code) {
+            } elseif (\STREAM_NOTIFY_CONNECT === $code) {
                 $info['connect_time'] = $info['total_time'];
                 $info['debug'] .= $info['request_header'];
                 unset($info['request_header']);
@@ -171,7 +179,7 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
 
         $this->logger && $this->logger->info(sprintf('Request: "%s %s"', $method, implode('', $url)));
 
-        [$host, $port, $url['authority']] = self::dnsResolve($url, $this->multi, $info, $onProgress);
+        [$host, $port] = self::parseHostPort($url, $info);
 
         if (!isset($options['normalized_headers']['host'])) {
             $options['headers'][] = 'Host: '.$host.$port;
@@ -183,6 +191,11 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
 
         if (0 < $options['max_duration']) {
             $options['timeout'] = min($options['max_duration'], $options['timeout']);
+        }
+
+        $bindto = $options['bindto'];
+        if (!$bindto && (70322 === \PHP_VERSION_ID || 70410 === \PHP_VERSION_ID)) {
+            $bindto = '0:0';
         }
 
         $context = [
@@ -198,7 +211,6 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
                 'follow_location' => false, // We follow redirects ourselves - the native logic is too limited
             ],
             'ssl' => array_filter([
-                'peer_name' => $host,
                 'verify_peer' => $options['verify_peer'],
                 'verify_peer_name' => $options['verify_host'],
                 'cafile' => $options['cafile'],
@@ -214,7 +226,7 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
                 'disable_compression' => true,
             ], static function ($v) { return null !== $v; }),
             'socket' => [
-                'bindto' => $options['bindto'],
+                'bindto' => $bindto,
                 'tcp_nodelay' => true,
             ],
         ];
@@ -225,7 +237,11 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
 
         $resolveRedirect = self::createRedirectResolver($options, $host, $proxy, $noProxy, $info, $onProgress);
         $context = stream_context_create($context, ['notification' => $notification]);
-        self::configureHeadersAndProxy($context, $host, $options['headers'], $proxy, $noProxy);
+
+        if (!self::configureHeadersAndProxy($context, $host, $options['headers'], $proxy, $noProxy, 'https:' === $url['scheme'])) {
+            $ip = self::dnsResolve($host, $this->multi, $info, $onProgress);
+            $url['authority'] = substr_replace($url['authority'], $ip, -\strlen($host) - \strlen($port), \strlen($host));
+        }
 
         return new NativeResponse($this->multi, $context, implode('', $url), $options, $info, $resolveRedirect, $onProgress, $this->logger);
     }
@@ -306,19 +322,25 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
     }
 
     /**
-     * Resolves the IP of the host using the local DNS cache if possible.
+     * Extracts the host and the port from the URL.
      */
-    private static function dnsResolve(array $url, NativeClientState $multi, array &$info, ?\Closure $onProgress): array
+    private static function parseHostPort(array $url, array &$info): array
     {
-        if ($port = parse_url($url['authority'], PHP_URL_PORT) ?: '') {
+        if ($port = parse_url($url['authority'], \PHP_URL_PORT) ?: '') {
             $info['primary_port'] = $port;
             $port = ':'.$port;
         } else {
             $info['primary_port'] = 'http:' === $url['scheme'] ? 80 : 443;
         }
 
-        $host = parse_url($url['authority'], PHP_URL_HOST);
+        return [parse_url($url['authority'], \PHP_URL_HOST), $port];
+    }
 
+    /**
+     * Resolves the IP of the host using the local DNS cache if possible.
+     */
+    private static function dnsResolve($host, NativeClientState $multi, array &$info, ?\Closure $onProgress): string
+    {
         if (null === $ip = $multi->dnsCache[$host] ?? null) {
             $info['debug'] .= "* Hostname was NOT found in DNS cache\n";
             $now = microtime(true);
@@ -341,7 +363,7 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
             $onProgress();
         }
 
-        return [$host, $port, substr_replace($url['authority'], $ip, -\strlen($host) - \strlen($port), \strlen($host))];
+        return $ip;
     }
 
     /**
@@ -404,24 +426,33 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
                 }
             }
 
-            [$host, $port, $url['authority']] = self::dnsResolve($url, $multi, $info, $onProgress);
-            stream_context_set_option($context, 'ssl', 'peer_name', $host);
+            [$host, $port] = self::parseHostPort($url, $info);
 
-            if (false !== (parse_url($location, PHP_URL_HOST) ?? false)) {
+            if (false !== (parse_url($location, \PHP_URL_HOST) ?? false)) {
                 // Authorization and Cookie headers MUST NOT follow except for the initial host name
                 $requestHeaders = $redirectHeaders['host'] === $host ? $redirectHeaders['with_auth'] : $redirectHeaders['no_auth'];
                 $requestHeaders[] = 'Host: '.$host.$port;
-                self::configureHeadersAndProxy($context, $host, $requestHeaders, $proxy, $noProxy);
+                $dnsResolve = !self::configureHeadersAndProxy($context, $host, $requestHeaders, $proxy, $noProxy, 'https:' === $url['scheme']);
+            } else {
+                $dnsResolve = isset(stream_context_get_options($context)['ssl']['peer_name']);
+            }
+
+            if ($dnsResolve) {
+                $ip = self::dnsResolve($host, $multi, $info, $onProgress);
+                $url['authority'] = substr_replace($url['authority'], $ip, -\strlen($host) - \strlen($port), \strlen($host));
             }
 
             return implode('', $url);
         };
     }
 
-    private static function configureHeadersAndProxy($context, string $host, array $requestHeaders, ?array $proxy, array $noProxy)
+    private static function configureHeadersAndProxy($context, string $host, array $requestHeaders, ?array $proxy, array $noProxy, bool $isSsl): bool
     {
         if (null === $proxy) {
-            return stream_context_set_option($context, 'http', 'header', $requestHeaders);
+            stream_context_set_option($context, 'http', 'header', $requestHeaders);
+            stream_context_set_option($context, 'ssl', 'peer_name', $host);
+
+            return false;
         }
 
         // Matching "no_proxy" should follow the behavior of curl
@@ -430,17 +461,24 @@ final class NativeHttpClient implements HttpClientInterface, LoggerAwareInterfac
             $dotRule = '.'.ltrim($rule, '.');
 
             if ('*' === $rule || $host === $rule || substr($host, -\strlen($dotRule)) === $dotRule) {
-                return stream_context_set_option($context, 'http', 'header', $requestHeaders);
+                stream_context_set_option($context, 'http', 'proxy', null);
+                stream_context_set_option($context, 'http', 'request_fulluri', false);
+                stream_context_set_option($context, 'http', 'header', $requestHeaders);
+                stream_context_set_option($context, 'ssl', 'peer_name', $host);
+
+                return false;
             }
         }
-
-        stream_context_set_option($context, 'http', 'proxy', $proxy['url']);
-        stream_context_set_option($context, 'http', 'request_fulluri', true);
 
         if (null !== $proxy['auth']) {
             $requestHeaders[] = 'Proxy-Authorization: '.$proxy['auth'];
         }
 
-        return stream_context_set_option($context, 'http', 'header', $requestHeaders);
+        stream_context_set_option($context, 'http', 'proxy', $proxy['url']);
+        stream_context_set_option($context, 'http', 'request_fulluri', !$isSsl);
+        stream_context_set_option($context, 'http', 'header', $requestHeaders);
+        stream_context_set_option($context, 'ssl', 'peer_name', null);
+
+        return true;
     }
 }

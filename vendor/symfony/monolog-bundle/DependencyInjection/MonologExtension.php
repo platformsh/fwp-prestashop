@@ -13,18 +13,22 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
+use Monolog\Handler\HandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Argument\BoundArgument;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -38,9 +42,31 @@ class MonologExtension extends Extension
 
     private $swiftMailerHandlers = [];
 
-    private function levelToMonologConst($level)
+    private function levelToMonologConst($level, ContainerBuilder $container)
     {
-        return is_int($level) ? $level : constant('Monolog\Logger::'.strtoupper($level));
+        if (null === $level || is_numeric($level)) {
+            return $level;
+        }
+
+        if (defined('Monolog\Logger::'.strtoupper($level))) {
+            return constant('Monolog\Logger::' . strtoupper($level));
+        }
+
+        if ($container->hasParameter($level)) {
+            return $this->levelToMonologConst($container->getParameter($level), $container);
+        }
+
+        try {
+            $logLevel = $container->resolveEnvPlaceholders($level, true);
+        } catch (ParameterNotFoundException $notFoundException) {
+            throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $level));
+        }
+
+        if ($logLevel !== '') {
+            return $this->levelToMonologConst($logLevel, $container);
+        }
+
+        throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $level));
     }
 
     /**
@@ -126,6 +152,12 @@ class MonologExtension extends Extension
             }
             $container->registerForAutoconfiguration(TokenProcessor::class)
                 ->addTag('monolog.processor');
+            if (interface_exists(HttpClientInterface::class)) {
+                $handlerAutoconfiguration = $container->registerForAutoconfiguration(HandlerInterface::class);
+                $handlerAutoconfiguration->setBindings($handlerAutoconfiguration->getBindings() + [
+                    HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
+                ]);
+            }
         }
     }
 
@@ -160,7 +192,7 @@ class MonologExtension extends Extension
         $handlerClass = $this->getHandlerClassByType($handler['type']);
         $definition = new Definition($handlerClass);
 
-        $handler['level'] = $this->levelToMonologConst($handler['level']);
+        $handler['level'] = $this->levelToMonologConst($handler['level'], $container);
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(['Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces']);
@@ -374,9 +406,9 @@ class MonologExtension extends Extension
             break;
 
         case 'fingers_crossed':
-            $handler['action_level'] = $this->levelToMonologConst($handler['action_level']);
+            $handler['action_level'] = $this->levelToMonologConst($handler['action_level'], $container);
             if (null !== $handler['passthru_level']) {
-                $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level']);
+                $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level'], $container);
             }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
@@ -420,10 +452,10 @@ class MonologExtension extends Extension
             break;
 
         case 'filter':
-            $handler['min_level'] = $this->levelToMonologConst($handler['min_level']);
-            $handler['max_level'] = $this->levelToMonologConst($handler['max_level']);
+            $handler['min_level'] = $this->levelToMonologConst($handler['min_level'], $container);
+            $handler['max_level'] = $this->levelToMonologConst($handler['max_level'], $container);
             foreach (array_keys($handler['accepted_levels']) as $k) {
-                $handler['accepted_levels'][$k] = $this->levelToMonologConst($handler['accepted_levels'][$k]);
+                $handler['accepted_levels'][$k] = $this->levelToMonologConst($handler['accepted_levels'][$k], $container);
             }
 
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
@@ -505,6 +537,7 @@ class MonologExtension extends Extension
             break;
 
         case 'swift_mailer':
+            $mailer = $handler['mailer'] ?: 'mailer';
             if (isset($handler['email_prototype'])) {
                 if (!empty($handler['email_prototype']['method'])) {
                     $prototype = [new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']];
@@ -516,7 +549,7 @@ class MonologExtension extends Extension
                 $messageFactory->setLazy(true);
                 $messageFactory->setPublic(false);
                 $messageFactory->setArguments([
-                    new Reference($handler['mailer']),
+                    new Reference($mailer),
                     $handler['from_email'],
                     $handler['to_email'],
                     $handler['subject'],
@@ -529,7 +562,7 @@ class MonologExtension extends Extension
                 $prototype = [new Reference($messageFactoryId), 'createMessage'];
             }
             $definition->setArguments([
-                new Reference($handler['mailer']),
+                new Reference($mailer),
                 $prototype,
                 $handler['level'],
                 $handler['bubble'],
@@ -551,6 +584,29 @@ class MonologExtension extends Extension
             if (!empty($handler['headers'])) {
                 $definition->addMethodCall('addHeader', [$handler['headers']]);
             }
+            break;
+
+        case 'symfony_mailer':
+            $mailer = $handler['mailer'] ?: 'mailer.mailer';
+            if (isset($handler['email_prototype'])) {
+                if (!empty($handler['email_prototype']['method'])) {
+                    $prototype = [new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']];
+                } else {
+                    $prototype = new Reference($handler['email_prototype']['id']);
+                }
+            } else {
+                $prototype = (new Definition('Symfony\Component\Mime\Email'))
+                    ->setPublic(false)
+                    ->addMethodCall('from', [$handler['from_email']])
+                    ->addMethodCall('to', $handler['to_email'])
+                    ->addMethodCall('subject', [$handler['subject']]);
+            }
+            $definition->setArguments([
+                new Reference($mailer),
+                $prototype,
+                $handler['level'],
+                $handler['bubble'],
+            ]);
             break;
 
         case 'socket':
@@ -914,6 +970,7 @@ class MonologExtension extends Extension
             'debug' => 'Symfony\Bridge\Monolog\Handler\DebugHandler',
             'swift_mailer' => 'Symfony\Bridge\Monolog\Handler\SwiftMailerHandler',
             'native_mailer' => 'Monolog\Handler\NativeMailerHandler',
+            'symfony_mailer' => 'Symfony\Bridge\Monolog\Handler\MailerHandler',
             'socket' => 'Monolog\Handler\SocketHandler',
             'pushover' => 'Monolog\Handler\PushoverHandler',
             'raven' => 'Monolog\Handler\RavenHandler',

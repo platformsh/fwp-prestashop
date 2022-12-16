@@ -19,14 +19,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const keepLicense = require('uglify-save-license');
+const TerserPlugin = require('terser-webpack-plugin');
 
-const psRootDir = path.resolve(process.env.PWD, '../../../');
-const psJsDir = path.resolve(psRootDir, 'admin-dev/themes/new-theme/js');
-const psAppDir = path.resolve(psJsDir, 'app');
-const psComponentsDir = path.resolve(psJsDir, 'components');
-
-const config = {
+let config = {
     entry: {
         grid: [
             './js/grid',
@@ -41,17 +36,18 @@ const config = {
     },
     //devtool: 'source-map', // uncomment me to build source maps (really slow)
     resolve: {
-        extensions: ['.js'],
+        extensions: ['.js', '.ts'],
         alias: {
-            '@app': psAppDir,
-            '@components': psComponentsDir,
-        },
+          '@PSTypes': path.resolve(__dirname, '../../../admin-dev/themes/new-theme/js/types'),
+          '@components': path.resolve(__dirname, '../../../admin-dev/themes/new-theme/js/components'),
+          '@app': path.resolve(__dirname, '../../../admin-dev/themes/new-theme/js/app')
+        }
     },
     module: {
         rules: [
             {
                 test: /\.js$/,
-                include: path.resolve(__dirname, 'js'),
+                include: path.resolve(__dirname, '../js'),
                 use: [{
                     loader: 'babel-loader',
                     options: {
@@ -62,39 +58,28 @@ const config = {
                 }]
             },
             {
-                test: /\.js$/,
-                include: path.resolve(__dirname, '../../../admin-dev/themes/new-theme/js'),
-                use: [{
-                    loader: 'babel-loader',
-                    options: {
-                        presets: [
-                            ['es2015', { modules: false }]
-                        ]
-                    }
-                }]
-            }
+              test: /\.ts?$/,
+              loader: 'ts-loader',
+              options: {
+                onlyCompileBundledFiles: true,
+              },
+              exclude: /node_modules/,
+            },
         ]
     },
     plugins: []
 };
 
 if (process.env.NODE_ENV === 'production') {
-    config.plugins.push(
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: false,
-            compress: {
-                sequences: true,
-                conditionals: true,
-                booleans: true,
-                if_return: true,
-                join_vars: true,
-                drop_console: true
-            },
-            output: {
-                comments: keepLicense
-            }
-        })
-    );
+    config = {
+      ...config,
+      optimization: {
+        minimize: true,
+        minimizer: [
+          new TerserPlugin(),
+        ],
+      },
+    }
 } else {
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }

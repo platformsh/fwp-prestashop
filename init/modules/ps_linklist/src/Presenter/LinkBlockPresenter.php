@@ -22,6 +22,7 @@
 namespace PrestaShop\Module\LinkList\Presenter;
 
 use Meta;
+use PrestaShop\Module\LinkList\Filter\LinkFilter;
 use PrestaShop\Module\LinkList\Model\LinkBlock;
 use Tools;
 
@@ -32,6 +33,7 @@ class LinkBlockPresenter
 {
     private $link;
     private $language;
+    private $linkFilter;
 
     /**
      * LinkBlockPresenter constructor.
@@ -39,10 +41,11 @@ class LinkBlockPresenter
      * @param \Link $link
      * @param \Language $language
      */
-    public function __construct(\Link $link, \Language $language)
+    public function __construct(\Link $link, \Language $language, LinkFilter $linkFilter = null)
     {
         $this->link = $link;
         $this->language = $language;
+        $this->linkFilter = $linkFilter ?? new LinkFilter();
     }
 
     /**
@@ -156,7 +159,7 @@ class LinkBlockPresenter
     {
         $productLinks = [];
         foreach ($productIds as $productId) {
-            if (false === $productId) {
+            if (false === $productId || $this->isLinkDisabled($productId)) {
                 continue;
             }
 
@@ -182,7 +185,7 @@ class LinkBlockPresenter
     {
         $staticLinks = [];
         foreach ($staticIds as $staticId) {
-            if (false === $staticId) {
+            if (false === $staticId || $this->isLinkDisabled($staticId)) {
                 continue;
             }
 
@@ -253,5 +256,10 @@ class LinkBlockPresenter
         }
 
         return $categoryLinks;
+    }
+
+    private function isLinkDisabled(string $routeId): bool
+    {
+        return !$this->linkFilter->isRouteEnabled($routeId);
     }
 }
